@@ -1,46 +1,159 @@
 {
   "products": [
     {
-      "sku": "MAXICOSI-BASSINET",
-      "title": "Maxi-Cosi Eco Care Bedside Bassinet (New)",
-      "description": "Brand-new in box. Eco Care design with breathable mesh sides. Adjustable height for bedside use.",
-      "price": 140,
-      "stock": 1,
-      "image": "img/maxicosi_bassinet.jpg",
-      "categories": [
-        "Baby",
-        "Furniture"
-      ],
-      "badge": "New Item",
-      "added_at": "2025-11-08",
-      "active": true
-    },
-    {
-      "sku": "LIFT-CHAIR-HEATED",
-      "title": "Heated Power Lift Chair – Brown",
-      "description": "Power lift + heat. Tested and works. Some normal wear. AS‑IS.",
-      "price": 225,
-      "stock": 1,
-      "image": "img/lift_chair_brown.jpg",
-      "categories": [
-        "Furniture"
-      ],
-      "badge": "Single Item",
-      "added_at": "2025-11-08",
-      "active": true
-    },
-    {
-      "sku": "PAMPERED-CHEF",
-      "title": "Pampered chef loaf pans set of 2",
-      "description": "Brand New Pampered Chef loaf pans set of 2 with lids perfect for baking breads or meatloaf",
-      "price": 50,
-      "stock": 1,
-      "image": "img/IMG_6570.JPG",
-      "categories": [
-        "Bakeware"
-      ],
+      "sku": "",
+      "title": "",
+      "description": "",
+      "price": 0,
+      "stock": 0,
+      "image": "img/placeholder.png",
+      "categories": [],
       "badge": "",
-      "added_at": "2025-11-08T00:00:00.000Z",
+      "added_at": "2025-11-09",
+      "active": true
+    },
+    {
+      "sku": "",
+      "title": "",
+      "description": "",
+      "price": 0,
+      "stock": 0,
+      "image": "img/placeholder.png",
+      "categories": [],
+      "badge": "",
+      "added_at": "2025-11-09",
+      "active": true
+    },
+    {
+      "sku": "",
+      "title": "",
+      "description": "",
+      "price": 0,
+      "stock": 0,
+      "image": "img/placeholder.png",
+      "categories": [],
+      "badge": "",
+      "added_at": "2025-11-09",
+      "active": true
+    },
+    {
+      "sku": "",
+      "title": "",
+      "description": "",
+      "price": 0,
+      "stock": 0,
+      "image": "img/placeholder.png",
+      "categories": [],
+      "badge": "",
+      "added_at": "2025-11-09",
+      "active": true
+    },
+    {
+      "sku": "",
+      "title": "",
+      "description": "",
+      "price": 0,
+      "stock": 0,
+      "image": "img/placeholder.png",
+      "categories": [],
+      "badge": "",
+      "added_at": "2025-11-09",
+      "active": true
+    },
+    {
+      "sku": "",
+      "title": "",
+      "description": "",
+      "price": 0,
+      "stock": 0,
+      "image": "img/placeholder.png",
+      "categories": [],
+      "badge": "",
+      "added_at": "2025-11-09",
+      "active": true
+    },
+    {
+      "sku": "",
+      "title": "",
+      "description": "",
+      "price": 0,
+      "stock": 0,
+      "image": "img/placeholder.png",
+      "categories": [],
+      "badge": "",
+      "added_at": "2025-11-09",
+      "active": true
+    },
+    {
+      "sku": "",
+      "title": "",
+      "description": "",
+      "price": 0,
+      "stock": 0,
+      "image": "img/placeholder.png",
+      "categories": [],
+      "badge": "",
+      "added_at": "2025-11-09",
+      "active": true
+    },
+    {
+      "sku": "",
+      "title": "",
+      "description": "",
+      "price": 0,
+      "stock": 0,
+      "image": "img/placeholder.png",
+      "categories": [],
+      "badge": "",
+      "added_at": "2025-11-09",
+      "active": true
+    },
+    {
+      "sku": "",
+      "title": "",
+      "description": "",
+      "price": 0,
+      "stock": 0,
+      "image": "img/placeholder.png",
+      "categories": [],
+      "badge": "",
+      "added_at": "2025-11-09",
+      "active": true
+    },
+    {
+      "sku": "",
+      "title": "",
+      "description": "",
+      "price": 0,
+      "stock": 0,
+      "image": "img/placeholder.png",
+      "categories": [],
+      "badge": "",
+      "added_at": "2025-11-09",
+      "active": true
+    },
+    {
+      "sku": "",
+      "title": "",
+      "description": "",
+      "price": 0,
+      "stock": 0,
+      "image": "img/placeholder.png",
+      "categories": [],
+      "badge": "",
+      "added_at": "2025-11-09",
+      "active": true
+    },
+    {
+      "sku": "",
+      "title": "",
+      "description": "",
+      "price": 0,
+      "stock": 0,
+      "image": "img/placeholder.png",
+      "categories": [],
+      "badge": "",
+      "added_at": "2025-11-09",
       "active": true
     }
   ]
