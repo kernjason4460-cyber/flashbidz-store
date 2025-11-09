@@ -1,13 +1,13 @@
 {
   "products": [
     {
-      "sku": "TEST-001",
-      "title": "Test Item",
-      "description": "This is a sanity-check item.",
-      "price": 10.0,
+      "sku": "TEST-NEW",
+      "title": "TEST",
+      "description": "THIS IS A TEST",
+      "price": 25,
       "stock": 1,
       "image": "img/placeholder.png",
-      "categories": ["test"],
+      "categories": [],
       "badge": "",
       "added_at": "2025-11-09",
       "active": true
