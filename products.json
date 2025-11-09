@@ -7,9 +7,11 @@
       "price": 25,
       "stock": 1,
       "image": "img/placeholder.png",
-      "categories": [],
+      "categories": [
+        "Clothing"
+      ],
       "badge": "",
-      "added_at": "2025-11-09",
+      "added_at": "11-09-2025",
       "active": true
     }
   ]
