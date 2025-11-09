@@ -1,9 +1,9 @@
 {
   "products": [
     {
-      "sku": "TEST-NEW",
-      "title": "TEST",
-      "description": "THIS IS A TEST",
+      "sku": "FROGG-TOGG",
+      "title": "RAIN GEAR",
+      "description": "FROGG TOGG RAIN GEAR",
       "price": 25,
       "stock": 1,
       "image": "img/placeholder.png",
