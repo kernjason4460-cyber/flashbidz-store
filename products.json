@@ -1,25 +1,13 @@
 {
   "products": [
     {
-      "sku": "",
-      "title": "",
-      "description": "",
-      "price": 0,
-      "stock": 0,
+      "sku": "TEST-001",
+      "title": "Test Item",
+      "description": "This is a sanity-check item.",
+      "price": 10.0,
+      "stock": 1,
       "image": "img/placeholder.png",
-      "categories": [],
-      "badge": "",
-      "added_at": "2025-11-09",
-      "active": true
-    },
-    {
-      "sku": "",
-      "title": "",
-      "description": "",
-      "price": 0,
-      "stock": 0,
-      "image": "img/placeholder.png",
-      "categories": [],
+      "categories": ["test"],
       "badge": "",
       "added_at": "2025-11-09",
       "active": true
