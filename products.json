@@ -4,14 +4,14 @@
       "sku": "FROGG-TOGG",
       "title": "RAIN GEAR",
       "description": "FROGG TOGG RAIN GEAR",
-      "price": 25,
+      "price": 40,
       "stock": 1,
-      "image": "img/placeholder.png",
+      "image": "img/IMG_6573.JPG",
       "categories": [
         "Clothing"
       ],
       "badge": "",
-      "added_at": "11-09-2025",
+      "added_at": "2025-11-09",
       "active": true
     }
   ]
