@@ -7,6 +7,9 @@
       "price": 140,
       "stock": 1,
       "image": "img/maxicosi_bassinet.jpg",
+      "images": [
+        "img/maxicosi_bassinet.jpg"
+      ],
       "categories": [
         "Baby",
         "Furniture"
@@ -18,10 +21,13 @@
     {
       "sku": "LIFT-CHAIR-HEATED",
       "title": "Heated Power Lift Chair – Brown",
-      "description": "Power lift + heat. Tested and works. Some normal wear. AS‑IS.",
+      "description": "Power lift + heat. Tested and works. Some normal wear. AS-IS.",
       "price": 225,
       "stock": 1,
       "image": "img/lift_chair_brown.jpg",
+      "images": [
+        "img/lift_chair_brown.jpg"
+      ],
       "categories": [
         "Furniture"
       ],
@@ -36,6 +42,9 @@
       "price": 50,
       "stock": 1,
       "image": "img/IMG_6570.JPG",
+      "images": [
+        "img/IMG_6570.JPG"
+      ],
       "categories": [
         "Bakeware"
       ],
