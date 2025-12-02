@@ -72,7 +72,7 @@ a { color: var(--text); text-decoration: none; }
   background: #0e0e0e;
   /* Taller, better for phone-style photos */
   aspect-ratio: 3 / 4;
-  max-height: 320px;   /* you can bump this to 300 or 320 if you want them even larger */
+  max-height: 340px;   /* you can bump this to 300 or 320 if you want them even larger */
   width: 100%;
   display: grid;
   place-items: center;
