@@ -166,9 +166,11 @@
       "description": "",
       "price": 10,
       "stock": 1,
-      "image": "img/placeholder.png",
+      "image": "img/flocked.jpeg",
       "images": [
-        "img/placeholder.png"
+        "img/flocked.jpeg",
+        "img/flocked2.jpeg",
+        "img/flocked3.jpeg"
       ],
       "categories": [
         "Holiday"
@@ -250,7 +252,9 @@
       "image": "img/Topper.jpeg",
       "images": [
         "img/Topper.jpeg",
-        "img/Topper2.jpeg"
+        "img/Topper2.jpeg",
+        "img/Topper3.jpeg",
+        "img/Topper4.jpeg"
       ],
       "categories": [
         "holiday"
