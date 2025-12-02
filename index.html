@@ -11,7 +11,7 @@
   <meta name="description" content="FlashBidz — fixed-price local deals with easy pickup in Mattawan, MI." />
 </head>
 <body>
-  <header class="site-header">
+  <header class="site-header" id="top">
     <a class="brand" href="#top">
       <img src="img/flashbidz_logo.svg" alt="FlashBidz" class="logoimg" />
       <div class="name">
@@ -26,27 +26,38 @@
     </nav>
   </header>
 
-  <section class="hero" id="top">
+  <section class="hero">
     <h2>Local Deals • Easy Pickup • No Bidding</h2>
     <p>Prices shown are <strong>before tax</strong>. Michigan sales tax is added at checkout for Venmo/Cash App.</p>
     <div class="hero-cta">
       <input id="q" class="search" type="search" placeholder="Search items… (e.g., bassinet, tools, Barbie)" aria-label="Search products" />
-      <a class="btn btn-primary" href="#shop" onclick="document.getElementById('q').focus()">Browse All</a>
+      <a class="btn btn-primary hero-browse" href="#shop" onclick="document.getElementById('q').focus()">Browse All</a>
     </div>
   </section>
 
   <main id="shop" class="container">
     <div class="toolbar">
-      <select id="cat" class="select">
-        <option value="">All categories</option>
-      </select>
-      <select id="sort" class="select">
-        <option value="new">Newest</option>
-        <option value="price-asc">Price: Low to High</option>
-        <option value="price-desc">Price: High to Low</option>
-      </select>
-      <span id="count" class="count"></span>
+      <div class="toolbar-left">
+        <label class="toolbar-label">
+          Category:
+          <select id="cat" class="select">
+            <option value="">All categories</option>
+          </select>
+        </label>
+      </div>
+      <div class="toolbar-right">
+        <label class="toolbar-label">
+          Sort:
+          <select id="sort" class="select">
+            <option value="new">Newest</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </label>
+        <span id="count" class="count"></span>
+      </div>
     </div>
+
     <div id="product-grid" class="grid" aria-live="polite"></div>
   </main>
 
@@ -56,15 +67,16 @@
       <li><strong>Pickup:</strong> Mattawan, MI (exact address provided after purchase). Please pick up within <strong>7 days</strong>.</li>
       <li><strong>Storage:</strong> After 7 days, <strong>$2 per item per day</strong>. After 14 days, items are <strong>abandoned</strong>.</li>
       <li><strong>Payment:</strong> Pay with <strong>Venmo or Cash App</strong>. MI <strong>6% sales tax</strong> is added at checkout.</li>
-      <li><strong>Condition:</strong> Items sold <em>AS‑IS, WHERE‑IS</em>. <strong>All sales final.</strong></li>
+      <li><strong>Condition:</strong> Items sold <em>AS-IS, WHERE-IS</em>. <strong>All sales final.</strong></li>
       <li><strong>Questions?</strong> Message us on Facebook or email <a href="mailto:support@flashbidz.net">support@flashbidz.net</a>.</li>
     </ul>
   </section>
 
   <footer class="site-footer">
-    <p>© <span id="year"></span> FlashBidz of Mattawan • All sales final • AS‑IS, WHERE‑IS</p>
+    <p>© <span id="year"></span> FlashBidz of Mattawan • All sales final • AS-IS, WHERE-IS</p>
   </footer>
 
+  <!-- Product card template -->
   <template id="product-card-tpl">
     <article class="card">
       <div class="img-wrap">
@@ -74,6 +86,7 @@
       <div class="card-body">
         <h4 class="title"></h4>
         <p class="desc"></p>
+
         <div class="meta">
           <span class="price"></span>
           <span class="stock"></span>
@@ -93,40 +106,63 @@
     </article>
   </template>
 
-   <script>
-    // Settings: your real handles + tax rate
-    const CASH_APP_TAG = "FlashBidz";     // without the $
-    const VENMO_USER  = "FlashBidz";      // venmo.com/u/FlashBidz
-    const MI_TAX_RATE = 0.06;             // 6%
+  <!-- Image gallery modal -->
+  <div id="image-modal" class="image-modal hidden">
+    <div class="image-modal-backdrop" onclick="closeImageModal()"></div>
+    <div class="image-modal-content">
+      <button class="image-modal-close" type="button" onclick="closeImageModal()">×</button>
+      <img id="image-modal-main" src="" alt="Product image" />
+      <div id="image-modal-thumbs" class="image-modal-thumbs"></div>
+    </div>
+  </div>
 
-    const YEAR_EL = document.getElementById('year');
-    YEAR_EL.textContent = new Date().getFullYear();
+  <script>
+    // ===== SETTINGS =====
+    const CASH_APP_TAG = "FlashBidz"; // Cash App $tag (without the $)
+    const VENMO_USER   = "FlashBidz"; // Venmo user (venmo.com/u/FlashBidz)
+    const MI_TAX_RATE  = 0.06;        // 6% Michigan sales tax
 
-    const grid = document.getElementById('product-grid');
-    const tpl = document.getElementById('product-card-tpl');
-    const q = document.getElementById('q');
-    const cat = document.getElementById('cat');
-    const sortSel = document.getElementById('sort');
-    const countEl = document.getElementById('count');
+    // ===== BASIC ELEMENTS =====
+    const YEAR_EL = document.getElementById("year");
+    if (YEAR_EL) YEAR_EL.textContent = new Date().getFullYear();
+
+    const grid    = document.getElementById("product-grid");
+    const tpl     = document.getElementById("product-card-tpl");
+    const q       = document.getElementById("q");
+    const cat     = document.getElementById("cat");
+    const sortSel = document.getElementById("sort");
+    const countEl = document.getElementById("count");
 
     let PRODUCTS = [];
 
     function fmt(n) {
-      return '$' + (Number(n) || 0).toFixed(2);
+      return "$" + (Number(n) || 0).toFixed(2);
     }
 
+    // ===== PAYMENT LINK HELPERS =====
+    function buildVenmoLink(amount, note) {
+      if (!VENMO_USER) return "";
+      return `https://venmo.com/u/${VENMO_USER}?txn=pay&amount=${(amount || 0).toFixed(2)}&note=${encodeURIComponent(note)}`;
+    }
+
+    function buildCashAppLink(amount, note) {
+      if (!CASH_APP_TAG) return "";
+      return `https://cash.app/$${CASH_APP_TAG}?amount=${(amount || 0).toFixed(2)}&note=${encodeURIComponent(note)}`;
+    }
+
+    // ===== LOAD PRODUCTS =====
     async function loadProducts() {
-      const res = await fetch('products.json?' + Date.now());
+      const res = await fetch("products.json?" + Date.now());
       const data = await res.json();
       PRODUCTS = data.products || [];
 
-      // Ensure every product has an images array and a main image
+      // Normalize images: ensure every product has images[] and image
       PRODUCTS.forEach(p => {
-        if (!p.images || !p.images.length) {
+        if (!Array.isArray(p.images) || !p.images.length) {
           if (p.image) {
             p.images = [p.image];
           } else {
-            p.images = ['img/placeholder.png'];
+            p.images = ["img/placeholder.png"];
           }
         }
         if (!p.image) {
@@ -134,9 +170,13 @@
         }
       });
 
-      const cats = Array.from(new Set(PRODUCTS.flatMap(p => p.categories || []))).sort();
+      // Build category dropdown
+      const cats = Array.from(
+        new Set(PRODUCTS.flatMap(p => p.categories || []))
+      ).filter(Boolean).sort();
+
       cats.forEach(c => {
-        const o = document.createElement('option');
+        const o = document.createElement("option");
         o.value = c;
         o.textContent = c;
         cat.appendChild(o);
@@ -145,159 +185,166 @@
       render();
     }
 
-    function buildVenmoLink(amount, note) {
-      if (!VENMO_USER) return '';
-      return `https://venmo.com/u/${VENMO_USER}?txn=pay&amount=${(amount || 0).toFixed(2)}&note=${encodeURIComponent(note)}`;
-    }
-
-    function buildCashAppLink(amount, note) {
-      if (!CASH_APP_TAG) return '';
-      return `https://cash.app/$${CASH_APP_TAG}?amount=${(amount || 0).toFixed(2)}&note=${encodeURIComponent(note)}`;
-    }
-
+    // ===== RENDER GRID =====
     function render() {
-      const query = (q.value || '').toLowerCase().trim();
-      const selectedCat = cat.value;
-      const sort = sortSel.value;
+      const query       = (q?.value || "").toLowerCase().trim();
+      const selectedCat = cat?.value || "";
+      const sort        = sortSel?.value || "new";
 
-      let items = PRODUCTS.filter(p => (p.active !== false));
+      let items = PRODUCTS.filter(p => p.active !== false);
 
       if (selectedCat) {
         items = items.filter(p => (p.categories || []).includes(selectedCat));
       }
+
       if (query) {
         items = items.filter(p =>
-          (p.title + ' ' + (p.description || '')).toLowerCase().includes(query)
+          ((p.title || "") + " " + (p.description || ""))
+            .toLowerCase()
+            .includes(query)
         );
       }
 
-      if (sort === 'price-asc') {
+      if (sort === "price-asc") {
         items.sort((a, b) => (a.price || 0) - (b.price || 0));
-      } else if (sort === 'price-desc') {
+      } else if (sort === "price-desc") {
         items.sort((a, b) => (b.price || 0) - (a.price || 0));
       } else {
-        items.sort((a, b) => new Date(b.added_at || 0) - new Date(a.added_at || 0));
+        items.sort(
+          (a, b) =>
+            new Date(b.added_at || 0).getTime() -
+            new Date(a.added_at || 0).getTime()
+        );
       }
 
-      grid.innerHTML = '';
+      grid.innerHTML = "";
       items.forEach(p => {
-        const node = tpl.content.cloneNode(true);
-        const img = node.querySelector('img');
-        const title = node.querySelector('.title');
-        const desc = node.querySelector('.desc');
-        const price = node.querySelector('.price');
-        const stock = node.querySelector('.stock');
-        const badge = node.querySelector('.badge');
-        const subEl = node.querySelector('.subtotal');
-        const taxEl = node.querySelector('.tax');
-        const totalEl = node.querySelector('.total');
-        const taxRateEl = node.querySelector('.tax-rate');
-        const venmoBtn = node.querySelector('.venmo');
-        const cashBtn = node.querySelector('.cashapp');
+        const node       = tpl.content.cloneNode(true);
+        const img        = node.querySelector("img");
+        const title      = node.querySelector(".title");
+        const desc       = node.querySelector(".desc");
+        const priceEl    = node.querySelector(".price");
+        const stockEl    = node.querySelector(".stock");
+        const badgeEl    = node.querySelector(".badge");
+        const subEl      = node.querySelector(".subtotal");
+        const taxEl      = node.querySelector(".tax");
+        const totalEl    = node.querySelector(".total");
+        const taxRateEl  = node.querySelector(".tax-rate");
+        const venmoBtn   = node.querySelector(".venmo");
+        const cashBtn    = node.querySelector(".cashapp");
 
-        img.src = p.image || 'img/placeholder.png';
-        img.alt = p.title;
-        img.style.cursor = 'pointer';
-        img.addEventListener('click', () => openImageModal(p));  // 👈 open gallery on click
+        // Image + gallery
+        img.src = p.image || "img/placeholder.png";
+        img.alt = p.title || "";
+        img.style.cursor = "pointer";
+        img.addEventListener("click", () => openImageModal(p));
 
-        title.textContent = p.title;
-        desc.textContent = p.description || '';
-        price.textContent = p.price ? fmt(p.price) : '';
-        stock.textContent = p.stock && p.stock > 0 ? 'In Stock' : 'Sold Out';
+        // Text
+        title.textContent   = p.title || "";
+        desc.textContent    = p.description || "";
+        priceEl.textContent = p.price ? fmt(p.price) : "";
+        stockEl.textContent = (p.stock && p.stock > 0) ? "In Stock" : "Sold Out";
 
         if (p.badge) {
-          badge.textContent = p.badge;
+          badgeEl.textContent = p.badge;
         } else {
-          badge.remove();
+          badgeEl.remove();
         }
 
+        // Totals
         const subtotal = Number(p.price || 0);
-        const tax = +(subtotal * MI_TAX_RATE).toFixed(2);
-        const total = +(subtotal + tax).toFixed(2);
-        taxRateEl.textContent = (MI_TAX_RATE * 100).toFixed(0);
-        subEl.textContent = fmt(subtotal);
-        taxEl.textContent = fmt(tax);
-        totalEl.textContent = fmt(total);
+        const tax      = +(subtotal * MI_TAX_RATE).toFixed(2);
+        const total    = +(subtotal + tax).toFixed(2);
 
-        const note = `${p.sku || ''}-${p.title || ''}`.slice(0, 60);
+        taxRateEl.textContent = (MI_TAX_RATE * 100).toFixed(0);
+        subEl.textContent     = fmt(subtotal);
+        taxEl.textContent     = fmt(tax);
+        totalEl.textContent   = fmt(total);
+
+        // Payment links
+        const note = `${p.sku || ""} - ${p.title || ""}`.slice(0, 70);
 
         if (p.stock && p.stock > 0) {
           const venmo = buildVenmoLink(total, note);
-          const cash = buildCashAppLink(total, note);
-          if (venmo) venmoBtn.href = venmo; else venmoBtn.classList.add('disabled');
-          if (cash) cashBtn.href = cash; else cashBtn.classList.add('disabled');
-        } else {
-          venmoBtn.textContent = 'Sold Out';
-          venmoBtn.classList.add('disabled');
-          venmoBtn.removeAttribute('href');
+          const cash  = buildCashAppLink(total, note);
 
-          cashBtn.textContent = 'Sold Out';
-          cashBtn.classList.add('disabled');
-          cashBtn.removeAttribute('href');
+          if (venmo) {
+            venmoBtn.href = venmo;
+          } else {
+            venmoBtn.classList.add("disabled");
+            venmoBtn.removeAttribute("href");
+          }
+
+          if (cash) {
+            cashBtn.href = cash;
+          } else {
+            cashBtn.classList.add("disabled");
+            cashBtn.removeAttribute("href");
+          }
+        } else {
+          venmoBtn.textContent = "Sold Out";
+          venmoBtn.classList.add("disabled");
+          venmoBtn.removeAttribute("href");
+
+          cashBtn.textContent = "Sold Out";
+          cashBtn.classList.add("disabled");
+          cashBtn.removeAttribute("href");
         }
 
         grid.appendChild(node);
       });
 
-      countEl.textContent = items.length + ' item' + (items.length === 1 ? '' : 's');
+      if (countEl) {
+        countEl.textContent =
+          items.length + " item" + (items.length === 1 ? "" : "s");
+      }
     }
 
-    // --- Mini gallery modal ---
-
+    // ===== MINI GALLERY MODAL =====
     function openImageModal(product) {
-      const modal = document.getElementById('image-modal');
-      const mainImg = document.getElementById('image-modal-main');
-      const thumbsContainer = document.getElementById('image-modal-thumbs');
+      const modal   = document.getElementById("image-modal");
+      const mainImg = document.getElementById("image-modal-main");
+      const thumbs  = document.getElementById("image-modal-thumbs");
 
       const imgs = (product.images && product.images.length)
         ? product.images
-        : [product.image || 'img/placeholder.png'];
+        : [product.image || "img/placeholder.png"];
 
       mainImg.src = imgs[0];
-      mainImg.alt = product.title || '';
+      mainImg.alt = product.title || "";
 
-      thumbsContainer.innerHTML = '';
-      imgs.forEach((src, index) => {
-        const t = document.createElement('img');
+      thumbs.innerHTML = "";
+      imgs.forEach((src, idx) => {
+        const t = document.createElement("img");
         t.src = src;
-        t.alt = product.title || '';
-        if (index === 0) t.classList.add('active-thumb');
-
-        t.addEventListener('click', () => {
+        t.alt = product.title || "";
+        if (idx === 0) t.classList.add("active-thumb");
+        t.addEventListener("click", () => {
           mainImg.src = src;
-          // update active class
-          thumbsContainer.querySelectorAll('img').forEach(el => el.classList.remove('active-thumb'));
-          t.classList.add('active-thumb');
+          thumbs.querySelectorAll("img").forEach(el => el.classList.remove("active-thumb"));
+          t.classList.add("active-thumb");
         });
-
-        thumbsContainer.appendChild(t);
+        thumbs.appendChild(t);
       });
 
-      modal.classList.remove('hidden');
+      modal.classList.remove("hidden");
     }
 
     function closeImageModal() {
-      const modal = document.getElementById('image-modal');
-      modal.classList.add('hidden');
+      const modal = document.getElementById("image-modal");
+      modal.classList.add("hidden");
     }
 
-    q.addEventListener('input', render);
-    cat.addEventListener('change', render);
-    sortSel.addEventListener('change', render);
+    // Make closeImageModal available to inline onclick
+    window.closeImageModal = closeImageModal;
 
+    // ===== FILTER EVENTS =====
+    q?.addEventListener("input", render);
+    cat?.addEventListener("change", render);
+    sortSel?.addEventListener("change", render);
+
+    // ===== INIT =====
     loadProducts();
   </script>
-<!-- Image gallery modal -->
-<div id="image-modal" class="image-modal hidden">
-  <div class="image-modal-backdrop" onclick="closeImageModal()"></div>
-  <div class="image-modal-content">
-    <button class="image-modal-close" onclick="closeImageModal()">×</button>
-    <img id="image-modal-main" src="" alt="Product image">
-
-    <div id="image-modal-thumbs" class="image-modal-thumbs">
-      <!-- Thumbnails will be injected by JS -->
-    </div>
-  </div>
-</div>
 </body>
 </html>
