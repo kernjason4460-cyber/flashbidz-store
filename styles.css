@@ -86,3 +86,75 @@ a { color: var(--text); text-decoration: none; }
   .hero { padding: 40px 3vw 18px; }
   .actions.two { grid-template-columns:1fr; }
 }
+/* --- Image gallery modal --- */
+
+.image-modal.hidden {
+  display: none;
+}
+
+.image-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+}
+
+.image-modal-content {
+  position: relative;
+  background: #111;
+  padding: 16px;
+  border-radius: 8px;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.8);
+}
+
+.image-modal-close {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+#image-modal-main {
+  max-width: 80vw;
+  max-height: 60vh;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.image-modal-thumbs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.image-modal-thumbs img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.7;
+  border: 2px solid transparent;
+}
+
+.image-modal-thumbs img.active-thumb {
+  opacity: 1;
+  border-color: #e53935; /* your red */
+}
