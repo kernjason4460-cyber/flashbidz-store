@@ -189,7 +189,7 @@
       "price": 10,
       "stock": 1,
       "images": [
-        "Mud_Pie.JPG"
+        "img/Mud_Pie.jpg"
       ],
       "categories": [
         "Holiday"
@@ -203,7 +203,10 @@
       "description": "Add some winter cheer to your Christmas tree with this adorable snowman topper!",
       "price": 10,
       "stock": 1,
-      "images": [],
+      "images": [
+        "img/Topper.jpeg",
+        "img/Topper2.jpeg"
+      ],
       "categories": [
         "holiday"
       ],
