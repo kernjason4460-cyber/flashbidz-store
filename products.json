@@ -1,23 +1,33 @@
 {
   "products": [
     {
-      "sku": "FROGG-TOGG",
-      "title": "Frogg Toggs Waterproof Rain Suit ? Size Large (Jacket + Pants)\nBlack with gray trim ? Unisex fit ? Size: L",
-      "description": "Frogg Toggs Waterproof Rain Suit ? Size Large (Jacket + Pants),Black with gray trim ? Unisex fit ? Size: L, Used once ? excellent condition, Lightweight 2-piece rain gear set that keeps you dry without the bulk. 100% waterproof & wind-resistant, Full zip jacket with snap storm flap, Elastic waist pants with pockets + adjustable leg cuffs, Packs down small ? easy to store in a backpack, saddlebag, or vehicle, Great for motorcycle riding, hunting, fishing, yard work, camping, sports events, job sites, etc.",
-      "price": 40,
+      "sku": "FBZ-20251128-0020",
+      "title": "turquoise and coral ring and belt buckleAccessories",
+      "description": "",
+      "price": 300,
       "stock": 1,
-      "image": "img/IMG_6573.JPG",
-      "images": [
-        "img/IMG_6573.JPG",
-        "img/IMG_6584.JPG",
-        "img/IMG_6585.JPG",
-        "img/IMG_6586.JPG"
-      ],
+      "image": "img/placeholder.png",
+      "images": [],
       "categories": [
-        "Clothing"
+        "Accessories"
       ],
       "badge": "",
-      "added_at": "11-09-2025",
+      "added_at": "2025-12-01",
+      "active": true
+    },
+    {
+      "sku": "FBZ-HOL-20251128-0032",
+      "title": "Holiday Collectible plate",
+      "description": "",
+      "price": 15,
+      "stock": 3,
+      "image": "img/placeholder.png",
+      "images": [],
+      "categories": [
+        "Holiday"
+      ],
+      "badge": "",
+      "added_at": "2025-12-01",
       "active": true
     }
   ]
