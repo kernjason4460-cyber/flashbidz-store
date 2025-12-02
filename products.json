@@ -6,7 +6,10 @@
       "description": "",
       "price": 300,
       "stock": 1,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Accessories"
       ],
@@ -19,7 +22,10 @@
       "description": "",
       "price": 15,
       "stock": 3,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Holiday"
       ],
@@ -32,7 +38,10 @@
       "description": "",
       "price": 8,
       "stock": 3,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Holiday"
       ],
@@ -45,7 +54,10 @@
       "description": "",
       "price": 5,
       "stock": 1,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Holiday"
       ],
@@ -58,7 +70,10 @@
       "description": "",
       "price": 10,
       "stock": 1,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Holiday"
       ],
@@ -71,7 +86,10 @@
       "description": "",
       "price": 10,
       "stock": 1,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Decor"
       ],
@@ -84,7 +102,10 @@
       "description": "",
       "price": 3,
       "stock": 3,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Holiday"
       ],
@@ -97,7 +118,10 @@
       "description": "",
       "price": 3,
       "stock": 1,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Holiday"
       ],
@@ -110,7 +134,10 @@
       "description": "",
       "price": 3,
       "stock": 1,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Holiday"
       ],
@@ -123,7 +150,10 @@
       "description": "",
       "price": 15,
       "stock": 1,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Holiday"
       ],
@@ -136,7 +166,10 @@
       "description": "",
       "price": 10,
       "stock": 1,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Holiday"
       ],
@@ -149,7 +182,10 @@
       "description": "",
       "price": 10,
       "stock": 1,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Decor"
       ],
@@ -162,7 +198,10 @@
       "description": "",
       "price": 15,
       "stock": 1,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Decor"
       ],
@@ -175,7 +214,10 @@
       "description": "",
       "price": 500,
       "stock": 1,
-      "images": [],
+      "image": "img/placeholder.png",
+      "images": [
+        "img/placeholder.png"
+      ],
       "categories": [
         "Holiday"
       ],
@@ -188,6 +230,7 @@
       "description": "Neutral white Mud Pie decorative tree.\nSize: 12 x 9 perfect for shelves, mantels, tier trays, or minimal Christmas d?cor. Matches any style!",
       "price": 10,
       "stock": 1,
+      "image": "img/Mud_Pie.jpg",
       "images": [
         "img/Mud_Pie.jpg",
         "img/Mud_Pie2.jpeg"
@@ -204,6 +247,7 @@
       "description": "Add some winter cheer to your Christmas tree with this adorable snowman topper!",
       "price": 10,
       "stock": 1,
+      "image": "img/Topper.jpeg",
       "images": [
         "img/Topper.jpeg",
         "img/Topper2.jpeg"
