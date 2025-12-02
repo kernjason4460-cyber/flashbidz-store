@@ -188,7 +188,9 @@
       "description": "Neutral white Mud Pie decorative tree.\nSize: 12? x 9? ? perfect for shelves, mantels, tier trays, or minimal Christmas d?cor. Matches any style!",
       "price": 10,
       "stock": 1,
-      "images": [],
+      "images": [
+        "Mud_Pie.JPG"
+      ],
       "categories": [
         "Holiday"
       ],
