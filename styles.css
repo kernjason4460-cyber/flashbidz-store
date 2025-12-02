@@ -245,3 +245,102 @@ a { color: var(--text); text-decoration: none; }
   opacity: 1;
   border-color: #e53935; /* FlashBidz red */
 }
+/* =========================
+   MOBILE IMPROVEMENTS
+   ========================= */
+
+/* Tablets & phones */
+@media (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+
+  /* Sticky header on scroll */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 8px 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* Make the nav buttons scrollable instead of squished */
+  .top-cta {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    gap: 8px;
+  }
+  .top-cta .btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* Hero section tighter & stacked */
+  .hero {
+    padding: 16px 12px 20px;
+    text-align: left;
+  }
+  .hero-cta {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .hero .search {
+    width: 100%;
+  }
+
+  /* Toolbar wraps nicely */
+  .toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .toolbar .select {
+    flex: 1 1 calc(50% - 6px);
+  }
+
+  /* ONE card per row on mobile = bigger images */
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .card {
+    border-radius: 12px;
+  }
+  .card-body {
+    padding: 12px;
+  }
+  .title {
+    font-size: 16px;
+  }
+  .price {
+    font-size: 18px;
+  }
+
+  /* Buttons easier to tap */
+  .btn {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .totals {
+    font-size: 13px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .site-header h1 {
+    font-size: 18px;
+  }
+  .site-header .tagline {
+    font-size: 11px;
+  }
+
+  /* Slightly taller images so they feel bigger */
+  .img-wrap {
+    aspect-ratio: 4 / 3;
+  }
+}
