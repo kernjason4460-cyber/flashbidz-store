@@ -26,9 +26,42 @@
     </nav>
   </header>
 
+  <!-- Cart bar -->
+  <section class="cart-bar" aria-label="Shopping cart">
+    <button id="cart-toggle" class="btn cart-btn" type="button">
+      Cart (<span id="cart-count">0</span>) • <span id="cart-total">$0.00</span>
+    </button>
+  </section>
+
+  <!-- Slide-out cart panel -->
+  <div id="cart-panel" class="cart-panel hidden" aria-hidden="true">
+    <div class="cart-panel-inner">
+      <h3>Your Cart</h3>
+      <div id="cart-items" class="cart-items"></div>
+
+      <div class="cart-summary">
+        <div>Subtotal: <strong id="cart-subtotal">$0.00</strong></div>
+        <div>MI Tax (6%): <strong id="cart-tax">$0.00</strong></div>
+        <div>Total: <strong id="cart-grand-total">$0.00</strong></div>
+      </div>
+
+      <p class="cart-note-label">Payment note we’ll attach (you may see it in Venmo/Cash App):</p>
+      <pre id="cart-note" class="cart-note"></pre>
+
+      <div class="actions two co-actions">
+        <button id="cart-venmo" class="btn pay venmo" type="button">Pay with Venmo</button>
+        <button id="cart-cash" class="btn pay cashapp" type="button">Pay with Cash App</button>
+      </div>
+
+      <p class="cart-help">
+        After you pay, please send us a quick Facebook message with a screenshot so we can match your payment to your order.
+      </p>
+    </div>
+  </div>
+
   <section class="hero">
     <h2>Local Deals • Easy Pickup • No Bidding</h2>
-    <p>Prices shown are <strong>before tax</strong>. Michigan sales tax is added at checkout for Venmo/Cash App.</p>
+    <p>Prices shown are <strong>before tax</strong>. Michigan sales tax is added at checkout.</p>
     <div class="hero-cta">
       <input id="q" class="search" type="search" placeholder="Search items… (e.g., bassinet, tools, Barbie)" aria-label="Search products" />
       <a class="btn btn-primary hero-browse" href="#shop" onclick="document.getElementById('q').focus()">Browse All</a>
@@ -66,7 +99,7 @@
     <ul>
       <li><strong>Pickup:</strong> Mattawan, MI (exact address provided after purchase). Please pick up within <strong>7 days</strong>.</li>
       <li><strong>Storage:</strong> After 7 days, <strong>$2 per item per day</strong>. After 14 days, items are <strong>abandoned</strong>.</li>
-      <li><strong>Payment:</strong> Pay with <strong>Venmo or Cash App</strong>. MI <strong>6% sales tax</strong> is added at checkout.</li>
+      <li><strong>Payment:</strong> Pay with <strong>Venmo or Cash App</strong>. MI <strong>6% sales tax</strong> is included in the total.</li>
       <li><strong>Condition:</strong> Items sold <em>AS-IS, WHERE-IS</em>. <strong>All sales final.</strong></li>
       <li><strong>Questions?</strong> Message us on Facebook or email <a href="mailto:support@flashbidz.net">support@flashbidz.net</a>.</li>
     </ul>
@@ -98,9 +131,10 @@
           <div>Total: <strong class="total"></strong></div>
         </div>
 
-        <div class="actions two">
-          <a class="btn pay venmo" target="_blank" rel="noopener">Pay with Venmo</a>
-          <a class="btn pay cashapp" target="_blank" rel="noopener">Pay with Cash App</a>
+        <div class="actions">
+          <button class="btn btn-primary add-to-cart" type="button">
+            Add to Cart
+          </button>
         </div>
       </div>
     </article>
@@ -133,7 +167,21 @@
     const sortSel = document.getElementById("sort");
     const countEl = document.getElementById("count");
 
+    // Cart elements
+    const cartToggle  = document.getElementById("cart-toggle");
+    const cartPanel   = document.getElementById("cart-panel");
+    const cartItemsEl = document.getElementById("cart-items");
+    const cartCountEl = document.getElementById("cart-count");
+    const cartTotalEl = document.getElementById("cart-total");
+    const cartSubEl   = document.getElementById("cart-subtotal");
+    const cartTaxEl   = document.getElementById("cart-tax");
+    const cartGrandEl = document.getElementById("cart-grand-total");
+    const cartNoteEl  = document.getElementById("cart-note");
+    const cartVenmo   = document.getElementById("cart-venmo");
+    const cartCash    = document.getElementById("cart-cash");
+
     let PRODUCTS = [];
+    let CART = [];
 
     function fmt(n) {
       return "$" + (Number(n) || 0).toFixed(2);
@@ -230,8 +278,7 @@
         const taxEl      = node.querySelector(".tax");
         const totalEl    = node.querySelector(".total");
         const taxRateEl  = node.querySelector(".tax-rate");
-        const venmoBtn   = node.querySelector(".venmo");
-        const cashBtn    = node.querySelector(".cashapp");
+        const addBtn     = node.querySelector(".add-to-cart");
 
         // Image + gallery
         img.src = p.image || "img/placeholder.png";
@@ -261,34 +308,16 @@
         taxEl.textContent     = fmt(tax);
         totalEl.textContent   = fmt(total);
 
-        // Payment links
-        const note = `${p.sku || ""} - ${p.title || ""}`.slice(0, 70);
-
-        if (p.stock && p.stock > 0) {
-          const venmo = buildVenmoLink(total, note);
-          const cash  = buildCashAppLink(total, note);
-
-          if (venmo) {
-            venmoBtn.href = venmo;
+        // Add to cart
+        if (addBtn) {
+          if (p.stock && p.stock > 0) {
+            addBtn.disabled = false;
+            addBtn.textContent = "Add to Cart";
+            addBtn.addEventListener("click", () => addToCart(p));
           } else {
-            venmoBtn.classList.add("disabled");
-            venmoBtn.removeAttribute("href");
+            addBtn.disabled = true;
+            addBtn.textContent = "Sold Out";
           }
-
-          if (cash) {
-            cashBtn.href = cash;
-          } else {
-            cashBtn.classList.add("disabled");
-            cashBtn.removeAttribute("href");
-          }
-        } else {
-          venmoBtn.textContent = "Sold Out";
-          venmoBtn.classList.add("disabled");
-          venmoBtn.removeAttribute("href");
-
-          cashBtn.textContent = "Sold Out";
-          cashBtn.classList.add("disabled");
-          cashBtn.removeAttribute("href");
         }
 
         grid.appendChild(node);
@@ -298,6 +327,187 @@
         countEl.textContent =
           items.length + " item" + (items.length === 1 ? "" : "s");
       }
+    }
+
+    // ===== CART LOGIC =====
+    function loadCart() {
+      try {
+        const raw = localStorage.getItem("fbz_cart");
+        CART = raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        CART = [];
+      }
+    }
+
+    function saveCart() {
+      localStorage.setItem("fbz_cart", JSON.stringify(CART));
+    }
+
+    function findCartIndex(sku) {
+      return CART.findIndex(item => item.sku === sku);
+    }
+
+    function addToCart(product) {
+      if (!product || !product.sku) return;
+      const idx = findCartIndex(product.sku);
+      if (idx >= 0) {
+        CART[idx].qty += 1;
+      } else {
+        CART.push({
+          sku: product.sku,
+          title: product.title,
+          price: Number(product.price || 0),
+          qty: 1
+        });
+      }
+      saveCart();
+      updateCartUI(true);
+    }
+
+    function changeQty(sku, delta) {
+      const idx = findCartIndex(sku);
+      if (idx < 0) return;
+      CART[idx].qty += delta;
+      if (CART[idx].qty <= 0) {
+        CART.splice(idx, 1);
+      }
+      saveCart();
+      updateCartUI();
+    }
+
+    function removeFromCart(sku) {
+      CART = CART.filter(item => item.sku !== sku);
+      saveCart();
+      updateCartUI();
+    }
+
+    function getCartTotals() {
+      let subtotal = 0;
+      CART.forEach(item => {
+        subtotal += item.price * item.qty;
+      });
+      const tax = +(subtotal * MI_TAX_RATE).toFixed(2);
+      const total = +(subtotal + tax).toFixed(2);
+      const count = CART.reduce((acc, item) => acc + item.qty, 0);
+      return { subtotal, tax, total, count };
+    }
+
+    function buildCartNote() {
+      if (!CART.length) return "";
+      const parts = CART.map(item => `${item.sku}x${item.qty}`);
+      let note = "FBZ Cart: " + parts.join(", ");
+      if (note.length > 90) {
+        note = note.slice(0, 87) + "...";
+      }
+      return note;
+    }
+
+    function updateCartUI(openPanelIfHasItems = false) {
+      const { subtotal, tax, total, count } = getCartTotals();
+
+      if (cartCountEl) cartCountEl.textContent = count;
+      if (cartTotalEl) cartTotalEl.textContent = fmt(total);
+      if (cartSubEl)  cartSubEl.textContent  = fmt(subtotal);
+      if (cartTaxEl)  cartTaxEl.textContent  = fmt(tax);
+      if (cartGrandEl)cartGrandEl.textContent= fmt(total);
+
+      const note = buildCartNote();
+      if (cartNoteEl) cartNoteEl.textContent = note || "(Cart is empty)";
+
+      cartItemsEl.innerHTML = "";
+
+      if (!CART.length) {
+        const empty = document.createElement("p");
+        empty.textContent = "Your cart is empty.";
+        empty.className = "muted";
+        cartItemsEl.appendChild(empty);
+      } else {
+        CART.forEach(item => {
+          const row = document.createElement("div");
+          row.className = "cart-item";
+
+          const title = document.createElement("div");
+          title.className = "cart-item-title";
+          title.textContent = item.title;
+
+          const controls = document.createElement("div");
+          controls.className = "cart-item-controls";
+
+          const minus = document.createElement("button");
+          minus.type = "button";
+          minus.className = "cart-qty-btn";
+          minus.textContent = "−";
+          minus.addEventListener("click", () => changeQty(item.sku, -1));
+
+          const qty = document.createElement("span");
+          qty.className = "cart-qty";
+          qty.textContent = item.qty;
+
+          const plus = document.createElement("button");
+          plus.type = "button";
+          plus.className = "cart-qty-btn";
+          plus.textContent = "+";
+          plus.addEventListener("click", () => changeQty(item.sku, +1));
+
+          controls.append(minus, qty, plus);
+
+          const right = document.createElement("div");
+          right.style.textAlign = "right";
+
+          const line = document.createElement("div");
+          line.textContent = fmt(item.price * item.qty);
+
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "cart-remove";
+          remove.textContent = "Remove";
+          remove.addEventListener("click", () => removeFromCart(item.sku));
+
+          right.append(line, remove);
+
+          row.append(title, controls, right);
+          cartItemsEl.appendChild(row);
+        });
+      }
+
+      if (openPanelIfHasItems && CART.length) {
+        openCartPanel();
+      }
+    }
+
+    function openCartPanel() {
+      if (!cartPanel) return;
+      cartPanel.classList.remove("hidden");
+      cartPanel.setAttribute("aria-hidden", "false");
+    }
+
+    function closeCartPanel() {
+      if (!cartPanel) return;
+      cartPanel.classList.add("hidden");
+      cartPanel.setAttribute("aria-hidden", "true");
+    }
+
+    function checkoutWith(method) {
+      if (!CART.length) {
+        alert("Your cart is empty.");
+        return;
+      }
+      const { total } = getCartTotals();
+      const note = buildCartNote();
+      let url = "";
+
+      if (method === "venmo") {
+        url = buildVenmoLink(total, note);
+      } else if (method === "cash") {
+        url = buildCashAppLink(total, note);
+      }
+
+      if (!url) {
+        alert("Payment link could not be generated.");
+        return;
+      }
+
+      window.open(url, "_blank");
     }
 
     // ===== MINI GALLERY MODAL =====
@@ -335,15 +545,38 @@
       modal.classList.add("hidden");
     }
 
-    // Make closeImageModal available to inline onclick
     window.closeImageModal = closeImageModal;
 
-    // ===== FILTER EVENTS =====
+    // ===== EVENTS =====
     q?.addEventListener("input", render);
     cat?.addEventListener("change", render);
     sortSel?.addEventListener("change", render);
 
+    if (cartToggle) {
+      cartToggle.addEventListener("click", () => {
+        const isHidden = cartPanel.classList.contains("hidden");
+        if (isHidden) openCartPanel();
+        else closeCartPanel();
+      });
+    }
+
+    if (cartPanel) {
+      cartPanel.addEventListener("click", (e) => {
+        if (e.target === cartPanel) closeCartPanel();
+      });
+    }
+
+    if (cartVenmo) {
+      cartVenmo.addEventListener("click", () => checkoutWith("venmo"));
+    }
+
+    if (cartCash) {
+      cartCash.addEventListener("click", () => checkoutWith("cash"));
+    }
+
     // ===== INIT =====
+    loadCart();
+    updateCartUI();
     loadProducts();
   </script>
 </body>
