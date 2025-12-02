@@ -189,7 +189,8 @@
       "price": 10,
       "stock": 1,
       "images": [
-        "img/Mud_Pie.jpg"
+        "img/Mud_Pie.jpg",
+        "img/Mud_Pie2.jpeg"
       ],
       "categories": [
         "Holiday"
