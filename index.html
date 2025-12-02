@@ -206,5 +206,17 @@
 
     loadProducts();
   </script>
+<!-- Image gallery modal -->
+<div id="image-modal" class="image-modal hidden">
+  <div class="image-modal-backdrop" onclick="closeImageModal()"></div>
+  <div class="image-modal-content">
+    <button class="image-modal-close" onclick="closeImageModal()">×</button>
+    <img id="image-modal-main" src="" alt="Product image">
+
+    <div id="image-modal-thumbs" class="image-modal-thumbs">
+      <!-- Thumbnails will be injected by JS -->
+    </div>
+  </div>
+</div>
 </body>
 </html>
