@@ -93,7 +93,7 @@
     </article>
   </template>
 
-  <script>
+   <script>
     // Settings: your real handles + tax rate
     const CASH_APP_TAG = "FlashBidz";     // without the $
     const VENMO_USER  = "FlashBidz";      // venmo.com/u/FlashBidz
@@ -110,17 +110,35 @@
     const countEl = document.getElementById('count');
 
     let PRODUCTS = [];
-    function fmt(n){ return '$' + (Number(n)||0).toFixed(2); }
+
+    function fmt(n) {
+      return '$' + (Number(n) || 0).toFixed(2);
+    }
 
     async function loadProducts() {
       const res = await fetch('products.json?' + Date.now());
       const data = await res.json();
       PRODUCTS = data.products || [];
 
+      // Ensure every product has an images array and a main image
+      PRODUCTS.forEach(p => {
+        if (!p.images || !p.images.length) {
+          if (p.image) {
+            p.images = [p.image];
+          } else {
+            p.images = ['img/placeholder.png'];
+          }
+        }
+        if (!p.image) {
+          p.image = p.images[0];
+        }
+      });
+
       const cats = Array.from(new Set(PRODUCTS.flatMap(p => p.categories || []))).sort();
       cats.forEach(c => {
         const o = document.createElement('option');
-        o.value = c; o.textContent = c;
+        o.value = c;
+        o.textContent = c;
         cat.appendChild(o);
       });
 
@@ -129,11 +147,12 @@
 
     function buildVenmoLink(amount, note) {
       if (!VENMO_USER) return '';
-      return `https://venmo.com/u/${VENMO_USER}?txn=pay&amount=${(amount||0).toFixed(2)}&note=${encodeURIComponent(note)}`;
+      return `https://venmo.com/u/${VENMO_USER}?txn=pay&amount=${(amount || 0).toFixed(2)}&note=${encodeURIComponent(note)}`;
     }
+
     function buildCashAppLink(amount, note) {
       if (!CASH_APP_TAG) return '';
-      return `https://cash.app/$${CASH_APP_TAG}?amount=${(amount||0).toFixed(2)}&note=${encodeURIComponent(note)}`;
+      return `https://cash.app/$${CASH_APP_TAG}?amount=${(amount || 0).toFixed(2)}&note=${encodeURIComponent(note)}`;
     }
 
     function render() {
@@ -143,12 +162,22 @@
 
       let items = PRODUCTS.filter(p => (p.active !== false));
 
-      if (selectedCat) items = items.filter(p => (p.categories || []).includes(selectedCat));
-      if (query) items = items.filter(p => (p.title + ' ' + (p.description||'')).toLowerCase().includes(query));
+      if (selectedCat) {
+        items = items.filter(p => (p.categories || []).includes(selectedCat));
+      }
+      if (query) {
+        items = items.filter(p =>
+          (p.title + ' ' + (p.description || '')).toLowerCase().includes(query)
+        );
+      }
 
-      if (sort === 'price-asc') items.sort((a,b) => (a.price||0) - (b.price||0));
-      else if (sort === 'price-desc') items.sort((a,b) => (b.price||0) - (a.price||0));
-      else items.sort((a,b) => new Date(b.added_at||0) - new Date(a.added_at||0));
+      if (sort === 'price-asc') {
+        items.sort((a, b) => (a.price || 0) - (b.price || 0));
+      } else if (sort === 'price-desc') {
+        items.sort((a, b) => (b.price || 0) - (a.price || 0));
+      } else {
+        items.sort((a, b) => new Date(b.added_at || 0) - new Date(a.added_at || 0));
+      }
 
       grid.innerHTML = '';
       items.forEach(p => {
@@ -168,11 +197,19 @@
 
         img.src = p.image || 'img/placeholder.png';
         img.alt = p.title;
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', () => openImageModal(p));  // 👈 open gallery on click
+
         title.textContent = p.title;
         desc.textContent = p.description || '';
         price.textContent = p.price ? fmt(p.price) : '';
         stock.textContent = p.stock && p.stock > 0 ? 'In Stock' : 'Sold Out';
-        if (p.badge) { badge.textContent = p.badge; } else { badge.remove(); }
+
+        if (p.badge) {
+          badge.textContent = p.badge;
+        } else {
+          badge.remove();
+        }
 
         const subtotal = Number(p.price || 0);
         const tax = +(subtotal * MI_TAX_RATE).toFixed(2);
@@ -182,7 +219,7 @@
         taxEl.textContent = fmt(tax);
         totalEl.textContent = fmt(total);
 
-        const note = `${p.sku || ''}-${p.title || ''}`.slice(0,60);
+        const note = `${p.sku || ''}-${p.title || ''}`.slice(0, 60);
 
         if (p.stock && p.stock > 0) {
           const venmo = buildVenmoLink(total, note);
@@ -190,14 +227,58 @@
           if (venmo) venmoBtn.href = venmo; else venmoBtn.classList.add('disabled');
           if (cash) cashBtn.href = cash; else cashBtn.classList.add('disabled');
         } else {
-          venmoBtn.textContent = 'Sold Out'; venmoBtn.classList.add('disabled'); venmoBtn.removeAttribute('href');
-          cashBtn.textContent = 'Sold Out';  cashBtn.classList.add('disabled');  cashBtn.removeAttribute('href');
+          venmoBtn.textContent = 'Sold Out';
+          venmoBtn.classList.add('disabled');
+          venmoBtn.removeAttribute('href');
+
+          cashBtn.textContent = 'Sold Out';
+          cashBtn.classList.add('disabled');
+          cashBtn.removeAttribute('href');
         }
 
         grid.appendChild(node);
       });
 
-      countEl.textContent = items.length + ' item' + (items.length===1?'':'s');
+      countEl.textContent = items.length + ' item' + (items.length === 1 ? '' : 's');
+    }
+
+    // --- Mini gallery modal ---
+
+    function openImageModal(product) {
+      const modal = document.getElementById('image-modal');
+      const mainImg = document.getElementById('image-modal-main');
+      const thumbsContainer = document.getElementById('image-modal-thumbs');
+
+      const imgs = (product.images && product.images.length)
+        ? product.images
+        : [product.image || 'img/placeholder.png'];
+
+      mainImg.src = imgs[0];
+      mainImg.alt = product.title || '';
+
+      thumbsContainer.innerHTML = '';
+      imgs.forEach((src, index) => {
+        const t = document.createElement('img');
+        t.src = src;
+        t.alt = product.title || '';
+        if (index === 0) t.classList.add('active-thumb');
+
+        t.addEventListener('click', () => {
+          mainImg.src = src;
+          // update active class
+          thumbsContainer.querySelectorAll('img').forEach(el => el.classList.remove('active-thumb'));
+          t.classList.add('active-thumb');
+        });
+
+        thumbsContainer.appendChild(t);
+      });
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeImageModal() {
+      const modal = document.getElementById('image-modal');
+      modal.classList.add('hidden');
     }
 
     q.addEventListener('input', render);
