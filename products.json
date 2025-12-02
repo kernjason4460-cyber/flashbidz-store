@@ -13,8 +13,9 @@
       "categories": [
         "Accessories"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-HOL-20251128-0032",
@@ -29,8 +30,9 @@
       "categories": [
         "Holiday"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-HOL-20251128-0029",
@@ -45,8 +47,9 @@
       "categories": [
         "Holiday"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-20251128-0015",
@@ -61,8 +64,9 @@
       "categories": [
         "Holiday"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-20251128-0014",
@@ -77,8 +81,9 @@
       "categories": [
         "Holiday"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-20251128-0013",
@@ -93,8 +98,9 @@
       "categories": [
         "Decor"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-20251128-0011",
@@ -109,8 +115,9 @@
       "categories": [
         "Holiday"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-20251128-0010",
@@ -125,8 +132,9 @@
       "categories": [
         "Holiday"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-20251128-0009",
@@ -141,8 +149,9 @@
       "categories": [
         "Holiday"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-HOM-20251128-0015",
@@ -157,8 +166,9 @@
       "categories": [
         "Holiday"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-HOL-20251128-0014",
@@ -175,8 +185,9 @@
       "categories": [
         "Holiday"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-GEN-20251125-0005",
@@ -191,8 +202,9 @@
       "categories": [
         "Decor"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-20251124-0001",
@@ -207,8 +219,9 @@
       "categories": [
         "Decor"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-20251122-0001",
@@ -223,8 +236,9 @@
       "categories": [
         "Holiday"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-20251202-0001",
@@ -240,8 +254,9 @@
       "categories": [
         "Holiday"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     },
     {
       "sku": "FBZ-20251202-0002",
@@ -259,8 +274,9 @@
       "categories": [
         "holiday"
       ],
-      "active": true,
-      "added_at": "2025-12-02"
+      "badge": "",
+      "added_at": "2025-12-02",
+      "active": true
     }
   ]
 }
