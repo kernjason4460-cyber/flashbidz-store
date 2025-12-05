@@ -150,106 +150,77 @@
     </div>
   </div>
 
+   <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3/"></script>
+
   <script>
-    // ===== SETTINGS =====
-    const CASH_APP_TAG = "FlashBidz"; // Cash App $tag (without the $)
-    const VENMO_USER   = "FlashBidz"; // Venmo user (venmo.com/u/FlashBidz)
-    const MI_TAX_RATE  = 0.06;        // 6% Michigan sales tax
+    // =========================
+    //  SETTINGS
+    // =========================
+    const STRIPE_PUBLISHABLE_KEY = "pk_live_51Sa4lgCY2ro7M4zrxnzepY4UR27lu8NuSG1Ig2d29Zg2Mb3bHV58nVMPacWHGbhyOV5qBirT8JTneZODr7UvkuDJ00nwHIISsM";
+    const STRIPE_PRICE_ID = "price_REPLACE_ME"; // <-- PUT YOUR Price ID HERE
+    const MI_TAX_RATE = 0.06; // 6% Michigan sales tax
 
-    // ===== BASIC ELEMENTS =====
-    const YEAR_EL = document.getElementById("year");
-    if (YEAR_EL) YEAR_EL.textContent = new Date().getFullYear();
-
-    const grid    = document.getElementById("product-grid");
-    const tpl     = document.getElementById("product-card-tpl");
-    const q       = document.getElementById("q");
-    const cat     = document.getElementById("cat");
-    const sortSel = document.getElementById("sort");
-    const countEl = document.getElementById("count");
-
-    // Cart elements
-    const cartToggle  = document.getElementById("cart-toggle");
-    const cartPanel   = document.getElementById("cart-panel");
-    const cartItemsEl = document.getElementById("cart-items");
-    const cartCountEl = document.getElementById("cart-count");
-    const cartTotalEl = document.getElementById("cart-total");
-    const cartSubEl   = document.getElementById("cart-subtotal");
-    const cartTaxEl   = document.getElementById("cart-tax");
-    const cartGrandEl = document.getElementById("cart-grand-total");
-    const cartNoteEl  = document.getElementById("cart-note");
-    const cartVenmo   = document.getElementById("cart-venmo");
-    const cartCash    = document.getElementById("cart-cash");
-
+    // =========================
+    //  BASIC HELPERS
+    // =========================
+    const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
     let PRODUCTS = [];
-    let CART = [];
+    const CART = {}; // { sku: { product, qty } }
 
-    function fmt(n) {
+    function money(n) {
       return "$" + (Number(n) || 0).toFixed(2);
     }
 
-    // ===== PAYMENT LINK HELPERS =====
-    function buildVenmoLink(amount, note) {
-      if (!VENMO_USER) return "";
-      return `https://venmo.com/u/${VENMO_USER}?txn=pay&amount=${(amount || 0).toFixed(2)}&note=${encodeURIComponent(note)}`;
+    function getMainImage(p) {
+      if (p.images && p.images.length) return p.images[0];
+      if (p.image) return p.image;
+      return "img/placeholder.png";
     }
 
-    function buildCashAppLink(amount, note) {
-      if (!CASH_APP_TAG) return "";
-      return `https://cash.app/$${CASH_APP_TAG}?amount=${(amount || 0).toFixed(2)}&note=${encodeURIComponent(note)}`;
-    }
+    // =========================
+    //  LOAD PRODUCTS + BUILD GRID
+    // =========================
+    const grid = document.getElementById("product-grid");
+    const tpl = document.getElementById("product-card-tpl");
+    const qInput = document.getElementById("q");
+    const catSelect = document.getElementById("cat");
+    const sortSelect = document.getElementById("sort");
+    const countEl = document.getElementById("count");
 
-    // ===== LOAD PRODUCTS =====
     async function loadProducts() {
       const res = await fetch("products.json?" + Date.now());
       const data = await res.json();
       PRODUCTS = data.products || [];
 
-      // Normalize images: ensure every product has images[] and image
-      PRODUCTS.forEach(p => {
-        if (!Array.isArray(p.images) || !p.images.length) {
-          if (p.image) {
-            p.images = [p.image];
-          } else {
-            p.images = ["img/placeholder.png"];
-          }
-        }
-        if (!p.image) {
-          p.image = p.images[0];
-        }
-      });
-
       // Build category dropdown
       const cats = Array.from(
         new Set(PRODUCTS.flatMap(p => p.categories || []))
-      ).filter(Boolean).sort();
-
+      ).sort();
       cats.forEach(c => {
-        const o = document.createElement("option");
-        o.value = c;
-        o.textContent = c;
-        cat.appendChild(o);
+        if (!c) return;
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        catSelect.appendChild(opt);
       });
 
-      render();
+      renderGrid();
     }
 
-    // ===== RENDER GRID =====
-    function render() {
-      const query       = (q?.value || "").toLowerCase().trim();
-      const selectedCat = cat?.value || "";
-      const sort        = sortSel?.value || "new";
+    function renderGrid() {
+      const query = (qInput.value || "").toLowerCase().trim();
+      const selectedCat = catSelect.value;
+      const sort = sortSelect.value;
 
       let items = PRODUCTS.filter(p => p.active !== false);
 
       if (selectedCat) {
         items = items.filter(p => (p.categories || []).includes(selectedCat));
       }
-
       if (query) {
         items = items.filter(p =>
-          ((p.title || "") + " " + (p.description || ""))
-            .toLowerCase()
-            .includes(query)
+          (p.title + " " + (p.description || "")).toLowerCase().includes(query)
         );
       }
 
@@ -259,325 +230,243 @@
         items.sort((a, b) => (b.price || 0) - (a.price || 0));
       } else {
         items.sort(
-          (a, b) =>
-            new Date(b.added_at || 0).getTime() -
-            new Date(a.added_at || 0).getTime()
+          (a, b) => new Date(b.added_at || 0) - new Date(a.added_at || 0)
         );
       }
 
       grid.innerHTML = "";
       items.forEach(p => {
-        const node       = tpl.content.cloneNode(true);
-        const img        = node.querySelector("img");
-        const title      = node.querySelector(".title");
-        const desc       = node.querySelector(".desc");
-        const priceEl    = node.querySelector(".price");
-        const stockEl    = node.querySelector(".stock");
-        const badgeEl    = node.querySelector(".badge");
-        const subEl      = node.querySelector(".subtotal");
-        const taxEl      = node.querySelector(".tax");
-        const totalEl    = node.querySelector(".total");
-        const taxRateEl  = node.querySelector(".tax-rate");
-        const addBtn     = node.querySelector(".add-to-cart");
+        const node = tpl.content.cloneNode(true);
 
-        // Image + gallery
-        img.src = p.image || "img/placeholder.png";
-        img.alt = p.title || "";
-        img.style.cursor = "pointer";
-        img.addEventListener("click", () => openImageModal(p));
+        const img = node.querySelector("img");
+        const titleEl = node.querySelector(".title");
+        const descEl = node.querySelector(".desc");
+        const priceEl = node.querySelector(".price");
+        const stockEl = node.querySelector(".stock");
+        const badgeEl = node.querySelector(".badge");
+        const subEl = node.querySelector(".subtotal");
+        const taxEl = node.querySelector(".tax");
+        const totalEl = node.querySelector(".total");
+        const taxRateEl = node.querySelector(".tax-rate");
 
-        // Text
-        title.textContent   = p.title || "";
-        desc.textContent    = p.description || "";
-        priceEl.textContent = p.price ? fmt(p.price) : "";
-        stockEl.textContent = (p.stock && p.stock > 0) ? "In Stock" : "Sold Out";
+        // Use existing card layout, but we ignore the Venmo/CashApp buttons.
+        const btnWrapper = node.querySelector(".actions");
+        btnWrapper.innerHTML = "";
+        const addBtn = document.createElement("button");
+        addBtn.className = "btn btn-primary btn-cart";
+        addBtn.type = "button";
+        addBtn.textContent = "Add to Cart";
+        addBtn.addEventListener("click", () => addToCart(p));
+        btnWrapper.appendChild(addBtn);
 
-        if (p.badge) {
-          badgeEl.textContent = p.badge;
-        } else {
-          badgeEl.remove();
-        }
+        img.src = getMainImage(p);
+        img.alt = p.title || "Item";
 
-        // Totals
+        titleEl.textContent = p.title;
+        descEl.textContent = p.description || "";
+        priceEl.textContent = p.price ? money(p.price) : "";
+        stockEl.textContent = p.stock && p.stock > 0 ? "In Stock" : "Sold Out";
+
+        if (p.badge) badgeEl.textContent = p.badge;
+        else badgeEl.remove();
+
         const subtotal = Number(p.price || 0);
-        const tax      = +(subtotal * MI_TAX_RATE).toFixed(2);
-        const total    = +(subtotal + tax).toFixed(2);
-
+        const tax = +(subtotal * MI_TAX_RATE).toFixed(2);
+        const total = +(subtotal + tax).toFixed(2);
         taxRateEl.textContent = (MI_TAX_RATE * 100).toFixed(0);
-        subEl.textContent     = fmt(subtotal);
-        taxEl.textContent     = fmt(tax);
-        totalEl.textContent   = fmt(total);
-
-        // Add to cart
-        if (addBtn) {
-          if (p.stock && p.stock > 0) {
-            addBtn.disabled = false;
-            addBtn.textContent = "Add to Cart";
-            addBtn.addEventListener("click", () => addToCart(p));
-          } else {
-            addBtn.disabled = true;
-            addBtn.textContent = "Sold Out";
-          }
-        }
+        subEl.textContent = money(subtotal);
+        taxEl.textContent = money(tax);
+        totalEl.textContent = money(total);
 
         grid.appendChild(node);
       });
 
-      if (countEl) {
-        countEl.textContent =
-          items.length + " item" + (items.length === 1 ? "" : "s");
-      }
+      countEl.textContent =
+        items.length + " item" + (items.length === 1 ? "" : "s");
     }
 
-    // ===== CART LOGIC =====
-    function loadCart() {
-      try {
-        const raw = localStorage.getItem("fbz_cart");
-        CART = raw ? JSON.parse(raw) : [];
-      } catch (e) {
-        CART = [];
-      }
-    }
+    qInput.addEventListener("input", renderGrid);
+    catSelect.addEventListener("change", renderGrid);
+    sortSelect.addEventListener("change", renderGrid);
 
-    function saveCart() {
-      localStorage.setItem("fbz_cart", JSON.stringify(CART));
-    }
-
-    function findCartIndex(sku) {
-      return CART.findIndex(item => item.sku === sku);
-    }
+    // =========================
+    //  CART
+    // =========================
+    const cartCountEl = document.getElementById("cart-count");
+    const cartTotalEl = document.getElementById("cart-total");
+    const cartListEl = document.getElementById("cart-items");
+    const cartPanel = document.getElementById("cart-panel");
+    const cartToggle = document.getElementById("cart-toggle");
 
     function addToCart(product) {
-      if (!product || !product.sku) return;
-      const idx = findCartIndex(product.sku);
-      if (idx >= 0) {
-        CART[idx].qty += 1;
-      } else {
-        CART.push({
-          sku: product.sku,
-          title: product.title,
-          price: Number(product.price || 0),
-          qty: 1
-        });
+      if (!product.sku) return;
+      if (!CART[product.sku]) {
+        CART[product.sku] = { product, qty: 0 };
       }
-      saveCart();
-      updateCartUI(true);
+      CART[product.sku].qty += 1;
+      updateCartUI();
     }
 
     function changeQty(sku, delta) {
-      const idx = findCartIndex(sku);
-      if (idx < 0) return;
-      CART[idx].qty += delta;
-      if (CART[idx].qty <= 0) {
-        CART.splice(idx, 1);
-      }
-      saveCart();
+      const entry = CART[sku];
+      if (!entry) return;
+      entry.qty += delta;
+      if (entry.qty <= 0) delete CART[sku];
       updateCartUI();
     }
 
-    function removeFromCart(sku) {
-      CART = CART.filter(item => item.sku !== sku);
-      saveCart();
-      updateCartUI();
+    function getCartItems() {
+      return Object.values(CART);
     }
 
-    function getCartTotals() {
-      let subtotal = 0;
-      CART.forEach(item => {
-        subtotal += item.price * item.qty;
+    function cartTotals() {
+      const items = getCartItems();
+      let sub = 0;
+      items.forEach(i => {
+        sub += (Number(i.product.price) || 0) * i.qty;
       });
-      const tax = +(subtotal * MI_TAX_RATE).toFixed(2);
-      const total = +(subtotal + tax).toFixed(2);
-      const count = CART.reduce((acc, item) => acc + item.qty, 0);
-      return { subtotal, tax, total, count };
+      const tax = +(sub * MI_TAX_RATE).toFixed(2);
+      const total = +(sub + tax).toFixed(2);
+      return { sub, tax, total, items };
     }
 
-    function buildCartNote() {
-      if (!CART.length) return "";
-      const parts = CART.map(item => `${item.sku}x${item.qty}`);
-      let note = "FBZ Cart: " + parts.join(", ");
-      if (note.length > 90) {
-        note = note.slice(0, 87) + "...";
-      }
-      return note;
+    function updateCartUI() {
+      const { sub, tax, total, items } = cartTotals();
+
+      // summary bar
+      const itemCount = items.reduce((s, i) => s + i.qty, 0);
+      cartCountEl.textContent = itemCount;
+      cartTotalEl.textContent = money(total);
+
+      // list
+      cartListEl.innerHTML = "";
+      items.forEach(({ product, qty }) => {
+        const li = document.createElement("li");
+        li.className = "cart-item";
+
+        const name = document.createElement("div");
+        name.className = "cart-item-name";
+        name.textContent = `${product.title || product.sku}`;
+
+        const controls = document.createElement("div");
+        controls.className = "cart-item-controls";
+
+        const minus = document.createElement("button");
+        minus.type = "button";
+        minus.textContent = "−";
+        minus.addEventListener("click", () => changeQty(product.sku, -1));
+
+        const qtySpan = document.createElement("span");
+        qtySpan.textContent = qty;
+
+        const plus = document.createElement("button");
+        plus.type = "button";
+        plus.textContent = "+";
+        plus.addEventListener("click", () => changeQty(product.sku, 1));
+
+        controls.append(minus, qtySpan, plus);
+
+        const lineTotal = document.createElement("div");
+        lineTotal.className = "cart-item-total";
+        lineTotal.textContent = money((product.price || 0) * qty);
+
+        li.append(name, controls, lineTotal);
+        cartListEl.appendChild(li);
+      });
+
+      // totals in panel
+      document.getElementById("cart-subtotal").textContent = money(sub);
+      document.getElementById("cart-tax").textContent = money(tax);
+      document.getElementById("cart-grandtotal").textContent = money(total);
     }
 
-    function updateCartUI(openPanelIfHasItems = false) {
-      const { subtotal, tax, total, count } = getCartTotals();
+    // open/close cart
+    cartToggle.addEventListener("click", () => {
+      cartPanel.classList.toggle("open");
+    });
 
-      if (cartCountEl) cartCountEl.textContent = count;
-      if (cartTotalEl) cartTotalEl.textContent = fmt(total);
-      if (cartSubEl)  cartSubEl.textContent  = fmt(subtotal);
-      if (cartTaxEl)  cartTaxEl.textContent  = fmt(tax);
-      if (cartGrandEl)cartGrandEl.textContent= fmt(total);
-
-      const note = buildCartNote();
-      if (cartNoteEl) cartNoteEl.textContent = note || "(Cart is empty)";
-
-      cartItemsEl.innerHTML = "";
-
-      if (!CART.length) {
-        const empty = document.createElement("p");
-        empty.textContent = "Your cart is empty.";
-        empty.className = "muted";
-        cartItemsEl.appendChild(empty);
-      } else {
-        CART.forEach(item => {
-          const row = document.createElement("div");
-          row.className = "cart-item";
-
-          const title = document.createElement("div");
-          title.className = "cart-item-title";
-          title.textContent = item.title;
-
-          const controls = document.createElement("div");
-          controls.className = "cart-item-controls";
-
-          const minus = document.createElement("button");
-          minus.type = "button";
-          minus.className = "cart-qty-btn";
-          minus.textContent = "−";
-          minus.addEventListener("click", () => changeQty(item.sku, -1));
-
-          const qty = document.createElement("span");
-          qty.className = "cart-qty";
-          qty.textContent = item.qty;
-
-          const plus = document.createElement("button");
-          plus.type = "button";
-          plus.className = "cart-qty-btn";
-          plus.textContent = "+";
-          plus.addEventListener("click", () => changeQty(item.sku, +1));
-
-          controls.append(minus, qty, plus);
-
-          const right = document.createElement("div");
-          right.style.textAlign = "right";
-
-          const line = document.createElement("div");
-          line.textContent = fmt(item.price * item.qty);
-
-          const remove = document.createElement("button");
-          remove.type = "button";
-          remove.className = "cart-remove";
-          remove.textContent = "Remove";
-          remove.addEventListener("click", () => removeFromCart(item.sku));
-
-          right.append(line, remove);
-
-          row.append(title, controls, right);
-          cartItemsEl.appendChild(row);
-        });
-      }
-
-      if (openPanelIfHasItems && CART.length) {
-        openCartPanel();
-      }
-    }
-
-    function openCartPanel() {
-      if (!cartPanel) return;
-      cartPanel.classList.remove("hidden");
-      cartPanel.setAttribute("aria-hidden", "false");
-    }
-
-    function closeCartPanel() {
-      if (!cartPanel) return;
-      cartPanel.classList.add("hidden");
-      cartPanel.setAttribute("aria-hidden", "true");
-    }
-
-    function checkoutWith(method) {
-      if (!CART.length) {
+    // =========================
+    //  STRIPE CHECKOUT
+    // =========================
+    async function checkoutWithStripe() {
+      const { total, items } = cartTotals();
+      if (!items.length) {
         alert("Your cart is empty.");
         return;
       }
-      const { total } = getCartTotals();
-      const note = buildCartNote();
-      let url = "";
 
-      if (method === "venmo") {
-        url = buildVenmoLink(total, note);
-      } else if (method === "cash") {
-        url = buildCashAppLink(total, note);
-      }
-
-      if (!url) {
-        alert("Payment link could not be generated.");
+      // Stripe minimum charge is about $0.50
+      if (total < 0.5) {
+        alert("Order total must be at least $0.50 to pay by card.");
         return;
       }
 
-      window.open(url, "_blank");
-    }
+      // Convert total into quantity of 10¢ units
+      const UNIT = 0.10;
+      const quantity = Math.round(total / UNIT);
 
-    // ===== MINI GALLERY MODAL =====
-    function openImageModal(product) {
-      const modal   = document.getElementById("image-modal");
-      const mainImg = document.getElementById("image-modal-main");
-      const thumbs  = document.getElementById("image-modal-thumbs");
+      const description = items
+        .map(i => `${i.qty}x ${i.product.sku || i.product.title}`)
+        .join(", ")
+        .slice(0, 500);
 
-      const imgs = (product.images && product.images.length)
-        ? product.images
-        : [product.image || "img/placeholder.png"];
-
-      mainImg.src = imgs[0];
-      mainImg.alt = product.title || "";
-
-      thumbs.innerHTML = "";
-      imgs.forEach((src, idx) => {
-        const t = document.createElement("img");
-        t.src = src;
-        t.alt = product.title || "";
-        if (idx === 0) t.classList.add("active-thumb");
-        t.addEventListener("click", () => {
-          mainImg.src = src;
-          thumbs.querySelectorAll("img").forEach(el => el.classList.remove("active-thumb"));
-          t.classList.add("active-thumb");
+      try {
+        const { error } = await stripe.redirectToCheckout({
+          lineItems: [{ price: STRIPE_PRICE_ID, quantity }],
+          mode: "payment",
+          successUrl:
+            window.location.origin +
+            window.location.pathname +
+            "?checkout=success",
+          cancelUrl:
+            window.location.origin +
+            window.location.pathname +
+            "?checkout=cancel",
+          clientReferenceId: description
         });
-        thumbs.appendChild(t);
-      });
 
-      modal.classList.remove("hidden");
+        if (error) {
+          console.error(error);
+          alert(error.message || "There was a problem starting checkout.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Something went wrong starting Stripe Checkout.");
+      }
     }
 
-    function closeImageModal() {
-      const modal = document.getElementById("image-modal");
-      modal.classList.add("hidden");
+    document.getElementById("checkout-btn")
+      .addEventListener("click", checkoutWithStripe);
+
+    // =========================
+    //  SHOW SUCCESS / CANCEL MESSAGE
+    // =========================
+    function handleCheckoutStatus() {
+      const params = new URLSearchParams(window.location.search);
+      const status = params.get("checkout");
+      const bar = document.getElementById("checkout-message");
+      if (!status || !bar) return;
+
+      if (status === "success") {
+        bar.textContent = "Thank you! Your payment was received. We’ll message you with pickup details.";
+        bar.classList.add("ok");
+      } else if (status === "cancel") {
+        bar.textContent = "Checkout was canceled – your cart is still here if you want to try again.";
+        bar.classList.add("warn");
+      } else {
+        return;
+      }
+
+      bar.classList.remove("hidden");
     }
 
-    window.closeImageModal = closeImageModal;
+    // =========================
+    //  INIT
+    // =========================
+    document.getElementById("year").textContent = new Date().getFullYear();
 
-    // ===== EVENTS =====
-    q?.addEventListener("input", render);
-    cat?.addEventListener("change", render);
-    sortSel?.addEventListener("change", render);
-
-    if (cartToggle) {
-      cartToggle.addEventListener("click", () => {
-        const isHidden = cartPanel.classList.contains("hidden");
-        if (isHidden) openCartPanel();
-        else closeCartPanel();
-      });
-    }
-
-    if (cartPanel) {
-      cartPanel.addEventListener("click", (e) => {
-        if (e.target === cartPanel) closeCartPanel();
-      });
-    }
-
-    if (cartVenmo) {
-      cartVenmo.addEventListener("click", () => checkoutWith("venmo"));
-    }
-
-    if (cartCash) {
-      cartCash.addEventListener("click", () => checkoutWith("cash"));
-    }
-
-    // ===== INIT =====
-    loadCart();
-    updateCartUI();
     loadProducts();
+    handleCheckoutStatus();
   </script>
 </body>
 </html>
