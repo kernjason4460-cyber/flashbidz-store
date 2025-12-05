@@ -375,15 +375,21 @@ a { color: var(--text); text-decoration: none; }
 
 .cart-panel {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  display: flex;
-  justify-content: flex-end;
-  z-index: 100;
+  right: 0;
+  top: 0;
+  width: 320px;
+  max-width: 100%;
+  height: 100vh;
+  background: #050505;
+  border-left: 1px solid #222;
+  transform: translateX(100%);  /* 👈 this is what hides it */
+  transition: transform 0.2s ease;
+  z-index: 50;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.6);
 }
 
-.cart-panel.hidden {
-  display: none;
+.cart-panel.open {
+  transform: translateX(0);
 }
 
 .cart-panel-inner {
