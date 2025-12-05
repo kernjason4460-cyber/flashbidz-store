@@ -155,13 +155,16 @@
    <!-- Stripe.js -->
   <script src="https://js.stripe.com/v3/"></script>
 
+    <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3/"></script>
+
   <script>
     // =========================
     //  SETTINGS
     // =========================
     const STRIPE_PUBLISHABLE_KEY = "pk_live_51Sa4lgCY2ro7M4zrxnzepY4UR27lu8NuSG1Ig2d29Zg2Mb3bHV58nVMPacWHGbhyOV5qBirT8JTneZODr7UvkuDJ00nwHIISsM";
-    const STRIPE_PRICE_ID = "price_1Sa5tgCY2ro7M4zrMXgsiX7i"; // <-- PUT YOUR Price ID HERE
-    const MI_TAX_RATE = 0.06; // 6% Michigan sales tax
+    const STRIPE_PRICE_ID = "price_REPLACE_ME"; // <-- put your real Price ID here
+    const MI_TAX_RATE = 0.06; // 6%
 
     // =========================
     //  BASIC HELPERS
@@ -181,39 +184,65 @@
     }
 
     // =========================
-    //  LOAD PRODUCTS + BUILD GRID
+    //  DOM ELEMENTS
     // =========================
-    const grid = document.getElementById("product-grid");
-    const tpl = document.getElementById("product-card-tpl");
-    const qInput = document.getElementById("q");
+    const grid      = document.getElementById("product-grid");
+    const tpl       = document.getElementById("product-card-tpl");
+    const qInput    = document.getElementById("q");
     const catSelect = document.getElementById("cat");
-    const sortSelect = document.getElementById("sort");
-    const countEl = document.getElementById("count");
+    const sortSelect= document.getElementById("sort");
+    const countEl   = document.getElementById("count");
 
+    const cartCountEl    = document.getElementById("cart-count");
+    const cartTotalEl    = document.getElementById("cart-total");
+    const cartListEl     = document.getElementById("cart-items");
+    const cartPanel      = document.getElementById("cart-panel");
+    const cartToggle     = document.getElementById("cart-toggle");
+    const cartSubEl      = document.getElementById("cart-subtotal");
+    const cartTaxEl      = document.getElementById("cart-tax");
+    const cartGrandEl    = document.getElementById("cart-grandtotal");
+    const checkoutBtn    = document.getElementById("checkout-btn");
+    const checkoutMsgBar = document.getElementById("checkout-message");
+
+    // =========================
+    //  LOAD PRODUCTS
+    // =========================
     async function loadProducts() {
-      const res = await fetch("products.json?" + Date.now());
-      const data = await res.json();
-      PRODUCTS = data.products || [];
+      try {
+        const res = await fetch("products.json?" + Date.now());
+        if (!res.ok) throw new Error("products.json not found");
+        const data = await res.json();
+        PRODUCTS = data.products || [];
+      } catch (err) {
+        console.error("Error loading products:", err);
+        if (grid) {
+          grid.innerHTML = "<p style='color:#ccc'>Could not load products.json</p>";
+        }
+        return;
+      }
 
       // Build category dropdown
-      const cats = Array.from(
-        new Set(PRODUCTS.flatMap(p => p.categories || []))
-      ).sort();
-      cats.forEach(c => {
-        if (!c) return;
-        const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
-        catSelect.appendChild(opt);
-      });
+      if (catSelect) {
+        const cats = Array.from(
+          new Set(PRODUCTS.flatMap(p => p.categories || []))
+        ).sort();
+        cats.forEach(c => {
+          if (!c) return;
+          const opt = document.createElement("option");
+          opt.value = c;
+          opt.textContent = c;
+          catSelect.appendChild(opt);
+        });
+      }
 
       renderGrid();
     }
 
     function renderGrid() {
-      const query = (qInput.value || "").toLowerCase().trim();
-      const selectedCat = catSelect.value;
-      const sort = sortSelect.value;
+      if (!grid || !tpl) return;
+      const query = (qInput && qInput.value || "").toLowerCase().trim();
+      const selectedCat = catSelect ? catSelect.value : "";
+      const sort = sortSelect ? sortSelect.value : "new";
 
       let items = PRODUCTS.filter(p => p.active !== false);
 
@@ -227,78 +256,92 @@
       }
 
       if (sort === "price-asc") {
-        items.sort((a, b) => (a.price || 0) - (b.price || 0));
+        items.sort((a,b) => (a.price || 0) - (b.price || 0));
       } else if (sort === "price-desc") {
-        items.sort((a, b) => (b.price || 0) - (a.price || 0));
+        items.sort((a,b) => (b.price || 0) - (a.price || 0));
       } else {
-        items.sort(
-          (a, b) => new Date(b.added_at || 0) - new Date(a.added_at || 0)
-        );
+        items.sort((a,b) => new Date(b.added_at || 0) - new Date(a.added_at || 0));
       }
 
       grid.innerHTML = "";
       items.forEach(p => {
         const node = tpl.content.cloneNode(true);
 
-        const img = node.querySelector("img");
-        const titleEl = node.querySelector(".title");
-        const descEl = node.querySelector(".desc");
-        const priceEl = node.querySelector(".price");
-        const stockEl = node.querySelector(".stock");
-        const badgeEl = node.querySelector(".badge");
-        const subEl = node.querySelector(".subtotal");
-        const taxEl = node.querySelector(".tax");
-        const totalEl = node.querySelector(".total");
-        const taxRateEl = node.querySelector(".tax-rate");
+        const img      = node.querySelector("img");
+        const titleEl  = node.querySelector(".title");
+        const descEl   = node.querySelector(".desc");
+        const priceEl  = node.querySelector(".price");
+        const stockEl  = node.querySelector(".stock");
+        const badgeEl  = node.querySelector(".badge");
+        const subEl    = node.querySelector(".subtotal");
+        const taxEl    = node.querySelector(".tax");
+        const totalEl  = node.querySelector(".total");
+        const taxRateEl= node.querySelector(".tax-rate");
+        const actions  = node.querySelector(".actions");
 
-        // Use existing card layout, but we ignore the Venmo/CashApp buttons.
-        const btnWrapper = node.querySelector(".actions");
-        btnWrapper.innerHTML = "";
-        const addBtn = document.createElement("button");
-        addBtn.className = "btn btn-primary btn-cart";
-        addBtn.type = "button";
-        addBtn.textContent = "Add to Cart";
-        addBtn.addEventListener("click", () => addToCart(p));
-        btnWrapper.appendChild(addBtn);
+        // Replace buttons with Add to Cart
+        if (actions) {
+          actions.innerHTML = "";
+          const addBtn = document.createElement("button");
+          addBtn.type = "button";
+          addBtn.className = "btn btn-primary btn-cart";
+          addBtn.textContent = "Add to Cart";
+          addBtn.addEventListener("click", () => addToCart(p));
+          actions.appendChild(addBtn);
+        }
 
-        img.src = getMainImage(p);
-        img.alt = p.title || "Item";
+        if (img) {
+          img.src = getMainImage(p);
+          img.alt = p.title || "Item";
+        }
+        if (titleEl) titleEl.textContent = p.title;
+        if (descEl)  descEl.textContent  = p.description || "";
+        if (priceEl) priceEl.textContent = p.price ? money(p.price) : "";
+        if (stockEl) stockEl.textContent = p.stock && p.stock > 0 ? "In Stock" : "Sold Out";
 
-        titleEl.textContent = p.title;
-        descEl.textContent = p.description || "";
-        priceEl.textContent = p.price ? money(p.price) : "";
-        stockEl.textContent = p.stock && p.stock > 0 ? "In Stock" : "Sold Out";
-
-        if (p.badge) badgeEl.textContent = p.badge;
-        else badgeEl.remove();
+        if (badgeEl) {
+          if (p.badge) badgeEl.textContent = p.badge;
+          else badgeEl.remove();
+        }
 
         const subtotal = Number(p.price || 0);
         const tax = +(subtotal * MI_TAX_RATE).toFixed(2);
         const total = +(subtotal + tax).toFixed(2);
-        taxRateEl.textContent = (MI_TAX_RATE * 100).toFixed(0);
-        subEl.textContent = money(subtotal);
-        taxEl.textContent = money(tax);
-        totalEl.textContent = money(total);
+
+        if (taxRateEl) taxRateEl.textContent = (MI_TAX_RATE * 100).toFixed(0);
+        if (subEl)     subEl.textContent = money(subtotal);
+        if (taxEl)     taxEl.textContent = money(tax);
+        if (totalEl)   totalEl.textContent = money(total);
 
         grid.appendChild(node);
       });
 
-      countEl.textContent =
-        items.length + " item" + (items.length === 1 ? "" : "s");
+      if (countEl) {
+        countEl.textContent = items.length + " item" + (items.length === 1 ? "" : "s");
+      }
     }
 
-    qInput.addEventListener("input", renderGrid);
-    catSelect.addEventListener("change", renderGrid);
-    sortSelect.addEventListener("change", renderGrid);
+    if (qInput)    qInput.addEventListener("input", renderGrid);
+    if (catSelect) catSelect.addEventListener("change", renderGrid);
+    if (sortSelect)sortSelect.addEventListener("change", renderGrid);
 
     // =========================
     //  CART
     // =========================
-    const cartCountEl = document.getElementById("cart-count");
-    const cartTotalEl = document.getElementById("cart-total");
-    const cartListEl = document.getElementById("cart-items");
-    const cartPanel = document.getElementById("cart-panel");
-    const cartToggle = document.getElementById("cart-toggle");
+    function getCartItems() {
+      return Object.values(CART);
+    }
+
+    function cartTotals() {
+      const items = getCartItems();
+      let sub = 0;
+      items.forEach(i => {
+        sub += (Number(i.product.price) || 0) * i.qty;
+      });
+      const tax = +(sub * MI_TAX_RATE).toFixed(2);
+      const total = +(sub + tax).toFixed(2);
+      return { sub, tax, total, items };
+    }
 
     function addToCart(product) {
       if (!product.sku) return;
@@ -317,75 +360,60 @@
       updateCartUI();
     }
 
-    function getCartItems() {
-      return Object.values(CART);
-    }
-
-    function cartTotals() {
-      const items = getCartItems();
-      let sub = 0;
-      items.forEach(i => {
-        sub += (Number(i.product.price) || 0) * i.qty;
-      });
-      const tax = +(sub * MI_TAX_RATE).toFixed(2);
-      const total = +(sub + tax).toFixed(2);
-      return { sub, tax, total, items };
-    }
-
     function updateCartUI() {
       const { sub, tax, total, items } = cartTotals();
 
-      // summary bar
-      const itemCount = items.reduce((s, i) => s + i.qty, 0);
-      cartCountEl.textContent = itemCount;
-      cartTotalEl.textContent = money(total);
+      const itemCount = items.reduce((s,i) => s + i.qty, 0);
+      if (cartCountEl) cartCountEl.textContent = itemCount;
+      if (cartTotalEl) cartTotalEl.textContent = money(total);
 
-      // list
-      cartListEl.innerHTML = "";
-      items.forEach(({ product, qty }) => {
-        const li = document.createElement("li");
-        li.className = "cart-item";
+      if (cartListEl) {
+        cartListEl.innerHTML = "";
+        items.forEach(({ product, qty }) => {
+          const li = document.createElement("li");
+          li.className = "cart-item";
 
-        const name = document.createElement("div");
-        name.className = "cart-item-name";
-        name.textContent = `${product.title || product.sku}`;
+          const name = document.createElement("div");
+          name.className = "cart-item-name";
+          name.textContent = `${product.title || product.sku}`;
 
-        const controls = document.createElement("div");
-        controls.className = "cart-item-controls";
+          const controls = document.createElement("div");
+          controls.className = "cart-item-controls";
 
-        const minus = document.createElement("button");
-        minus.type = "button";
-        minus.textContent = "−";
-        minus.addEventListener("click", () => changeQty(product.sku, -1));
+          const minus = document.createElement("button");
+          minus.type = "button";
+          minus.textContent = "−";
+          minus.addEventListener("click", () => changeQty(product.sku, -1));
 
-        const qtySpan = document.createElement("span");
-        qtySpan.textContent = qty;
+          const qtySpan = document.createElement("span");
+          qtySpan.textContent = qty;
 
-        const plus = document.createElement("button");
-        plus.type = "button";
-        plus.textContent = "+";
-        plus.addEventListener("click", () => changeQty(product.sku, 1));
+          const plus = document.createElement("button");
+          plus.type = "button";
+          plus.textContent = "+";
+          plus.addEventListener("click", () => changeQty(product.sku, 1));
 
-        controls.append(minus, qtySpan, plus);
+          controls.append(minus, qtySpan, plus);
 
-        const lineTotal = document.createElement("div");
-        lineTotal.className = "cart-item-total";
-        lineTotal.textContent = money((product.price || 0) * qty);
+          const lineTotal = document.createElement("div");
+          lineTotal.className = "cart-item-total";
+          lineTotal.textContent = money((product.price || 0) * qty);
 
-        li.append(name, controls, lineTotal);
-        cartListEl.appendChild(li);
-      });
+          li.append(name, controls, lineTotal);
+          cartListEl.appendChild(li);
+        });
+      }
 
-      // totals in panel
-      document.getElementById("cart-subtotal").textContent = money(sub);
-      document.getElementById("cart-tax").textContent = money(tax);
-      document.getElementById("cart-grandtotal").textContent = money(total);
+      if (cartSubEl)   cartSubEl.textContent   = money(sub);
+      if (cartTaxEl)   cartTaxEl.textContent   = money(tax);
+      if (cartGrandEl) cartGrandEl.textContent = money(total);
     }
 
-    // open/close cart
-    cartToggle.addEventListener("click", () => {
-      cartPanel.classList.toggle("open");
-    });
+    if (cartToggle && cartPanel) {
+      cartToggle.addEventListener("click", () => {
+        cartPanel.classList.toggle("open");
+      });
+    }
 
     // =========================
     //  STRIPE CHECKOUT
@@ -397,13 +425,11 @@
         return;
       }
 
-      // Stripe minimum charge is about $0.50
       if (total < 0.5) {
         alert("Order total must be at least $0.50 to pay by card.");
         return;
       }
 
-      // Convert total into quantity of 10¢ units
       const UNIT = 0.10;
       const quantity = Math.round(total / UNIT);
 
@@ -416,14 +442,8 @@
         const { error } = await stripe.redirectToCheckout({
           lineItems: [{ price: STRIPE_PRICE_ID, quantity }],
           mode: "payment",
-          successUrl:
-            window.location.origin +
-            window.location.pathname +
-            "?checkout=success",
-          cancelUrl:
-            window.location.origin +
-            window.location.pathname +
-            "?checkout=cancel",
+          successUrl: window.location.origin + window.location.pathname + "?checkout=success",
+          cancelUrl:  window.location.origin + window.location.pathname + "?checkout=cancel",
           clientReferenceId: description
         });
 
@@ -437,35 +457,36 @@
       }
     }
 
-    document.getElementById("checkout-btn")
-      .addEventListener("click", checkoutWithStripe);
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener("click", checkoutWithStripe);
+    }
 
     // =========================
-    //  SHOW SUCCESS / CANCEL MESSAGE
+    //  CHECKOUT STATUS BANNER
     // =========================
     function handleCheckoutStatus() {
+      if (!checkoutMsgBar) return;
       const params = new URLSearchParams(window.location.search);
       const status = params.get("checkout");
-      const bar = document.getElementById("checkout-message");
-      if (!status || !bar) return;
+      if (!status) return;
 
       if (status === "success") {
-        bar.textContent = "Thank you! Your payment was received. We’ll message you with pickup details.";
-        bar.classList.add("ok");
+        checkoutMsgBar.textContent = "Thank you! Your payment was received. We’ll message you with pickup details.";
+        checkoutMsgBar.classList.add("ok");
       } else if (status === "cancel") {
-        bar.textContent = "Checkout was canceled – your cart is still here if you want to try again.";
-        bar.classList.add("warn");
+        checkoutMsgBar.textContent = "Checkout was canceled – your cart is still here if you want to try again.";
+        checkoutMsgBar.classList.add("warn");
       } else {
         return;
       }
-
-      bar.classList.remove("hidden");
+      checkoutMsgBar.classList.remove("hidden");
     }
 
     // =========================
     //  INIT
     // =========================
-    document.getElementById("year").textContent = new Date().getFullYear();
+    const yearEl = document.getElementById("year");
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
 
     loadProducts();
     handleCheckoutStatus();
