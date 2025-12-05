@@ -27,37 +27,47 @@
   </header>
 
   <!-- Cart bar -->
-  <section class="cart-bar" aria-label="Shopping cart">
-    <button id="cart-toggle" class="btn cart-btn" type="button">
+  <section class="cart-bar">
+    <button id="cart-toggle" class="cart-toggle">
       Cart (<span id="cart-count">0</span>) • <span id="cart-total">$0.00</span>
     </button>
   </section>
 
   <!-- Slide-out cart panel -->
-  <div id="cart-panel" class="cart-panel hidden" aria-hidden="true">
+  <aside id="cart-panel" class="cart-panel">
     <div class="cart-panel-inner">
       <h3>Your Cart</h3>
-      <div id="cart-items" class="cart-items"></div>
+
+      <ul id="cart-items" class="cart-items">
+        <!-- Cart items injected by JS -->
+      </ul>
 
       <div class="cart-summary">
-        <div>Subtotal: <strong id="cart-subtotal">$0.00</strong></div>
-        <div>MI Tax (6%): <strong id="cart-tax">$0.00</strong></div>
-        <div>Total: <strong id="cart-grand-total">$0.00</strong></div>
+        <div>
+          <span>Subtotal</span>
+          <strong id="cart-subtotal">$0.00</strong>
+        </div>
+        <div>
+          <span>MI Tax (6%)</span>
+          <strong id="cart-tax">$0.00</strong>
+        </div>
+        <div class="cart-grand">
+          <span>Total</span>
+          <strong id="cart-grandtotal">$0.00</strong>
+        </div>
       </div>
 
-      <p class="cart-note-label">Payment note we’ll attach (you may see it in Venmo/Cash App):</p>
-      <pre id="cart-note" class="cart-note"></pre>
-
-      <div class="actions two co-actions">
-        <button id="cart-venmo" class="btn pay venmo" type="button">Pay with Venmo</button>
-        <button id="cart-cash" class="btn pay cashapp" type="button">Pay with Cash App</button>
-      </div>
-
-      <p class="cart-help">
-        After you pay, please send us a quick Facebook message with a screenshot so we can match your payment to your order.
+      <button id="checkout-btn" class="btn btn-primary cart-checkout-btn">
+        Pay securely with card
+      </button>
+      <p class="cart-note">
+        You’ll be taken to Stripe’s secure checkout. We’ll message you with pickup info after payment.
       </p>
     </div>
-  </div>
+  </aside>
+
+  <!-- Checkout status bar -->
+  <div id="checkout-message" class="checkout-message hidden"></div>
 
   <section class="hero">
     <h2>Local Deals • Easy Pickup • No Bidding</h2>
