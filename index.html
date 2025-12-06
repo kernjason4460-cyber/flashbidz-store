@@ -401,12 +401,13 @@ function cartFeedback() {
     // =========================
     //  RENDER GRID
     // =========================
-    function renderGrid() {
+      function renderGrid() {
       if (!grid || !tpl) return;
       const query = ((qInput && qInput.value) || "").toLowerCase().trim();
       const selectedCat = catSelect ? catSelect.value : "";
       const sort = sortSelect ? sortSelect.value : "new";
 
+      // Show all active products; we'll handle stock in the button itself
       let items = PRODUCTS.filter((p) => p.active !== false);
 
       // Remove items that are completely sold out (0 remaining)
