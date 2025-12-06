@@ -472,6 +472,15 @@
       });
     }
 
+    // Close cart when user clicks the "Shop" button in the header
+document.querySelectorAll('a[href="#shop"]').forEach(link => {
+  link.addEventListener('click', () => {
+    if (cartPanel) {
+      cartPanel.classList.remove("open");
+    }
+  });
+});
+    
     // =========================
     //  STRIPE CHECKOUT
     // =========================
