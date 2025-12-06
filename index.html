@@ -109,7 +109,7 @@
     <ul>
       <li><strong>Pickup:</strong> Mattawan, MI (exact address provided after purchase). Please pick up within <strong>7 days</strong>.</li>
       <li><strong>Storage:</strong> After 7 days, <strong>$2 per item per day</strong>. After 14 days, items are <strong>abandoned</strong>.</li>
-      <li><strong>Payment:</strong> Pay with <strong>Venmo or Cash App</strong>. MI <strong>6% sales tax</strong> is included in the total.</li>
+      <li><strong>Payment:</strong> Pay by card via our secure checkout. MI <strong>6% sales tax</strong> is included in the total.</li>
       <li><strong>Condition:</strong> Items sold <em>AS-IS, WHERE-IS</em>. <strong>All sales final.</strong></li>
       <li><strong>Questions?</strong> Message us on Facebook or email <a href="mailto:support@flashbidz.net">support@flashbidz.net</a>.</li>
     </ul>
@@ -117,8 +117,6 @@
 
   <footer class="site-footer">
     <p>© <span id="year"></span> FlashBidz of Mattawan • All sales final • AS-IS, WHERE-IS</p>
-  <div id="checkout-message" class="checkout-message hidden"></div>
-    
   </footer>
 
   <!-- Product card template -->
@@ -152,20 +150,28 @@
     </article>
   </template>
 
-  <!-- Image gallery modal -->
-  <div id="image-modal" class="image-modal hidden">
-    <div class="image-modal-backdrop" onclick="closeImageModal()"></div>
+  <!-- Image gallery modal (upgraded) -->
+  <div id="image-modal" class="image-modal hidden" aria-modal="true" role="dialog">
+    <div class="image-modal-backdrop"></div>
     <div class="image-modal-content">
-      <button class="image-modal-close" type="button" onclick="closeImageModal()">×</button>
-      <img id="image-modal-main" src="" alt="Product image" />
+      <button class="image-modal-close" type="button" aria-label="Close">&times;</button>
+
+      <div class="image-modal-main-wrap">
+        <button class="image-modal-arrow left" type="button" aria-label="Previous image">‹</button>
+        <img id="image-modal-main" src="" alt="Product image" />
+        <button class="image-modal-arrow right" type="button" aria-label="Next image">›</button>
+      </div>
+
+      <div class="image-modal-meta">
+        <span id="image-modal-caption"></span>
+        <span id="image-modal-count"></span>
+      </div>
+
       <div id="image-modal-thumbs" class="image-modal-thumbs"></div>
     </div>
   </div>
 
-   <!-- Stripe.js -->
-  <script src="https://js.stripe.com/v3/"></script>
-
-    <!-- Stripe.js -->
+  <!-- Stripe.js -->
   <script src="https://js.stripe.com/v3/"></script>
 
   <script>
@@ -176,10 +182,8 @@
     const STRIPE_PRICE_ID = "price_REPLACE_ME"; // <-- put your real Price ID here
     const MI_TAX_RATE = 0.06; // 6%
 
-    // =========================
-    //  BASIC HELPERS
-    // =========================
     const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+
     let PRODUCTS = [];
     const CART = {}; // { sku: { product, qty } }
 
@@ -191,6 +195,12 @@
       if (p.images && p.images.length) return p.images[0];
       if (p.image) return p.image;
       return "img/placeholder.png";
+    }
+
+    function getAllImages(p) {
+      if (p.images && p.images.length) return p.images;
+      if (p.image) return [p.image];
+      return ["img/placeholder.png"];
     }
 
     // =========================
@@ -213,51 +223,29 @@
     const cartGrandEl    = document.getElementById("cart-grandtotal");
     const checkoutBtn    = document.getElementById("checkout-btn");
     const checkoutMsgBar = document.getElementById("checkout-message");
-// =========================
-//  IMAGE MODAL (GALLERY)
-// =========================
-const imageModal      = document.getElementById("image-modal");
-const imageModalMain  = document.getElementById("image-modal-main");
-const imageModalThumbs= document.getElementById("image-modal-thumbs");
 
-let modalImages = [];
-let modalIndex  = 0;
+    const yearEl = document.getElementById("year");
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-function setModalImage(i) {
-  if (!modalImages.length || !imageModalMain) return;
-  modalIndex = ((i % modalImages.length) + modalImages.length) % modalImages.length;
-  imageModalMain.src = modalImages[modalIndex];
+    // =========================
+    //  IMAGE MODAL ELEMENTS
+    // =========================
+    const imageModal          = document.getElementById("image-modal");
+    const imageModalBackdrop  = document.querySelector(".image-modal-backdrop");
+    const imageModalCloseBtn  = document.querySelector(".image-modal-close");
+    const imageModalMain      = document.getElementById("image-modal-main");
+    const imageModalThumbs    = document.getElementById("image-modal-thumbs");
+    const imageModalCount     = document.getElementById("image-modal-count");
+    const imageModalCaption   = document.getElementById("image-modal-caption");
+    const imageModalArrowLeft = document.querySelector(".image-modal-arrow.left");
+    const imageModalArrowRight= document.querySelector(".image-modal-arrow.right");
 
-  if (!imageModalThumbs) return;
-  Array.from(imageModalThumbs.querySelectorAll("img")).forEach((img, idx) => {
-    img.classList.toggle("active-thumb", idx === modalIndex);
-  });
-}
+    let modalOpen   = false;
+    let modalProduct= null;
+    let modalImages = [];
+    let modalIndex  = 0;
+    let touchStartX = 0;
 
-function openImageModal(images, title) {
-  if (!imageModal || !imageModalMain || !imageModalThumbs) return;
-  modalImages = images && images.length ? images : [];
-  if (!modalImages.length) return;
-
-  imageModalThumbs.innerHTML = "";
-  modalImages.forEach((src, idx) => {
-    const thumb = document.createElement("img");
-    thumb.src = src;
-    thumb.alt = title || "Item image";
-    thumb.addEventListener("click", () => setModalImage(idx));
-    if (idx === 0) thumb.classList.add("active-thumb");
-    imageModalThumbs.appendChild(thumb);
-  });
-
-  setModalImage(0);
-  imageModal.classList.remove("hidden");
-}
-
-function closeImageModal() {
-  if (imageModal) {
-    imageModal.classList.add("hidden");
-  }
-}
     // =========================
     //  LOAD PRODUCTS
     // =========================
@@ -294,9 +282,9 @@ function closeImageModal() {
 
     function renderGrid() {
       if (!grid || !tpl) return;
-      const query = (qInput && qInput.value || "").toLowerCase().trim();
+      const query       = (qInput && qInput.value || "").toLowerCase().trim();
       const selectedCat = catSelect ? catSelect.value : "";
-      const sort = sortSelect ? sortSelect.value : "new";
+      const sort        = sortSelect ? sortSelect.value : "new";
 
       let items = PRODUCTS.filter(p => p.active !== false);
 
@@ -321,55 +309,39 @@ function closeImageModal() {
       items.forEach(p => {
         const node = tpl.content.cloneNode(true);
 
-        const img      = node.querySelector("img");
-        const titleEl  = node.querySelector(".title");
-        const descEl   = node.querySelector(".desc");
-        const priceEl  = node.querySelector(".price");
-        const stockEl  = node.querySelector(".stock");
-        const badgeEl  = node.querySelector(".badge");
-        const subEl    = node.querySelector(".subtotal");
-        const taxEl    = node.querySelector(".tax");
-        const totalEl  = node.querySelector(".total");
-        const taxRateEl= node.querySelector(".tax-rate");
-        const actions  = node.querySelector(".actions");
+        const card      = node.querySelector(".card");
+        const imgWrap   = node.querySelector(".img-wrap");
+        const img       = node.querySelector("img");
+        const titleEl   = node.querySelector(".title");
+        const descEl    = node.querySelector(".desc");
+        const priceEl   = node.querySelector(".price");
+        const stockEl   = node.querySelector(".stock");
+        const badgeEl   = node.querySelector(".badge");
+        const subEl     = node.querySelector(".subtotal");
+        const taxEl     = node.querySelector(".tax");
+        const totalEl   = node.querySelector(".total");
+        const taxRateEl = node.querySelector(".tax-rate");
+        const actions   = node.querySelector(".actions");
 
-        // Make image open the photo modal instead of going to product page
-if (img) {
-  img.addEventListener("click", (e) => {
-    e.stopPropagation();
-    openImageModal(p);
-  });
-}
-        // Replace buttons with Add to Cart
-if (actions) {
-  actions.innerHTML = "";
-  const addBtn = document.createElement("button");
-  addBtn.type = "button";
-  addBtn.className = "btn btn-primary btn-cart";
-  addBtn.textContent = "Add to Cart";
+        // Add to Cart button
+        if (actions) {
+          actions.innerHTML = "";
+          const addBtn = document.createElement("button");
+          addBtn.type = "button";
+          addBtn.className = "btn btn-primary btn-cart";
+          addBtn.textContent = "Add to Cart";
+          addBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            addToCart(p);
+          });
+          actions.appendChild(addBtn);
+        }
 
-  // Prevent card click from firing when button is clicked
-  addBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    addToCart(p);
-  });
-
-  actions.appendChild(addBtn);
-}
+        const imgs = getAllImages(p);
 
         if (img) {
-          const mainImg = getMainImage(p);
-          img.src = mainImg;
+          img.src = imgs[0];
           img.alt = p.title || "Item";
-          img.style.cursor = "zoom-in";
-
-          // When you click the picture, open the mini gallery
-          img.addEventListener("click", () => {
-            const galleryImages = (p.images && p.images.length)
-              ? p.images
-              : [mainImg];
-            openImageModal(galleryImages, p.title);
-          });
         }
         if (titleEl) titleEl.textContent = p.title;
         if (descEl)  descEl.textContent  = p.description || "";
@@ -382,13 +354,21 @@ if (actions) {
         }
 
         const subtotal = Number(p.price || 0);
-        const tax = +(subtotal * MI_TAX_RATE).toFixed(2);
-        const total = +(subtotal + tax).toFixed(2);
+        const tax      = +(subtotal * MI_TAX_RATE).toFixed(2);
+        const total    = +(subtotal + tax).toFixed(2);
 
         if (taxRateEl) taxRateEl.textContent = (MI_TAX_RATE * 100).toFixed(0);
-        if (subEl)     subEl.textContent = money(subtotal);
-        if (taxEl)     taxEl.textContent = money(tax);
-        if (totalEl)   totalEl.textContent = money(total);
+        if (subEl)     subEl.textContent     = money(subtotal);
+        if (taxEl)     taxEl.textContent     = money(tax);
+        if (totalEl)   totalEl.textContent   = money(total);
+
+        // Clicking the photo opens the gallery
+        if (imgWrap) {
+          imgWrap.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openImageModal(p, 0);
+          });
+        }
 
         grid.appendChild(node);
       });
@@ -560,11 +540,119 @@ if (actions) {
     }
 
     // =========================
+    //  IMAGE MODAL LOGIC
+    // =========================
+    function showModalImage(index) {
+      if (!modalImages.length || !imageModalMain) return;
+
+      if (index < 0) index = modalImages.length - 1;
+      if (index >= modalImages.length) index = 0;
+      modalIndex = index;
+
+      const src = modalImages[index];
+
+      // trigger fade
+      imageModalMain.classList.remove("fade-in");
+      void imageModalMain.offsetWidth;
+      imageModalMain.src = src;
+      imageModalMain.classList.add("fade-in");
+
+      if (imageModalCount) {
+        imageModalCount.textContent = (index + 1) + " / " + modalImages.length;
+      }
+      if (imageModalCaption) {
+        imageModalCaption.textContent = modalProduct?.title || "";
+      }
+
+      if (imageModalThumbs) {
+        [...imageModalThumbs.querySelectorAll("img")].forEach((img, i) => {
+          img.classList.toggle("active-thumb", i === index);
+        });
+      }
+    }
+
+    function openImageModal(product, startIndex = 0) {
+      modalProduct = product;
+      modalImages  = getAllImages(product);
+      modalIndex   = startIndex || 0;
+
+      if (!imageModal) return;
+
+      if (imageModalThumbs) {
+        imageModalThumbs.innerHTML = "";
+        modalImages.forEach((src, i) => {
+          const t = document.createElement("img");
+          t.src = src;
+          t.alt = (product.title || "Item") + " " + (i + 1);
+          t.addEventListener("click", () => showModalImage(i));
+          imageModalThumbs.appendChild(t);
+        });
+      }
+
+      imageModal.classList.remove("hidden");
+      document.body.classList.add("modal-open");
+      modalOpen = true;
+      showModalImage(modalIndex);
+    }
+
+    function closeImageModal() {
+      if (!imageModal) return;
+      imageModal.classList.add("hidden");
+      document.body.classList.remove("modal-open");
+      modalOpen = false;
+      if (imageModalMain) imageModalMain.classList.remove("zoomed");
+    }
+
+    // Modal event wiring
+    if (imageModalBackdrop) {
+      imageModalBackdrop.addEventListener("click", closeImageModal);
+    }
+    if (imageModalCloseBtn) {
+      imageModalCloseBtn.addEventListener("click", closeImageModal);
+    }
+    if (imageModalArrowLeft) {
+      imageModalArrowLeft.addEventListener("click", () => showModalImage(modalIndex - 1));
+    }
+    if (imageModalArrowRight) {
+      imageModalArrowRight.addEventListener("click", () => showModalImage(modalIndex + 1));
+    }
+
+    // Tap to zoom
+    if (imageModalMain) {
+      imageModalMain.addEventListener("click", () => {
+        imageModalMain.classList.toggle("zoomed");
+      });
+
+      // Swipe left/right on touch
+      imageModalMain.addEventListener("touchstart", (e) => {
+        if (!e.touches.length) return;
+        touchStartX = e.touches[0].clientX;
+      });
+      imageModalMain.addEventListener("touchend", (e) => {
+        if (!e.changedTouches.length) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) > 40) {
+          if (dx < 0) showModalImage(modalIndex + 1);
+          else        showModalImage(modalIndex - 1);
+        }
+      });
+    }
+
+    // Keyboard navigation
+    document.addEventListener("keydown", (e) => {
+      if (!modalOpen) return;
+      if (e.key === "Escape") {
+        closeImageModal();
+      } else if (e.key === "ArrowRight") {
+        showModalImage(modalIndex + 1);
+      } else if (e.key === "ArrowLeft") {
+        showModalImage(modalIndex - 1);
+      }
+    });
+
+    // =========================
     //  INIT
     // =========================
-    const yearEl = document.getElementById("year");
-    if (yearEl) yearEl.textContent = new Date().getFullYear();
-
     loadProducts();
     handleCheckoutStatus();
   </script>
