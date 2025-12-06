@@ -628,13 +628,16 @@ a { color: var(--text); text-decoration: none; }
   }
 }
 /* Mobile tweak: cart panel starts below header so top is visible */
+/* Mobile: cart panel full-screen with safe-area padding */
 @media (max-width: 700px) {
   .cart-panel {
-    top: 60px;                      /* start below sticky header */
-    height: calc(100vh - 60px);     /* fill the rest of the screen */
+    top: 0;
+    height: 100vh;
+    max-height: 100vh;
+    padding-top: env(safe-area-inset-top, 0); /* for iPhone notch / Safari bar */
   }
 
   .cart-panel-inner {
-    padding-top: 12px;              /* little breathing room at the top */
+    padding-top: calc(env(safe-area-inset-top, 0) + 12px);
   }
 }
