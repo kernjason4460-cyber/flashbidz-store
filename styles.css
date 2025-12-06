@@ -642,15 +642,17 @@ a { color: var(--text); text-decoration: none; }
   transform: translateX(-50%) translateY(0);
 }
 
-/* === FINAL mobile cart override (iPhone 13 friendly) === */
+/* === FINAL mobile cart override (iPhone 13 Safari) === */
 @media (max-width: 700px) {
   .cart-panel {
-    top: 100px !important;
-    height: calc(100dvh - 90px) !important;
-    max-height: calc(100dvh - 90px) !important;
+    /* push panel lower so "Your Cart" isn't under the notch/address bar */
+    top: 112px !important;
+    height: calc(100vh - 112px) !important;
+    max-height: calc(100vh - 112px) !important;
   }
 
   .cart-panel-inner {
-    padding-top: 12px;
+    /* add a bit of safe-area padding just in case */
+    padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
   }
 }
