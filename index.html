@@ -91,6 +91,33 @@
     </div>
   </aside>
 
+  // =========================
+// CART PERSISTENCE
+// =========================
+
+// Save cart to localStorage
+function saveCart() {
+  try {
+    localStorage.setItem("flashbidz_cart", JSON.stringify(CART));
+  } catch (e) {
+    console.warn("Unable to save cart", e);
+  }
+}
+
+// Load cart from localStorage
+function loadCart() {
+  try {
+    const raw = localStorage.getItem("flashbidz_cart");
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    Object.keys(saved).forEach(sku => {
+      CART[sku] = saved[sku];
+    });
+  } catch (e) {
+    console.warn("Unable to load cart", e);
+  }
+}
+
   <!-- HERO -->
   <section class="hero">
     <h2>Local Deals • Easy Pickup • No Bidding</h2>
@@ -506,6 +533,7 @@
       updateCartUI();
       renderGrid(); // re-draw so remaining/stock text updates
       cartFeedback();
+      saveCart();
     }
     
     function clearCart() {
@@ -799,7 +827,8 @@ if (clearCartBtn) {
     // =========================
     const yearEl = document.getElementById("year");
     if (yearEl) yearEl.textContent = new Date().getFullYear();
-
+    loadCart();
+    updateCartUI();
     loadProducts();
     handleCheckoutStatus();
   </script>
