@@ -658,7 +658,19 @@ document.querySelectorAll('a[href="#shop"]').forEach(link => {
         showModalImage(modalIndex - 1);
       }
     });
-
+// Close cart & jump to products when "Shop" is clicked
+const shopLinks = document.querySelectorAll('a[href="#shop"]');
+shopLinks.forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (cartPanel) cartPanel.classList.remove('open');
+    const shopSection = document.getElementById('shop');
+    if (shopSection) {
+      shopSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+    
     // =========================
     //  INIT
     // =========================
