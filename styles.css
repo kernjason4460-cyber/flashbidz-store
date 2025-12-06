@@ -645,7 +645,7 @@ a { color: var(--text); text-decoration: none; }
 /* === FINAL mobile cart override (iPhone 13 friendly) === */
 @media (max-width: 700px) {
   .cart-panel {
-    top: 90px !important;
+    top: 100px !important;
     height: calc(100dvh - 90px) !important;
     max-height: calc(100dvh - 90px) !important;
   }
