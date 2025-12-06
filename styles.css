@@ -478,11 +478,11 @@ a { color: var(--text); text-decoration: none; }
   margin-top: 4px;
 }
 
-/* Checkout status bar */
 .checkout-message {
   position: sticky;
   top: 0;
-  padding: 8px 4vw;
+  z-index: 5;          /* was 50 – let cart panel be above it */
+  padding: 10px 16px;
   text-align: center;
   font-size: 14px;
   background: #222;
