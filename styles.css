@@ -373,24 +373,7 @@ a { color: var(--text); text-decoration: none; }
 }
 
 /* Slide-out panel */
-.cart-panel {
-  position: fixed;
-  right: 0;
-  top: 0;
-  width: 320px;
-  max-width: 100%;
-  height: 100vh;
-  background: #050505;
-  border-left: 1px solid #222;
-  transform: translateX(100%);
-  transition: transform 0.2s ease;
-  z-index: 50;
-  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.6);
-}
 
-.cart-panel.open {
-  transform: translateX(0);
-}
 
 .cart-panel-inner {
   height: 100%;
@@ -649,13 +632,7 @@ a { color: var(--text); text-decoration: none; }
 }
 
 /* === FINAL mobile cart override (iPhone 13 Safari) === */
-@media (max-width: 700px) {
-  .cart-panel {
-    /* push panel lower so "Your Cart" isn't under the notch/address bar */
-    top: 112px !important;
-    height: calc(100vh - 112px) !important;
-    max-height: calc(100vh - 112px) !important;
-  }
+
 
   .cart-panel-inner {
     /* add a bit of safe-area padding just in case */
@@ -666,4 +643,36 @@ a { color: var(--text); text-decoration: none; }
   margin-top: 6px;
   background: #111;
   border-color: #444;
+}
+/* === FLASHBIDZ CART PANEL – FINAL VERSION === */
+.cart-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 340px;
+  max-width: 100%;
+  height: 100vh;
+  background: #050505;
+  border-left: 1px solid #222;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.7);
+  transform: translateX(100%);   /* hidden by default */
+  transition: transform 0.2s ease;
+  z-index: 999;                  /* always on top of header, bars, etc. */
+}
+
+.cart-panel.open {
+  transform: translateX(0);      /* slide in when open */
+}
+
+.cart-panel-inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px 16px;       /* 24px top so "Your Cart" is never cut off */
+  gap: 12px;
+  overflow-y: auto;
+}
+/* Hard-disable the checkout message bar so it can't overlap the cart */
+.checkout-message {
+  display: none !important;
 }
