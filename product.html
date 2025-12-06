@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FlashBidz Product</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html">
+    <img src="img/flashbidz_logo.svg" class="logoimg" />
+    <div class="name">
+      <h1>FlashBidz Store</h1>
+      <p class="tagline">Mattawan, MI</p>
+    </div>
+  </a>
+</header>
+
+<main class="container" id="product-container">
+  <p style="color:#bbb">Loading product…</p>
+</main>
+
+<!-- Gallery Modal -->
+<div id="image-modal" class="image-modal hidden">
+  <div class="image-modal-backdrop" onclick="closeImageModal()"></div>
+  <div class="image-modal-content">
+    <button class="image-modal-close" onclick="closeImageModal()">×</button>
+    <img id="image-modal-main" src="" />
+    <div id="image-modal-thumbs" class="image-modal-thumbs"></div>
+  </div>
+</div>
+
+<script>
+const STRIPE_PUBLISHABLE_KEY = "pk_live_XXXX"; 
+const STRIPE_PRICE_ID = "price_REPLACE";
+const MI_TAX_RATE = 0.06;
+const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+
+function money(n){ return "$" + n.toFixed(2); }
+
+function openImageModal(images, index=0) {
+  const modal = document.getElementById("image-modal");
+  const main = document.getElementById("image-modal-main");
+  const thumbs = document.getElementById("image-modal-thumbs");
+
+  modal.classList.remove("hidden");
+  main.src = images[index];
+
+  thumbs.innerHTML = "";
+  images.forEach((src,i)=>{
+    const t = document.createElement("img");
+    t.src = src;
+    if (i === index) t.classList.add("active-thumb");
+    t.onclick = ()=>openImageModal(images,i);
+    thumbs.appendChild(t);
+  });
+}
+function closeImageModal(){ 
+  document.getElementById("image-modal").classList.add("hidden");
+}
+
+async function loadProduct(){
+  const url = new URL(window.location.href);
+  const sku = url.searchParams.get("sku");
+  if (!sku) return;
+
+  const res = await fetch("products.json?" + Date.now());
+  const data = await res.json();
+  const p = data.products.find(x => x.sku === sku);
+
+  if (!p) {
+    document.getElementById("product-container").innerHTML =
+      "<p style='color:#ccc'>Product not found.</p>";
+    return;
+  }
+
+  const images = p.images?.length ? p.images : [p.image];
+
+  const subtotal = p.price;
+  const tax = +(subtotal * MI_TAX_RATE).toFixed(2);
+  const total = +(subtotal + tax).toFixed(2);
+
+  document.title = p.title + " — FlashBidz";
+
+  document.getElementById("product-container").innerHTML = `
+    <div class="card" style="max-width:700px;margin:auto">
+      <div class="img-wrap" onclick='openImageModal(${JSON.stringify(images)})'>
+        <img src="${images[0]}" style="cursor:pointer"/>
+      </div>
+
+      <div class="card-body">
+        <h2>${p.title}</h2>
+        <p>${p.description || ""}</p>
+
+        <div class="meta">
+          <span class="price">${money(p.price)}</span>
+          <span>${p.stock > 0 ? "In Stock" : "Sold Out"}</span>
+        </div>
+
+        <div class="totals">
+          <div>Subtotal: <strong>${money(subtotal)}</strong></div>
+          <div>MI Tax (6%): <strong>${money(tax)}</strong></div>
+          <div>Total: <strong>${money(total)}</strong></div>
+        </div>
+
+        <button class="btn btn-primary" onclick="startCheckout(${total})">
+          Buy Now
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+async function startCheckout(total){
+  const UNIT = 0.10;
+  const qty = Math.round(total / UNIT);
+
+  await stripe.redirectToCheckout({
+    lineItems: [{ price: STRIPE_PRICE_ID, quantity: qty }],
+    mode: "payment",
+    successUrl: window.location.origin + window.location.pathname + "?checkout=success",
+    cancelUrl: window.location.href
+  });
+}
+
+loadProduct();
+</script>
+
+</body>
+</html>
