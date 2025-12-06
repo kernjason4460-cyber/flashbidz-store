@@ -9,6 +9,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <meta name="description" content="FlashBidz — fixed-price local deals with easy pickup in Mattawan, MI." />
+  <!-- OPTIONAL: Google Analytics 4
+       When you’re ready, replace G-XXXXXXX with your Measurement ID
+       and remove the surrounding HTML comments. -->
+  <!--
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXX');
+  </script>
+  -->
 </head>
 <body>
   <!-- ================= HEADER ================= -->
@@ -200,7 +212,12 @@
     const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
     let PRODUCTS = [];
     const CART = {};
-
+    // Safe analytics helper (no errors if GA isn't installed)
+    function track(eventName, params) {
+      if (window.gtag) {
+        window.gtag('event', eventName, params || {});
+      }
+    }
     // =========================
     //  HELPERS
     // =========================
@@ -498,7 +515,16 @@ function cartFeedback() {
         countEl.textContent = items.length + " item" + (items.length === 1 ? "" : "s");
       }
     }
-
+      // Analytics: list of items shown
+      track('view_item_list', {
+        item_list_id: 'main_grid',
+        item_list_name: 'FlashBidz Store Grid',
+        items: items.map(p => ({
+          item_id: p.sku || '',
+          item_name: p.title || '',
+          price: p.price || 0
+        }))
+      });
     if (qInput) qInput.addEventListener("input", renderGrid);
     if (catSelect) catSelect.addEventListener("change", renderGrid);
     if (sortSelect) sortSelect.addEventListener("change", renderGrid);
@@ -526,7 +552,18 @@ function cartFeedback() {
       renderGrid();
       cartFeedback();
     }
-
+      // Analytics: add_to_cart
+      track('add_to_cart', {
+        currency: 'USD',
+        value: Number(product.price || 0),
+        items: [{
+          item_id: product.sku || '',
+          item_name: product.title || '',
+          price: product.price || 0,
+          quantity: 1
+        }]
+      });
+    
     function changeQty(sku, delta) {
       const entry = CART[sku];
       if (!entry) return;
@@ -668,7 +705,17 @@ function cartFeedback() {
         .map((i) => `${i.qty}x ${i.product.sku || i.product.title}`)
         .join(", ")
         .slice(0, 500);
-
+      // Analytics: begin_checkout
+      track('begin_checkout', {
+        currency: 'USD',
+        value: total,
+        items: items.map(i => ({
+          item_id: i.product.sku || '',
+          item_name: i.product.title || '',
+          price: i.product.price || 0,
+          quantity: i.qty
+        }))
+      });
       try {
         const { error } = await stripe.redirectToCheckout({
           lineItems: [{ price: STRIPE_PRICE_ID, quantity }],
