@@ -619,7 +619,23 @@ function cartFeedback() {
         }
       });
     }
+    // Close cart + scroll back to products when "Shop" is clicked
+    document.querySelectorAll('a[href="#shop"]').forEach(link => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
 
+        // Close the cart panel if it's open
+       if (cartPanel) {
+          cartPanel.classList.remove("open");
+        }
+
+        const target = document.getElementById("shop");
+        if (!target) return;
+
+        const top = target.getBoundingClientRect().top + window.scrollY - 120;
+        window.scrollTo({ top, behavior: "smooth" });
+      });
+    });
     // Clear cart button
     if (clearCartBtn) {
       clearCartBtn.addEventListener("click", () => {
@@ -700,7 +716,23 @@ function cartFeedback() {
       }
       checkoutMsgBar.classList.remove("hidden");
     }
+document.querySelectorAll('a[href="#shop"]').forEach(a => {
+  a.addEventListener("click", e => {
+    e.preventDefault();
 
+    // 👇 CLOSE the cart / checkout panel if it's open
+    if (cartPanel) {
+      cartPanel.classList.remove("open");
+    }
+
+    const el = document.getElementById("shop");
+    if (!el) return;
+
+    // Smooth scroll to the products area, with a little offset
+    const top = el.getBoundingClientRect().top + window.scrollY - 120;
+    window.scrollTo({ top, behavior: "smooth" });
+  });
+});
     // =========================
     //  INIT
     // =========================
