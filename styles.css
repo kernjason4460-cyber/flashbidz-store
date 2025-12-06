@@ -641,3 +641,35 @@ a { color: var(--text); text-decoration: none; }
     padding-top: calc(env(safe-area-inset-top, 0) + 12px);
   }
 }
+/* === Cart "added" toast === */
+.cart-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 72px; /* sits above the cart bar */
+  transform: translateX(-50%) translateY(20px);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(15, 15, 15, 0.96);
+  border: 1px solid #333;
+  color: #f9fafb;
+  font-size: 13px;
+  line-height: 1.3;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 60;
+}
+
+.cart-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 700px) {
+  .cart-toast {
+    bottom: 84px;           /* a bit higher on phones */
+    max-width: 90vw;
+    text-align: center;
+    padding-inline: 12px;
+  }
+}
