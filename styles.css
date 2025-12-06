@@ -659,3 +659,8 @@ a { color: var(--text); text-decoration: none; }
     padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
   }
 }
+.cart-clear-btn {
+  margin-top: 6px;
+  background: #111;
+  border-color: #444;
+}
