@@ -396,10 +396,14 @@ a { color: var(--text); text-decoration: none; }
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 16px;
   gap: 12px;
   overflow-y: auto;              /* 👈 main scroll area */
   -webkit-overflow-scrolling: touch;
+}
+
+.cart-panel-inner {
+  padding-top: 20px;
 }
 
 /* Cart items list */
