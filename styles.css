@@ -475,13 +475,6 @@ a { color: var(--text); text-decoration: none; }
   margin-top: 4px;
 }
 
-/* Mobile: cart panel full width */
-@media (max-width: 700px) {
-  .cart-panel {
-    width: 100%;
-    max-width: none;
-  }
-}
 /* Checkout status bar */
 .checkout-message {
   position: sticky;
@@ -506,13 +499,6 @@ a { color: var(--text); text-decoration: none; }
 .checkout-message.hidden {
   display: none;
 }
-
-/* Mobile: cart panel covers full screen */
-@media (max-width: 700px) {
-  .cart-panel {
-    width: 100%;
-    max-width: none;
-  }
 
   .cart-bar {
     top: 56px;
@@ -627,15 +613,6 @@ a { color: var(--text); text-decoration: none; }
     grid-template-columns: 1fr;
   }
 }
-/* Mobile tweak: cart panel starts below header so top is visible */
-/* Mobile: cart panel full-screen with safe-area padding */
-@media (max-width: 700px) {
-  .cart-panel {
-    top: 0;
-    height: 100vh;
-    max-height: 100vh;
-    padding-top: env(safe-area-inset-top, 0); /* for iPhone notch / Safari bar */
-  }
 
   .cart-panel-inner {
     padding-top: calc(env(safe-area-inset-top, 0) + 12px);
@@ -665,30 +642,15 @@ a { color: var(--text); text-decoration: none; }
   transform: translateX(-50%) translateY(0);
 }
 
-@media (max-width: 700px) {
-  .cart-toast {
-    bottom: 84px;           /* a bit higher on phones */
-    max-width: 90vw;
-    text-align: center;
-    padding-inline: 12px;
-  }
-}
-/* === Mobile cart full-screen with safe-area padding (iPhone friendly) === */
+/* === FINAL mobile cart override (iPhone 13 friendly) === */
 @media (max-width: 700px) {
   .cart-panel {
-    top: 0;
-    height: 100vh;
-    max-height: 100vh;
-    /* keep slide-in behavior */
-    transform: translateX(100%);
-    padding-top: env(safe-area-inset-top, 0); /* avoid notch / URL bar */
-  }
-
-  .cart-panel.open {
-    transform: translateX(0);
+    top: 90px !important;
+    height: calc(100dvh - 90px) !important;
+    max-height: calc(100dvh - 90px) !important;
   }
 
   .cart-panel-inner {
-    padding-top: calc(env(safe-area-inset-top, 0) + 12px);
+    padding-top: 12px;
   }
 }
