@@ -479,9 +479,8 @@ a { color: var(--text); text-decoration: none; }
 }
 
 .checkout-message {
-  position: sticky;
-  top: 0;
-  z-index: 5;          /* was 50 – let cart panel be above it */
+  position: static;          /* no sticky overlay */
+  margin: 0;
   padding: 10px 16px;
   text-align: center;
   font-size: 14px;
