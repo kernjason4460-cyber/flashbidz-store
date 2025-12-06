@@ -75,6 +75,11 @@
       <button id="checkout-btn" class="btn btn-primary cart-checkout-btn">
         Pay securely with card
       </button>
+
+      <button id="clear-cart-btn" class="btn cart-clear-btn" type="button">
+        Clear cart
+      </button>
+
       <p class="cart-note">
         You’ll be taken to Stripe’s secure checkout. We’ll message you with
         pickup info after payment.
@@ -284,11 +289,11 @@
     const cartGrandEl = document.getElementById("cart-grandtotal");
     const checkoutBtn = document.getElementById("checkout-btn");
     const checkoutMsgBar = document.getElementById("checkout-message");
-
+    const clearCartBtn   = document.getElementById("clear-cart-btn");
     const imageModal = document.getElementById("image-modal");
     const imageModalMain = document.getElementById("image-modal-main");
     const imageModalThumbs = document.getElementById("image-modal-thumbs");
-
+   
     // =========================
     //  LOAD PRODUCTS
     // =========================
@@ -497,7 +502,13 @@
       renderGrid(); // re-draw so remaining/stock text updates
       cartFeedback();
     }
-
+    
+    function clearCart() {
+      Object.keys(CART).forEach((k) => delete CART[k]);
+      updateCartUI();
+      renderGrid();
+    }
+    
     function changeQty(sku, delta) {
       const entry = CART[sku];
       if (!entry) return;
@@ -732,8 +743,16 @@
     }
 
     if (checkoutBtn) {
-      checkoutBtn.addEventListener("click", checkoutWithStripe);
-    }
+  checkoutBtn.addEventListener("click", checkoutWithStripe);
+}
+
+if (clearCartBtn) {
+  clearCartBtn.addEventListener("click", () => {
+    if (!getCartItems().length) return;
+    if (!confirm("Remove all items from your cart?")) return;
+    clearCart();
+  });
+}
 
     // =========================
     //  CHECKOUT STATUS BANNER
