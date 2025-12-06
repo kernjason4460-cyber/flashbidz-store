@@ -467,10 +467,16 @@
     }
 
     if (cartToggle && cartPanel) {
-      cartToggle.addEventListener("click", () => {
-        cartPanel.classList.toggle("open");
-      });
+  cartToggle.addEventListener("click", () => {
+    cartPanel.classList.toggle("open");
+
+    // When opening, scroll the inside to the very top
+    if (cartPanel.classList.contains("open")) {
+      const inner = cartPanel.querySelector(".cart-panel-inner");
+      if (inner) inner.scrollTop = 0;
     }
+  });
+}
 
     // Close cart when user clicks the "Shop" button in the header
 document.querySelectorAll('a[href="#shop"]').forEach(link => {
