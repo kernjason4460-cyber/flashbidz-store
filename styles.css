@@ -449,7 +449,23 @@ a { color: var(--text); text-decoration: none; }
   display: flex;
   justify-content: space-between;
 }
+.cart-back-btn {
+  align-self: flex-start;
+  margin-bottom: 6px;
+  font-size: 13px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 4px 0;
+}
 
+.cart-back-btn:hover {
+  color: #ffffff;
+}
 .cart-grand {
   font-weight: 700;
   font-size: 15px;
