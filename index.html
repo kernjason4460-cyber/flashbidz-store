@@ -242,19 +242,50 @@
       return { sub, tax, total, items };
     }
 
-    // Simple cart feedback (vibrate + cart bump)
-    function cartFeedback() {
-      if (navigator.vibrate) {
-        navigator.vibrate(25);
-      }
-      if (cartToggle) {
-        cartToggle.classList.add("cart-bump");
-        clearTimeout(window._cartBumpTimer);
-        window._cartBumpTimer = setTimeout(() => {
-          cartToggle.classList.remove("cart-bump");
-        }, 220);
-      }
+   // Simple cart feedback: sound + vibrate + cart bump
+function cartFeedback() {
+  // Vibrate (mobile)
+  if (navigator.vibrate) {
+    navigator.vibrate(30);
+  }
+
+  // Tiny "beep" using Web Audio API (no file needed)
+  try {
+    // Reuse one AudioContext if possible
+    if (!window._flashbidzAudioCtx) {
+      window._flashbidzAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
+    const ctx = window._flashbidzAudioCtx;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "triangle";          // softer than square/sawtooth
+    osc.frequency.value = 880;      // pitch of the beep
+
+    const now = ctx.currentTime;
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.16);
+  } catch (e) {
+    // If audio fails (older browser / permissions), just skip sound
+    console.warn("Cart sound failed:", e);
+  }
+
+  // Cart bump animation
+  if (cartToggle) {
+    cartToggle.classList.add("cart-bump");
+    clearTimeout(window._cartBumpTimer);
+    window._cartBumpTimer = setTimeout(() => {
+      cartToggle.classList.remove("cart-bump");
+    }, 220);
+  }
+}
 
     // =========================
     //  DOM ELEMENTS
