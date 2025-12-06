@@ -256,6 +256,9 @@
 
       let items = PRODUCTS.filter(p => p.active !== false);
 
+      // Remove products that are completely sold out (0 remaining)
+      items = items.filter(p => getRemainingStock(p) > 0);
+    
       if (selectedCat) {
         items = items.filter(p => (p.categories || []).includes(selectedCat));
       }
