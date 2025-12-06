@@ -427,7 +427,8 @@ a { color: var(--text); text-decoration: none; }
 
 /* Cart items scroll, totals + button stay at bottom */
 .cart-items {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;               /* 🔑 lets it actually shrink & scroll */
   list-style: none;
   margin: 12px 0;
   padding: 0;
@@ -435,15 +436,7 @@ a { color: var(--text); text-decoration: none; }
   flex-direction: column;
   gap: 8px;
   overflow-y: auto;
-  min-height: 0; /* important for mobile scrolling */
-}
-
-.cart-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
+  -webkit-overflow-scrolling: touch;  /* 🔑 smooth scrolling on iPhone */
 }
 
 .cart-item-name {
