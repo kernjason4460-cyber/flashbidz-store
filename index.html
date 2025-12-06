@@ -332,10 +332,14 @@ function closeImageModal() {
         const totalEl  = node.querySelector(".total");
         const taxRateEl= node.querySelector(".tax-rate");
         const actions  = node.querySelector(".actions");
-// Make entire card clickable → open product detail page
-node.querySelector(".card").addEventListener("click", () => {
-  window.location.href = `product.html?sku=${encodeURIComponent(p.sku)}`;
-});
+
+        // Make image open the photo modal instead of going to product page
+if (img) {
+  img.addEventListener("click", (e) => {
+    e.stopPropagation();
+    openImageModal(p);
+  });
+}
         // Replace buttons with Add to Cart
 if (actions) {
   actions.innerHTML = "";
