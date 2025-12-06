@@ -627,3 +627,14 @@ a { color: var(--text); text-decoration: none; }
     grid-template-columns: 1fr;
   }
 }
+/* Mobile tweak: cart panel starts below header so top is visible */
+@media (max-width: 700px) {
+  .cart-panel {
+    top: 60px;                      /* start below sticky header */
+    height: calc(100vh - 60px);     /* fill the rest of the screen */
+  }
+
+  .cart-panel-inner {
+    padding-top: 12px;              /* little breathing room at the top */
+  }
+}
