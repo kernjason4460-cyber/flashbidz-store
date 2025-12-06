@@ -374,19 +374,20 @@ a { color: var(--text); text-decoration: none; }
 
 /* Slide-out panel */
 
-
 .cart-panel-inner {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  gap: 12px;
-  overflow-y: auto;              /* 👈 main scroll area */
-  -webkit-overflow-scrolling: touch;
-}
 
-.cart-panel-inner {
-  padding-top: 20px;
+  /* THE FIX — adds safe-area padding + fallback so title is always visible */
+  padding-top: calc(env(safe-area-inset-top) + 24px);
+
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-bottom: 16px;
+
+  gap: 16px;
+  overflow-y: auto;
 }
 
 /* Cart items list */
@@ -603,10 +604,6 @@ a { color: var(--text); text-decoration: none; }
   }
 }
 
-  .cart-panel-inner {
-    padding-top: calc(env(safe-area-inset-top, 0) + 12px);
-  }
-}
 /* === Cart "added" toast === */
 .cart-toast {
   position: fixed;
@@ -633,12 +630,6 @@ a { color: var(--text); text-decoration: none; }
 
 /* === FINAL mobile cart override (iPhone 13 Safari) === */
 
-
-  .cart-panel-inner {
-    /* add a bit of safe-area padding just in case */
-    padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
-  }
-}
 .cart-clear-btn {
   margin-top: 6px;
   background: #111;
@@ -664,14 +655,6 @@ a { color: var(--text); text-decoration: none; }
   transform: translateX(0);      /* slide in when open */
 }
 
-.cart-panel-inner {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 24px 16px 16px;       /* 24px top so "Your Cart" is never cut off */
-  gap: 12px;
-  overflow-y: auto;
-}
 /* Hard-disable the checkout message bar so it can't overlap the cart */
 .checkout-message {
   display: none !important;
