@@ -297,7 +297,8 @@
     const imageModal = document.getElementById("image-modal");
     const imageModalMain = document.getElementById("image-modal-main");
     const imageModalThumbs = document.getElementById("image-modal-thumbs");
-   
+    const cartBackBtn   = document.getElementById("cart-back-btn");
+    
     // =========================
     //  LOAD PRODUCTS
     // =========================
@@ -630,7 +631,19 @@
         }
       });
     }
+// Back to shopping button inside cart
+if (cartBackBtn && cartPanel) {
+  cartBackBtn.addEventListener("click", () => {
+    // Close the cart panel
+    cartPanel.classList.remove("open");
 
+    // Scroll back to the shop grid
+    const shop = document.getElementById("shop");
+    if (shop) {
+      shop.scrollIntoView({ behavior: "smooth" });
+    }
+  });
+}
     // Close cart and scroll when SHOP clicked
     document.querySelectorAll('a[href="#shop"]').forEach((link) => {
       link.addEventListener("click", (e) => {
