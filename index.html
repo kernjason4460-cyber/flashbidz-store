@@ -400,14 +400,57 @@
       return { sub, tax, total, items };
     }
 
-    function addToCart(product) {
-      if (!product.sku) return;
-      if (!CART[product.sku]) {
-        CART[product.sku] = { product, qty: 0 };
-      }
-      CART[product.sku].qty += 1;
-      updateCartUI();
+}// Give feedback when an item is added to cart
+function cartFeedback(product) {
+  // 1) Tiny vibration on supported devices
+  if (navigator && typeof navigator.vibrate === "function") {
+    navigator.vibrate(40);
+  }
+
+  // 2) Soft "click" sound using Web Audio (no file needed)
+  try {
+    if (!window._cartAudioCtx) {
+      window._cartAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
+    const ctx = window._cartAudioCtx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "triangle";
+    osc.frequency.value = 880;      // pitch
+    gain.gain.value = 0.08;         // volume (keep it low)
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.12);
+  } catch (e) {
+    // If Safari or permissions complain, just ignore
+    console.warn("cart sound failed", e);
+  }
+
+  // 3) Toast message
+  const toast = document.getElementById("cart-toast");
+  if (!toast) return;
+
+  toast.textContent = `Added "${product.title || product.sku}" to cart`;
+  toast.classList.add("show");
+
+  clearTimeout(window._cartToastTimer);
+  window._cartToastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 1600);
+}
+   function addToCart(product) {
+  if (!product.sku) return;
+  if (!CART[product.sku]) {
+    CART[product.sku] = { product, qty: 0 };
+  }
+  CART[product.sku].qty += 1;
+  updateCartUI();
+  cartFeedback(product);   // 👈 new line
+}
 
     function changeQty(sku, delta) {
       const entry = CART[sku];
