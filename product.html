@@ -3,131 +3,421 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FlashBidz Product</title>
+  <title>FlashBidz Item • Local Deals • Mattawan, MI</title>
   <link rel="stylesheet" href="styles.css" />
-  <script src="https://js.stripe.com/v3/"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
-
 <body>
-<header class="site-header">
-  <a class="brand" href="index.html">
-    <img src="img/flashbidz_logo.svg" class="logoimg" />
-    <div class="name">
-      <h1>FlashBidz Store</h1>
-      <p class="tagline">Mattawan, MI</p>
-    </div>
-  </a>
-</header>
+  <header class="site-header" id="top">
+    <a class="brand" href="index.html#top">
+      <img src="img/flashbidz_logo.svg" alt="FlashBidz" class="logoimg" />
+      <div class="name">
+        <h1>FlashBidz Store</h1>
+        <p class="tagline">Neighbors Helping Neighbors • Mattawan, MI</p>
+      </div>
+    </a>
+    <nav class="top-cta">
+      <a class="btn btn-primary" href="index.html#shop">Shop</a>
+      <a class="btn" href="index.html#pickup">Pickup Info</a>
+      <a class="btn" href="https://www.facebook.com/flashbidz.mattawan" target="_blank" rel="noopener">Message on Facebook</a>
+    </nav>
+  </header>
 
-<main class="container" id="product-container">
-  <p style="color:#bbb">Loading product…</p>
-</main>
+  <!-- Cart bar -->
+  <section class="cart-bar">
+    <button id="cart-toggle" class="cart-toggle">
+      Cart (<span id="cart-count">0</span>) • <span id="cart-total">$0.00</span>
+    </button>
+  </section>
 
-<!-- Gallery Modal -->
-<div id="image-modal" class="image-modal hidden">
-  <div class="image-modal-backdrop" onclick="closeImageModal()"></div>
-  <div class="image-modal-content">
-    <button class="image-modal-close" onclick="closeImageModal()">×</button>
-    <img id="image-modal-main" src="" />
-    <div id="image-modal-thumbs" class="image-modal-thumbs"></div>
-  </div>
-</div>
+  <!-- Slide-out cart panel -->
+  <aside id="cart-panel" class="cart-panel">
+    <div class="cart-panel-inner">
+      <h3>Your Cart</h3>
 
-<script>
-const STRIPE_PUBLISHABLE_KEY = "pk_live_XXXX"; 
-const STRIPE_PRICE_ID = "price_REPLACE";
-const MI_TAX_RATE = 0.06;
-const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+      <ul id="cart-items" class="cart-items"></ul>
 
-function money(n){ return "$" + n.toFixed(2); }
-
-function openImageModal(images, index=0) {
-  const modal = document.getElementById("image-modal");
-  const main = document.getElementById("image-modal-main");
-  const thumbs = document.getElementById("image-modal-thumbs");
-
-  modal.classList.remove("hidden");
-  main.src = images[index];
-
-  thumbs.innerHTML = "";
-  images.forEach((src,i)=>{
-    const t = document.createElement("img");
-    t.src = src;
-    if (i === index) t.classList.add("active-thumb");
-    t.onclick = ()=>openImageModal(images,i);
-    thumbs.appendChild(t);
-  });
-}
-function closeImageModal(){ 
-  document.getElementById("image-modal").classList.add("hidden");
-}
-
-async function loadProduct(){
-  const url = new URL(window.location.href);
-  const sku = url.searchParams.get("sku");
-  if (!sku) return;
-
-  const res = await fetch("products.json?" + Date.now());
-  const data = await res.json();
-  const p = data.products.find(x => x.sku === sku);
-
-  if (!p) {
-    document.getElementById("product-container").innerHTML =
-      "<p style='color:#ccc'>Product not found.</p>";
-    return;
-  }
-
-  const images = p.images?.length ? p.images : [p.image];
-
-  const subtotal = p.price;
-  const tax = +(subtotal * MI_TAX_RATE).toFixed(2);
-  const total = +(subtotal + tax).toFixed(2);
-
-  document.title = p.title + " — FlashBidz";
-
-  document.getElementById("product-container").innerHTML = `
-    <div class="card" style="max-width:700px;margin:auto">
-      <div class="img-wrap" onclick='openImageModal(${JSON.stringify(images)})'>
-        <img src="${images[0]}" style="cursor:pointer"/>
+      <div class="cart-summary">
+        <div>
+          <span>Subtotal</span>
+          <strong id="cart-subtotal">$0.00</strong>
+        </div>
+        <div>
+          <span>MI Tax (6%)</span>
+          <strong id="cart-tax">$0.00</strong>
+        </div>
+        <div class="cart-grand">
+          <span>Total</span>
+          <strong id="cart-grandtotal">$0.00</strong>
+        </div>
       </div>
 
-      <div class="card-body">
-        <h2>${p.title}</h2>
-        <p>${p.description || ""}</p>
+      <button id="checkout-btn" class="btn btn-primary cart-checkout-btn">
+        Pay securely with card
+      </button>
+      <p class="cart-note">
+        You’ll be taken to Stripe’s secure checkout. We’ll message you with pickup info after payment.
+      </p>
+    </div>
+  </aside>
 
-        <div class="meta">
-          <span class="price">${money(p.price)}</span>
-          <span>${p.stock > 0 ? "In Stock" : "Sold Out"}</span>
+  <!-- Checkout status bar -->
+  <div id="checkout-message" class="checkout-message hidden"></div>
+
+  <!-- Product detail content -->
+  <main class="container product-detail" id="product-detail">
+    <a href="index.html#shop" class="back-link">← Back to all items</a>
+
+    <div class="product-layout">
+      <div class="product-images">
+        <div class="product-main-img-wrap">
+          <img id="product-main-img" src="img/placeholder.png" alt="Item photo" />
+        </div>
+        <div id="product-thumbs" class="product-thumbs"></div>
+      </div>
+
+      <div class="product-info">
+        <h2 id="product-title">Loading item…</h2>
+        <p id="product-sku" class="product-sku"></p>
+        <p id="product-desc" class="product-info-desc"></p>
+
+        <div class="product-info-meta">
+          <span id="product-price" class="product-info-price"></span>
+          <span id="product-stock" class="product-info-stock"></span>
         </div>
 
         <div class="totals">
-          <div>Subtotal: <strong>${money(subtotal)}</strong></div>
-          <div>MI Tax (6%): <strong>${money(tax)}</strong></div>
-          <div>Total: <strong>${money(total)}</strong></div>
+          <div>Subtotal: <strong id="detail-subtotal"></strong></div>
+          <div>MI Sales Tax (6%): <strong id="detail-tax"></strong></div>
+          <div>Total: <strong id="detail-total"></strong></div>
         </div>
 
-        <button class="btn btn-primary" onclick="startCheckout(${total})">
-          Buy Now
+        <button id="product-add-btn" class="btn btn-primary" type="button">
+          Add to Cart
         </button>
       </div>
     </div>
-  `;
-}
+  </main>
 
-async function startCheckout(total){
-  const UNIT = 0.10;
-  const qty = Math.round(total / UNIT);
+  <section id="pickup" class="pickup container">
+    <h3>Pickup, Payment & Policies</h3>
+    <ul>
+      <li><strong>Pickup:</strong> Mattawan, MI (exact address provided after purchase). Please pick up within <strong>7 days</strong>.</li>
+      <li><strong>Storage:</strong> After 7 days, <strong>$2 per item per day</strong>. After 14 days, items are <strong>abandoned</strong>.</li>
+      <li><strong>Payment:</strong> Secure online card payment via Stripe. MI <strong>6% sales tax</strong> is included in the total.</li>
+      <li><strong>Condition:</strong> Items sold <em>AS-IS, WHERE-IS</em>. <strong>All sales final.</strong></li>
+      <li><strong>Questions?</strong> Message us on Facebook or email <a href="mailto:support@flashbidz.net">support@flashbidz.net</a>.</li>
+    </ul>
+  </section>
 
-  await stripe.redirectToCheckout({
-    lineItems: [{ price: STRIPE_PRICE_ID, quantity: qty }],
-    mode: "payment",
-    successUrl: window.location.origin + window.location.pathname + "?checkout=success",
-    cancelUrl: window.location.href
-  });
-}
+  <footer class="site-footer">
+    <p>© <span id="year"></span> FlashBidz of Mattawan • All sales final • AS-IS, WHERE-IS</p>
+  </footer>
 
-loadProduct();
-</script>
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3/"></script>
 
+  <script>
+    // === COPY OF SHARED SETTINGS (same as index.html) ===
+    const STRIPE_PUBLISHABLE_KEY = "pk_live_51Sa4lgCY2ro7M4zrxnzepY4UR27lu8NuSG1Ig2d29Zg2Mb3bHV58nVMPacWHGbhyOV5qBirT8JTneZODr7UvkuDJ00nwHIISsM";
+    const STRIPE_PRICE_ID = "price_REPLACE_ME"; // same Price ID you use on index.html
+    const MI_TAX_RATE = 0.06;
+    const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+
+    let PRODUCTS = [];
+    let CART = {};
+    const CART_KEY = "flashbidz_cart_v1";
+
+    function money(n) {
+      return "$" + (Number(n) || 0).toFixed(2);
+    }
+
+    function getMainImage(p) {
+      if (p.images && p.images.length) return p.images[0];
+      if (p.image) return p.image;
+      return "img/placeholder.png";
+    }
+
+    // --- Cart persistence helpers (same as index) ---
+    function persistCart() {
+      try {
+        const simple = Object.values(CART).map(entry => ({
+          sku: entry.product.sku,
+          qty: entry.qty
+        }));
+        localStorage.setItem(CART_KEY, JSON.stringify(simple));
+      } catch (err) {}
+    }
+
+    function restoreCartFromStorage() {
+      try {
+        const raw = localStorage.getItem(CART_KEY);
+        if (!raw) return;
+        const decoded = JSON.parse(raw);
+        CART = {};
+        decoded.forEach(({ sku, qty }) => {
+          const prod = PRODUCTS.find(p => p.sku === sku);
+          if (!prod || !qty || qty <= 0) return;
+          CART[sku] = { product: prod, qty };
+        });
+        updateCartUI();
+      } catch (err) {}
+    }
+
+    function getCartItems() {
+      return Object.values(CART);
+    }
+
+    function cartTotals() {
+      const items = getCartItems();
+      let sub = 0;
+      items.forEach(i => {
+        sub += (Number(i.product.price) || 0) * i.qty;
+      });
+      const tax = +(sub * MI_TAX_RATE).toFixed(2);
+      const total = +(sub + tax).toFixed(2);
+      return { sub, tax, total, items };
+    }
+
+    function addToCart(product) {
+      if (!product.sku) return;
+      if (!CART[product.sku]) {
+        CART[product.sku] = { product, qty: 0 };
+      }
+      CART[product.sku].qty += 1;
+      updateCartUI();
+      persistCart();
+    }
+
+    function changeQty(sku, delta) {
+      const entry = CART[sku];
+      if (!entry) return;
+      entry.qty += delta;
+      if (entry.qty <= 0) delete CART[sku];
+      updateCartUI();
+      persistCart();
+    }
+
+    // --- Cart UI elements ---
+    const cartCountEl = document.getElementById("cart-count");
+    const cartTotalEl = document.getElementById("cart-total");
+    const cartListEl  = document.getElementById("cart-items");
+    const cartPanel   = document.getElementById("cart-panel");
+    const cartToggle  = document.getElementById("cart-toggle");
+    const cartSubEl   = document.getElementById("cart-subtotal");
+    const cartTaxEl   = document.getElementById("cart-tax");
+    const cartGrandEl = document.getElementById("cart-grandtotal");
+    const checkoutBtn = document.getElementById("checkout-btn");
+    const checkoutMsgBar = document.getElementById("checkout-message");
+
+    function updateCartUI() {
+      const { sub, tax, total, items } = cartTotals();
+      const itemCount = items.reduce((s,i) => s + i.qty, 0);
+
+      if (cartCountEl) cartCountEl.textContent = itemCount;
+      if (cartTotalEl) cartTotalEl.textContent = money(total);
+
+      if (cartListEl) {
+        cartListEl.innerHTML = "";
+        items.forEach(({ product, qty }) => {
+          const li = document.createElement("li");
+          li.className = "cart-item";
+
+          const name = document.createElement("div");
+          name.className = "cart-item-name";
+          name.textContent = product.title || product.sku;
+
+          const controls = document.createElement("div");
+          controls.className = "cart-item-controls";
+
+          const minus = document.createElement("button");
+          minus.type = "button";
+          minus.textContent = "−";
+          minus.addEventListener("click", () => changeQty(product.sku, -1));
+
+          const qtySpan = document.createElement("span");
+          qtySpan.textContent = qty;
+
+          const plus = document.createElement("button");
+          plus.type = "button";
+          plus.textContent = "+";
+          plus.addEventListener("click", () => changeQty(product.sku, 1));
+
+          controls.append(minus, qtySpan, plus);
+
+          const lineTotal = document.createElement("div");
+          lineTotal.className = "cart-item-total";
+          lineTotal.textContent = money((product.price || 0) * qty);
+
+          li.append(name, controls, lineTotal);
+          cartListEl.appendChild(li);
+        });
+      }
+
+      if (cartSubEl)   cartSubEl.textContent   = money(sub);
+      if (cartTaxEl)   cartTaxEl.textContent   = money(tax);
+      if (cartGrandEl) cartGrandEl.textContent = money(total);
+    }
+
+    if (cartToggle && cartPanel) {
+      cartToggle.addEventListener("click", () => {
+        cartPanel.classList.toggle("open");
+      });
+    }
+
+    async function checkoutWithStripe() {
+      const { total, items } = cartTotals();
+      if (!items.length) {
+        alert("Your cart is empty.");
+        return;
+      }
+      if (total < 0.5) {
+        alert("Order total must be at least $0.50 to pay by card.");
+        return;
+      }
+      const UNIT = 0.10;
+      const quantity = Math.round(total / UNIT);
+      const description = items
+        .map(i => `${i.qty}x ${i.product.sku || i.product.title}`)
+        .join(", ")
+        .slice(0, 500);
+
+      try {
+        const { error } = await stripe.redirectToCheckout({
+          lineItems: [{ price: STRIPE_PRICE_ID, quantity }],
+          mode: "payment",
+          successUrl: window.location.origin + window.location.pathname + "?checkout=success",
+          cancelUrl:  window.location.origin + window.location.pathname + "?checkout=cancel",
+          clientReferenceId: description
+        });
+        if (error) {
+          alert(error.message || "There was a problem starting checkout.");
+        }
+      } catch (err) {
+        alert("Something went wrong starting Stripe Checkout.");
+      }
+    }
+
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener("click", checkoutWithStripe);
+    }
+
+    function handleCheckoutStatus() {
+      if (!checkoutMsgBar) return;
+      const params = new URLSearchParams(window.location.search);
+      const status = params.get("checkout");
+      if (!status) return;
+
+      if (status === "success") {
+        CART = {};
+        localStorage.removeItem(CART_KEY);
+        updateCartUI();
+        checkoutMsgBar.textContent = "Thank you! Your payment was received. We’ll message you with pickup details.";
+        checkoutMsgBar.classList.add("ok");
+      } else if (status === "cancel") {
+        checkoutMsgBar.textContent = "Checkout was canceled – your cart is still here if you want to try again.";
+        checkoutMsgBar.classList.add("warn");
+      } else {
+        return;
+      }
+      checkoutMsgBar.classList.remove("hidden");
+    }
+
+    // === Product detail specific bits ===
+    const mainImgEl   = document.getElementById("product-main-img");
+    const thumbsEl    = document.getElementById("product-thumbs");
+    const titleEl     = document.getElementById("product-title");
+    const skuEl       = document.getElementById("product-sku");
+    const descEl      = document.getElementById("product-desc");
+    const priceEl     = document.getElementById("product-price");
+    const stockEl     = document.getElementById("product-stock");
+    const subEl       = document.getElementById("detail-subtotal");
+    const taxEl       = document.getElementById("detail-tax");
+    const totalEl     = document.getElementById("detail-total");
+    const addBtn      = document.getElementById("product-add-btn");
+
+    function renderProductDetail(product) {
+      if (!product) {
+        if (titleEl) titleEl.textContent = "Item not found";
+        if (descEl) descEl.textContent = "This item may have been removed or sold.";
+        return;
+      }
+
+      if (titleEl) titleEl.textContent = product.title;
+      if (skuEl)   skuEl.textContent   = "SKU: " + (product.sku || "");
+      if (descEl)  descEl.textContent  = product.description || "";
+      if (priceEl) priceEl.textContent = product.price ? money(product.price) : "";
+      if (stockEl) stockEl.textContent = product.stock && product.stock > 0 ? "In Stock" : "Sold Out";
+
+      const subtotal = Number(product.price || 0);
+      const tax = +(subtotal * MI_TAX_RATE).toFixed(2);
+      const total = +(subtotal + tax).toFixed(2);
+      if (subEl)   subEl.textContent   = money(subtotal);
+      if (taxEl)   taxEl.textContent   = money(tax);
+      if (totalEl) totalEl.textContent = money(total);
+
+      const imgs = product.images && product.images.length ? product.images : [getMainImage(product)];
+
+      if (mainImgEl) {
+        mainImgEl.src = imgs[0];
+        mainImgEl.alt = product.title || "Item photo";
+      }
+
+      if (thumbsEl) {
+        thumbsEl.innerHTML = "";
+        imgs.forEach((src, idx) => {
+          const t = document.createElement("img");
+          t.src = src;
+          if (idx === 0) t.classList.add("active-thumb");
+          t.addEventListener("click", () => {
+            mainImgEl.src = src;
+            thumbsEl.querySelectorAll("img").forEach(img => img.classList.remove("active-thumb"));
+            t.classList.add("active-thumb");
+          });
+          thumbsEl.appendChild(t);
+        });
+      }
+
+      if (addBtn) {
+        addBtn.disabled = !(product.stock && product.stock > 0);
+        addBtn.textContent = product.stock && product.stock > 0 ? "Add to Cart" : "Sold Out";
+        addBtn.onclick = () => addToCart(product);
+      }
+    }
+
+    async function loadProductPage() {
+      const params = new URLSearchParams(window.location.search);
+      const sku = params.get("sku");
+
+      if (!sku) {
+        renderProductDetail(null);
+        return;
+      }
+
+      try {
+        const res = await fetch("products.json?" + Date.now());
+        const data = await res.json();
+        PRODUCTS = data.products || [];
+      } catch (err) {
+        console.error("Error loading products.json", err);
+        renderProductDetail(null);
+        return;
+      }
+
+      restoreCartFromStorage();
+
+      const product = PRODUCTS.find(p => p.sku === sku);
+      renderProductDetail(product);
+    }
+
+    // === INIT ===
+    const yearEl = document.getElementById("year");
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    loadProductPage();
+    handleCheckoutStatus();
+  </script>
 </body>
 </html>
