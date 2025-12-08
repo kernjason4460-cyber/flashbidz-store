@@ -1085,6 +1085,31 @@
       resize: vertical;
     }
 
+    /* PAYMENT SECTION */
+
+    .payment-section {
+      margin-top: 0.4rem;
+      padding-top: 0.35rem;
+      border-top: 1px dashed rgba(148, 163, 184, 0.6);
+    }
+
+    .payment-help {
+      margin: 0.25rem 0 0.4rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .payment-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .payment-buttons .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
     /* SHIPPING / PICKUP TOGGLE */
 
     .checkout-shipping-toggle {
@@ -1671,13 +1696,28 @@
             placeholder="Pickup timing, shipping questions, or anything else."
           ></textarea>
         </div>
+
+        <div class="payment-section">
+          <label>Pay Now</label>
+          <p class="payment-help">
+            Use the total above and tap a button to pay instantly with CashApp or Venmo. Then come back here and submit your order so we can match your payment.
+          </p>
+          <div class="payment-buttons">
+            <button id="pay-cashapp" type="button" class="btn btn-primary">
+              Pay with CashApp
+            </button>
+            <button id="pay-venmo" type="button" class="btn btn-ghost">
+              Pay with Venmo
+            </button>
+          </div>
+        </div>
+
         <div class="checkout-form-footer">
           <small>
-            We’ll review your cart, confirm availability, and follow up with your total
-            and payment details.
+            1) Send payment using CashApp or Venmo. 2) Click “Submit Order” so we can match your payment and schedule pickup or shipping.
           </small>
           <button id="checkout-btn" class="btn btn-primary btn-sm" type="button">
-            Submit Cart
+            Submit Order (I've Paid)
           </button>
         </div>
       </div>
@@ -1887,6 +1927,8 @@
     const CART_STORAGE_KEY = "flashbidz_cart_v3";
     const THEME_STORAGE_KEY = "flashbidz_theme";
     const TAX_RATE = 0.06;
+    const CASHAPP_URL = "https://cash.app/$Kern4460";
+    const VENMO_URL = "https://venmo.com/u/Jason_Kern4460";
 
     let allProducts = [];
     let filteredProducts = [];
@@ -1953,6 +1995,9 @@
       el.shippingZip = document.getElementById("shipping-zip");
       el.shippingRateButtons = document.querySelectorAll(".shipping-rate-btn");
 
+      el.payCashappBtn = document.getElementById("pay-cashapp");
+      el.payVenmoBtn = document.getElementById("pay-venmo");
+
       el.addToCartSound = document.getElementById("add-to-cart-sound");
 
       el.themeToggle = document.getElementById("theme-toggle");
@@ -1997,6 +2042,27 @@
           const amount = Number(btn.dataset.amount || 0);
           setShippingAmount(amount);
         });
+      });
+
+      // payment buttons
+      el.payCashappBtn?.addEventListener("click", () => {
+        const totalText = el.cartTotalBottom?.textContent || "";
+        alert(
+          "Your total is " +
+            totalText +
+            ". We'll open CashApp so you can send payment now."
+        );
+        window.open(CASHAPP_URL, "_blank");
+      });
+
+      el.payVenmoBtn?.addEventListener("click", () => {
+        const totalText = el.cartTotalBottom?.textContent || "";
+        alert(
+          "Your total is " +
+            totalText +
+            ". We'll open Venmo so you can send payment now."
+        );
+        window.open(VENMO_URL, "_blank");
       });
 
       if (el.modal) {
@@ -2723,8 +2789,7 @@
 
       if (el.checkoutMessage) {
         el.checkoutMessage.innerHTML =
-          "<span>Cart submitted!</span> We’ll review availability and follow up with your total" +
-          (fulfillment === "shipping" ? " and shipping details." : " and pickup details.");
+          "<span>Order received!</span> We'll match this with your CashApp or Venmo payment and then confirm pickup or shipping.";
         el.checkoutMessage.classList.remove("hidden");
         el.checkoutMessage.classList.add("show");
         setTimeout(() => {
@@ -2733,7 +2798,7 @@
       }
 
       alert(
-        "Your cart has been submitted.\n\nYou can copy this summary if you’d like:\n\n" +
+        "Your order has been submitted.\n\nIf you haven't already, please send payment now using CashApp or Venmo using the total shown in your cart.\n\nYou can copy this summary for your records:\n\n" +
           text
       );
 
