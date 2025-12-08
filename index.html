@@ -154,41 +154,43 @@
         display: none;
       }
     }
-/* --- MOBILE HEADER LAYOUT FIX --- */
-@media (max-width: 640px) {
-  .site-header {
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    flex-wrap: nowrap;
-    padding-top: 0.6rem;
-    padding-bottom: 0.6rem;
-    gap: 0.5rem;
-  }
 
-  /* Make the brand/logo take full width on row 1 */
-  .site-header .brand {
-    width: 100%;
-    display: flex;
-    align-items: center;
-  }
+    /* --- MOBILE HEADER LAYOUT FIX --- */
+    @media (max-width: 640px) {
+      .site-header {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        padding-top: 0.6rem;
+        padding-bottom: 0.6rem;
+        gap: 0.5rem;
+      }
 
-  /* Buttons appear on row 2 and wrap normally */
-  .top-cta {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 0.4rem;
-  }
+      /* Make the brand/logo take full width on row 1 */
+      .site-header .brand {
+        width: 100%;
+        display: flex;
+        align-items: center;
+      }
 
-  /* Reduce button padding slightly on very small screens */
-  .top-cta .btn,
-  .theme-toggle {
-    padding: 0.35rem 0.7rem;
-    font-size: 0.72rem;
-  }
-}
+      /* Buttons appear on row 2 and wrap normally */
+      .top-cta {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 0.4rem;
+      }
+
+      /* Reduce button padding slightly on very small screens */
+      .top-cta .btn,
+      .theme-toggle {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.72rem;
+      }
+    }
+
     .btn {
       border-radius: 999px;
       padding: 0.45rem 0.9rem;
@@ -1039,8 +1041,13 @@
       margin-bottom: 0.35rem;
     }
 
+    .checkout-form-row--3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     @media (max-width: 480px) {
-      .checkout-form-row {
+      .checkout-form-row,
+      .checkout-form-row--3 {
         grid-template-columns: minmax(0, 1fr);
       }
     }
@@ -1076,6 +1083,53 @@
     .checkout-form textarea {
       min-height: 60px;
       resize: vertical;
+    }
+
+    /* SHIPPING / PICKUP TOGGLE */
+
+    .checkout-shipping-toggle {
+      display: flex;
+      gap: 0.4rem;
+      margin: 0.35rem 0 0.25rem;
+      flex-wrap: wrap;
+    }
+
+    .shipping-option {
+      position: relative;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      padding: 0.25rem 0.7rem;
+      font-size: 0.72rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    .shipping-option input {
+      display: none;
+    }
+
+    .shipping-option span {
+      pointer-events: none;
+    }
+
+    .shipping-option.active {
+      background: linear-gradient(to right, #ef4444, #f97316);
+      color: #f9fafb;
+      border-color: transparent;
+      box-shadow: 0 10px 20px rgba(239, 68, 68, 0.45);
+    }
+
+    [data-theme="dark"] .shipping-option {
+      background: rgba(15, 23, 42, 0.98);
+      border-color: rgba(55, 65, 81, 0.9);
+      color: #e5e7eb;
+    }
+
+    .shipping-address {
+      margin-top: 0.25rem;
     }
 
     .checkout-form-footer {
@@ -1384,6 +1438,16 @@
       flex: 1;
       justify-content: center;
     }
+
+    /* PRODUCT BADGE OVERLAP FIX */
+    .product-grid {
+      row-gap: 1.25rem;
+    }
+
+    .product-badges {
+      max-width: calc(100% - 1rem);
+      z-index: 1;
+    }
   </style>
 </head>
 <body>
@@ -1488,21 +1552,81 @@
             <input
               id="checkout-contact"
               type="text"
-              placeholder="Phone or Facebook name"
+              placeholder="Phone, email, or Facebook name"
             />
           </div>
         </div>
+
+        <!-- PICKUP vs SHIPPING -->
+        <div class="checkout-shipping-toggle">
+          <label class="shipping-option active">
+            <input
+              type="radio"
+              name="checkout-fulfillment"
+              value="pickup"
+              id="fulfillment-pickup"
+              checked
+            />
+            <span>Local Pickup</span>
+          </label>
+          <label class="shipping-option">
+            <input
+              type="radio"
+              name="checkout-fulfillment"
+              value="shipping"
+              id="fulfillment-shipping"
+            />
+            <span>Ship to Me</span>
+          </label>
+        </div>
+
+        <!-- SHIPPING ADDRESS (shown only if "Ship to Me" is selected) -->
+        <div id="shipping-fields" class="shipping-address hidden">
+          <div class="checkout-form-row">
+            <div>
+              <label for="shipping-address1">Street address</label>
+              <input
+                id="shipping-address1"
+                type="text"
+                placeholder="123 Main St"
+              />
+            </div>
+            <div>
+              <label for="shipping-address2">Apt / Suite (optional)</label>
+              <input
+                id="shipping-address2"
+                type="text"
+                placeholder="Apt, suite, etc."
+              />
+            </div>
+          </div>
+          <div class="checkout-form-row checkout-form-row--3">
+            <div>
+              <label for="shipping-city">City</label>
+              <input id="shipping-city" type="text" placeholder="Mattawan" />
+            </div>
+            <div>
+              <label for="shipping-state">State</label>
+              <input id="shipping-state" type="text" maxlength="2" placeholder="MI" />
+            </div>
+            <div>
+              <label for="shipping-zip">ZIP</label>
+              <input id="shipping-zip" type="text" placeholder="49071" />
+            </div>
+          </div>
+        </div>
+
         <div>
           <label for="checkout-notes">Notes</label>
           <textarea
             id="checkout-notes"
-            placeholder="Pickup timing, questions, etc."
+            placeholder="Pickup timing, shipping questions, or anything else."
           ></textarea>
         </div>
         <div class="checkout-form-footer">
           <small>
-            We’ll review your cart, confirm availability, and message you with
-            your total and pickup details.
+            We’ll review your cart, confirm availability, estimate shipping (if needed),
+            and send you a link or message with your total and payment details.
           </small>
           <button id="checkout-btn" class="btn btn-primary btn-sm" type="button">
             Submit Cart
@@ -1517,8 +1641,8 @@
       </div>
 
       <p class="cart-note">
-        All items are local pickup at FlashBidz in Mattawan, MI. Payment due at
-        pickup unless we arrange something different with you.
+        Local pickup at FlashBidz in Mattawan, MI by default. Shipping can be arranged
+        on many items (calculated separately, e.g., via Pirate Ship).
       </p>
     </div>
   </aside>
@@ -1618,10 +1742,10 @@
             <li>Add items to your cart and submit it.</li>
             <li>
               We review your cart, confirm availability, and send you a message
-              with your total and pickup options.
+              with your total and pickup or shipping options.
             </li>
             <li>
-              You pay at pickup (or via agreed method) and take your items home!
+              You pay at pickup or online (when enabled) and take your items home!
             </li>
           </ol>
         </div>
@@ -1715,13 +1839,13 @@
     const CART_STORAGE_KEY = "flashbidz_cart_v3";
     const THEME_STORAGE_KEY = "flashbidz_theme";
 
-   let allProducts = [];
-let filteredProducts = [];
-let cart = [];
+    let allProducts = [];
+    let filteredProducts = [];
+    let cart = [];
 
-// for the product modal image gallery
-let currentModalImages = [];
-let currentModalImageIndex = 0;
+    // for the product modal image gallery
+    let currentModalImages = [];
+    let currentModalImageIndex = 0;
 
     const el = {};
 
@@ -1732,6 +1856,7 @@ let currentModalImageIndex = 0;
       loadCartFromStorage();
       loadProducts();
       setCurrentYear();
+      handleFulfillmentChange(); // ensure correct initial visibility
     });
 
     function cacheDom() {
@@ -1764,6 +1889,16 @@ let currentModalImageIndex = 0;
       el.checkoutName = document.getElementById("checkout-name");
       el.checkoutContact = document.getElementById("checkout-contact");
       el.checkoutNotes = document.getElementById("checkout-notes");
+
+      // fulfillment + shipping fields
+      el.fulfillmentPickup = document.getElementById("fulfillment-pickup");
+      el.fulfillmentShipping = document.getElementById("fulfillment-shipping");
+      el.shippingFields = document.getElementById("shipping-fields");
+      el.shippingAddress1 = document.getElementById("shipping-address1");
+      el.shippingAddress2 = document.getElementById("shipping-address2");
+      el.shippingCity = document.getElementById("shipping-city");
+      el.shippingState = document.getElementById("shipping-state");
+      el.shippingZip = document.getElementById("shipping-zip");
 
       el.addToCartSound = document.getElementById("add-to-cart-sound");
 
@@ -1798,6 +1933,10 @@ let currentModalImageIndex = 0;
       el.checkoutBtn?.addEventListener("click", handleCheckout);
 
       el.themeToggle?.addEventListener("click", toggleTheme);
+
+      // fulfillment selection
+      el.fulfillmentPickup?.addEventListener("change", handleFulfillmentChange);
+      el.fulfillmentShipping?.addEventListener("change", handleFulfillmentChange);
 
       if (el.modal) {
         el.modal.addEventListener("click", (e) => {
@@ -2339,6 +2478,23 @@ let currentModalImageIndex = 0;
       renderCart();
     }
 
+    function handleFulfillmentChange() {
+      const shippingSelected = el.fulfillmentShipping?.checked;
+      if (el.shippingFields) {
+        el.shippingFields.classList.toggle("hidden", !shippingSelected);
+      }
+
+      // toggle active style on pills
+      const pickupLabel = el.fulfillmentPickup?.closest(".shipping-option");
+      const shippingLabel = el.fulfillmentShipping?.closest(".shipping-option");
+      if (pickupLabel) {
+        pickupLabel.classList.toggle("active", !!el.fulfillmentPickup?.checked);
+      }
+      if (shippingLabel) {
+        shippingLabel.classList.toggle("active", !!el.fulfillmentShipping?.checked);
+      }
+    }
+
     function handleCheckout() {
       if (!cart.length) return;
 
@@ -2346,12 +2502,85 @@ let currentModalImageIndex = 0;
       const contact = (el.checkoutContact?.value || "").trim();
       const notes = (el.checkoutNotes?.value || "").trim();
 
+      const fulfillment =
+        el.fulfillmentShipping && el.fulfillmentShipping.checked
+          ? "shipping"
+          : "pickup";
+
+      const shipping = fulfillment === "shipping"
+        ? {
+            address1: (el.shippingAddress1?.value || "").trim(),
+            address2: (el.shippingAddress2?.value || "").trim(),
+            city: (el.shippingCity?.value || "").trim(),
+            state: (el.shippingState?.value || "").trim(),
+            zip: (el.shippingZip?.value || "").trim(),
+          }
+        : null;
+
+      // basic validation so you don't get totally blank requests
+      if (!name || !contact) {
+        alert("Please enter your name and the best way to reach you.");
+        return;
+      }
+
+      if (fulfillment === "shipping" && shipping) {
+        if (!shipping.address1 || !shipping.city || !shipping.state || !shipping.zip) {
+          alert("Please fill in your full shipping address.");
+          return;
+        }
+      }
+
+      const subtotal = cart.reduce(
+        (sum, item) => sum + item.quantity * item.price,
+        0
+      );
+
+      const orderPayload = {
+        items: cart.map((item) => ({
+          sku: item.sku,
+          title: item.title,
+          quantity: item.quantity,
+          unit_price: item.price,
+          line_total: item.price * item.quantity,
+        })),
+        totals: {
+          subtotal,
+          shipping: null, // you can fill this in from Pirate Ship later
+          grand_total: subtotal, // + shipping when you add it
+        },
+        fulfillment,
+        buyer: {
+          name,
+          contact,
+          notes,
+          shipping,
+        },
+        meta: {
+          source: "flashbidz_store",
+          created_at: new Date().toISOString(),
+        },
+      };
+
+      console.log("Stripe-ready order payload:", orderPayload);
+
       const summaryLines = [];
       summaryLines.push("FLASHBIDZ STORE CART");
       summaryLines.push("-------------------");
-      if (name) summaryLines.push("Name: " + name);
-      if (contact) summaryLines.push("Contact: " + contact);
-      if (notes) summaryLines.push("Notes: " + notes);
+      summaryLines.push("Fulfillment: " + (fulfillment === "shipping" ? "Ship to Me" : "Local Pickup"));
+      summaryLines.push("Name: " + name);
+      summaryLines.push("Contact: " + contact);
+      if (fulfillment === "shipping" && shipping) {
+        summaryLines.push("Shipping address:");
+        summaryLines.push("  " + shipping.address1);
+        if (shipping.address2) summaryLines.push("  " + shipping.address2);
+        summaryLines.push(
+          "  " + shipping.city + ", " + shipping.state + " " + shipping.zip
+        );
+      }
+      if (notes) {
+        summaryLines.push("");
+        summaryLines.push("Notes: " + notes);
+      }
       summaryLines.push("");
       summaryLines.push("ITEMS:");
       cart.forEach((item) => {
@@ -2361,19 +2590,16 @@ let currentModalImageIndex = 0;
           )} = $${(item.quantity * item.price).toFixed(2)}`
         );
       });
-      const total = cart.reduce(
-        (sum, item) => sum + item.quantity * item.price,
-        0
-      );
       summaryLines.push("");
-      summaryLines.push("Total: $" + total.toFixed(2));
+      summaryLines.push("Total (before shipping): $" + subtotal.toFixed(2));
 
       const text = summaryLines.join("\n");
       console.log("Checkout summary:\n" + text);
 
       if (el.checkoutMessage) {
         el.checkoutMessage.innerHTML =
-          "<span>Cart submitted!</span> We’ll review availability and message you with your total and pickup details.";
+          "<span>Cart submitted!</span> We’ll review availability and follow up with your total" +
+          (fulfillment === "shipping" ? " and shipping options." : " and pickup details.");
         el.checkoutMessage.classList.remove("hidden");
         el.checkoutMessage.classList.add("show");
         setTimeout(() => {
@@ -2385,6 +2611,25 @@ let currentModalImageIndex = 0;
         "Your cart has been submitted.\n\nYou can copy this summary if you’d like:\n\n" +
           text
       );
+
+      /*
+      When you're ready to hook up Stripe + your backend, this is roughly what you'll do:
+
+      fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.checkout_url) {
+            window.location = data.checkout_url;
+          }
+        })
+        .catch((err) => {
+          console.error("Error creating checkout session:", err);
+        });
+      */
     }
 
     function setCurrentYear() {
@@ -2408,52 +2653,52 @@ let currentModalImageIndex = 0;
         .replace(/'/g, "&#039;");
     }
 
-   function openProductModal(product) {
-  if (!el.modal) return;
+    function openProductModal(product) {
+      if (!el.modal) return;
 
-  // Build the image list (main + extras)
-  currentModalImages =
-    Array.isArray(product.images) && product.images.length
-      ? product.images
-      : [product.image || "img/placeholder.png"];
-  currentModalImageIndex = 0;
+      // Build the image list (main + extras)
+      currentModalImages =
+        Array.isArray(product.images) && product.images.length
+          ? product.images
+          : [product.image || "img/placeholder.png"];
+      currentModalImageIndex = 0;
 
-  // Main image + text
-  el.modalMainImage.src = currentModalImages[0];
-  el.modalMainImage.alt = product.title || "";
-  el.modalTitle.textContent = product.title || "";
-  el.modalSku.textContent = product.sku ? "SKU: " + product.sku : "";
-  el.modalPrice.textContent =
-    "$" + Number(product.price || 0).toFixed(2);
-  el.modalDescription.textContent =
-    product.description || "No additional description provided.";
+      // Main image + text
+      el.modalMainImage.src = currentModalImages[0];
+      el.modalMainImage.alt = product.title || "";
+      el.modalTitle.textContent = product.title || "";
+      el.modalSku.textContent = product.sku ? "SKU: " + product.sku : "";
+      el.modalPrice.textContent =
+        "$" + Number(product.price || 0).toFixed(2);
+      el.modalDescription.textContent =
+        product.description || "No additional description provided.";
 
-  // Thumbnails
-  el.modalThumbs.innerHTML = "";
-  currentModalImages.forEach((src, index) => {
-    const thumb = document.createElement("button");
-    thumb.type = "button";
-    thumb.className = "modal-thumb";
-    thumb.innerHTML = `<img src="${src}" alt="">`;
-    thumb.addEventListener("click", () => {
-      currentModalImageIndex = index;
-      el.modalMainImage.src = src;
-    });
-    el.modalThumbs.appendChild(thumb);
-  });
+      // Thumbnails
+      el.modalThumbs.innerHTML = "";
+      currentModalImages.forEach((src, index) => {
+        const thumb = document.createElement("button");
+        thumb.type = "button";
+        thumb.className = "modal-thumb";
+        thumb.innerHTML = `<img src="${src}" alt="">`;
+        thumb.addEventListener("click", () => {
+          currentModalImageIndex = index;
+          el.modalMainImage.src = src;
+        });
+        el.modalThumbs.appendChild(thumb);
+      });
 
-  // NEW: tap the big image to cycle through all pictures
-  el.modalMainImage.onclick = () => {
-    if (!currentModalImages.length) return;
-    currentModalImageIndex =
-      (currentModalImageIndex + 1) % currentModalImages.length;
-    el.modalMainImage.src = currentModalImages[currentModalImageIndex];
-  };
+      // tap the big image to cycle through all pictures
+      el.modalMainImage.onclick = () => {
+        if (!currentModalImages.length) return;
+        currentModalImageIndex =
+          (currentModalImageIndex + 1) % currentModalImages.length;
+        el.modalMainImage.src = currentModalImages[currentModalImageIndex];
+      };
 
-  el.modal.dataset.sku = product.sku || "";
-  el.modal.classList.add("open");
-  el.modal.setAttribute("aria-hidden", "false");
-}
+      el.modal.dataset.sku = product.sku || "";
+      el.modal.classList.add("open");
+      el.modal.setAttribute("aria-hidden", "false");
+    }
 
     function closeModal() {
       if (!el.modal) return;
