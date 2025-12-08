@@ -2,177 +2,157 @@
   "products": [
     {
       "sku": "FBZ-20251128-0020",
-      "title": "Turquoise and Coral Ring and Belt Buckle",
+      "title": "turquoise and coral ring and belt buckleAccessories",
       "description": "",
       "price": 300,
-      "stock": 1,
+      "stock": 4,
       "image": "img/placeholder.png",
-      "images": [
-        "img/placeholder.png"
-      ],
+      "images": [],
       "categories": [
         "Accessories"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-HOL-20251128-0032",
-      "title": "Holiday Collectible Plate",
+      "title": "Holiday Collectible plate",
       "description": "",
       "price": 15,
       "stock": 3,
       "image": "img/placeholder.png",
-      "images": [
-        "img/placeholder.png"
-      ],
+      "images": [],
       "categories": [
         "Holiday"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-HOL-20251128-0029",
-      "title": "Holiday Bowl",
+      "title": "Holiday bowl",
       "description": "",
       "price": 8,
       "stock": 3,
       "image": "img/placeholder.png",
-      "images": [
-        "img/placeholder.png"
-      ],
+      "images": [],
       "categories": [
         "Holiday"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-20251128-0015",
-      "title": "Merry Christmas Photo Frame",
+      "title": "Merry Christmas photo frameHome decor",
       "description": "",
       "price": 5,
       "stock": 1,
       "image": "img/placeholder.png",
-      "images": [
-        "img/placeholder.png"
-      ],
+      "images": [],
       "categories": [
         "Holiday"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-20251128-0014",
-      "title": "Battery Operated Christmas Lights with Remote",
+      "title": "Battery operated Christmas lights with remoteHoliday",
       "description": "",
       "price": 10,
       "stock": 1,
       "image": "img/placeholder.png",
-      "images": [
-        "img/placeholder.png"
-      ],
+      "images": [],
       "categories": [
         "Holiday"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-20251128-0013",
-      "title": "Fall Wood Block Decor Set",
+      "title": "Fall wood block decor setHome decor",
       "description": "",
       "price": 10,
       "stock": 1,
       "image": "img/placeholder.png",
-      "images": [
-        "img/placeholder.png"
-      ],
+      "images": [],
       "categories": [
         "Decor"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-20251128-0011",
-      "title": "Ceramic Christmas Ornament Set",
+      "title": "Ceramic Christmas ornament setHoliday",
       "description": "",
       "price": 3,
       "stock": 3,
       "image": "img/placeholder.png",
-      "images": [
-        "img/placeholder.png"
-      ],
+      "images": [],
       "categories": [
         "Holiday"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-20251128-0010",
-      "title": "Wooden Santa Christmas Decor",
+      "title": "Wooden Santa Christmas decorholiday",
       "description": "",
       "price": 3,
       "stock": 1,
       "image": "img/placeholder.png",
-      "images": [
-        "img/placeholder.png"
-      ],
+      "images": [],
       "categories": [
         "Holiday"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-20251128-0009",
-      "title": "Let It Snow Wooden Sign",
+      "title": "Let it snow wooden signHoliday",
       "description": "",
       "price": 3,
       "stock": 1,
       "image": "img/placeholder.png",
-      "images": [
-        "img/placeholder.png"
-      ],
+      "images": [],
       "categories": [
         "Holiday"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-HOM-20251128-0015",
-      "title": "Indoor/Outdoor \"Let It Snow\" Decorative Rug",
+      "title": "Indoor/outdoor Let it snow decorative rugHome decor",
       "description": "",
       "price": 15,
       "stock": 1,
       "image": "img/placeholder.png",
-      "images": [
-        "img/placeholder.png"
-      ],
+      "images": [],
       "categories": [
         "Holiday"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-HOL-20251128-0014",
-      "title": "Flocked Mini Christmas Trees with Rustic Wood Log Base",
+      "title": "flocked mini Christmas trees with rustic wood log baseHoliday",
       "description": "",
       "price": 10,
       "stock": 1,
@@ -186,59 +166,53 @@
         "Holiday"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-GEN-20251125-0005",
-      "title": "Black Cottage Frame Picture",
+      "title": "Black cottager frame pictureHome decor",
       "description": "",
       "price": 10,
       "stock": 1,
       "image": "img/placeholder.png",
-      "images": [
-        "img/placeholder.png"
-      ],
+      "images": [],
       "categories": [
         "Decor"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-20251124-0001",
-      "title": "100th Anniversary Cocoa Baby Bean Vase",
+      "title": "100th Anniversary Cocoa baby bean vasehome decor",
       "description": "",
       "price": 15,
       "stock": 1,
       "image": "img/placeholder.png",
-      "images": [
-        "img/placeholder.png"
-      ],
+      "images": [],
       "categories": [
         "Decor"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-20251122-0001",
-      "title": "White House Historical Ornament Collection",
+      "title": "White House historical ornament collectionholiday",
       "description": "",
       "price": 500,
       "stock": 1,
       "image": "img/placeholder.png",
-      "images": [
-        "img/placeholder.png"
-      ],
+      "images": [],
       "categories": [
         "Holiday"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-20251202-0001",
@@ -255,8 +229,8 @@
         "Holiday"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     },
     {
       "sku": "FBZ-20251202-0002",
@@ -272,11 +246,11 @@
         "img/Topper4.jpeg"
       ],
       "categories": [
-        "Holiday"
+        "holiday"
       ],
       "badge": "",
-      "added_at": "2025-12-02",
-      "active": true
+      "active": true,
+      "added_at": "2025-12-08"
     }
   ]
 }
