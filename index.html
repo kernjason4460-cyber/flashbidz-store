@@ -1681,9 +1681,13 @@
     const CART_STORAGE_KEY = "flashbidz_cart_v3";
     const THEME_STORAGE_KEY = "flashbidz_theme";
 
-    let allProducts = [];
-    let filteredProducts = [];
-    let cart = [];
+   let allProducts = [];
+let filteredProducts = [];
+let cart = [];
+
+// for the product modal image gallery
+let currentModalImages = [];
+let currentModalImageIndex = 0;
 
     const el = {};
 
@@ -2370,39 +2374,52 @@
         .replace(/'/g, "&#039;");
     }
 
-    function openProductModal(product) {
-      if (!el.modal) return;
+   function openProductModal(product) {
+  if (!el.modal) return;
 
-      const images =
-        Array.isArray(product.images) && product.images.length
-          ? product.images
-          : [product.image || "img/placeholder.png"];
+  // Build the image list (main + extras)
+  currentModalImages =
+    Array.isArray(product.images) && product.images.length
+      ? product.images
+      : [product.image || "img/placeholder.png"];
+  currentModalImageIndex = 0;
 
-      el.modalMainImage.src = images[0];
-      el.modalMainImage.alt = product.title || "";
-      el.modalTitle.textContent = product.title || "";
-      el.modalSku.textContent = product.sku ? "SKU: " + product.sku : "";
-      el.modalPrice.textContent =
-        "$" + Number(product.price || 0).toFixed(2);
-      el.modalDescription.textContent =
-        product.description || "No additional description provided.";
-      el.modalThumbs.innerHTML = "";
+  // Main image + text
+  el.modalMainImage.src = currentModalImages[0];
+  el.modalMainImage.alt = product.title || "";
+  el.modalTitle.textContent = product.title || "";
+  el.modalSku.textContent = product.sku ? "SKU: " + product.sku : "";
+  el.modalPrice.textContent =
+    "$" + Number(product.price || 0).toFixed(2);
+  el.modalDescription.textContent =
+    product.description || "No additional description provided.";
 
-      images.forEach((src) => {
-        const thumb = document.createElement("button");
-        thumb.type = "button";
-        thumb.className = "modal-thumb";
-        thumb.innerHTML = `<img src="${src}" alt="">`;
-        thumb.addEventListener("click", () => {
-          el.modalMainImage.src = src;
-        });
-        el.modalThumbs.appendChild(thumb);
-      });
+  // Thumbnails
+  el.modalThumbs.innerHTML = "";
+  currentModalImages.forEach((src, index) => {
+    const thumb = document.createElement("button");
+    thumb.type = "button";
+    thumb.className = "modal-thumb";
+    thumb.innerHTML = `<img src="${src}" alt="">`;
+    thumb.addEventListener("click", () => {
+      currentModalImageIndex = index;
+      el.modalMainImage.src = src;
+    });
+    el.modalThumbs.appendChild(thumb);
+  });
 
-      el.modal.dataset.sku = product.sku || "";
-      el.modal.classList.add("open");
-      el.modal.setAttribute("aria-hidden", "false");
-    }
+  // NEW: tap the big image to cycle through all pictures
+  el.modalMainImage.onclick = () => {
+    if (!currentModalImages.length) return;
+    currentModalImageIndex =
+      (currentModalImageIndex + 1) % currentModalImages.length;
+    el.modalMainImage.src = currentModalImages[currentModalImageIndex];
+  };
+
+  el.modal.dataset.sku = product.sku || "";
+  el.modal.classList.add("open");
+  el.modal.setAttribute("aria-hidden", "false");
+}
 
     function closeModal() {
       if (!el.modal) return;
