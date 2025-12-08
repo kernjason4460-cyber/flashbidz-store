@@ -2092,34 +2092,27 @@ function sendOrderToSheet(orderPayload) {
           throw new Error("HTTP " + response.status);
         }
 
-        const data = await response.json();
-        const products = Array.isArray(data) ? data : data.products;
+      const data = await response.json();
+const products = Array.isArray(data) ? data : data.products;
 
-        if (!products || !products.length) {
-          el.productGrid.innerHTML = "<p>No products found.</p>";
-          return;
-        }
+if (!products || !products.length) {
+  el.productGrid.innerHTML = "<p>No products found.</p>";
+  return;
+}
 
-        allProducts = products.filter(
-          (p) => p.active !== false && (p.stock === undefined || p.stock > 0)
-        );
+// TEMP: show everything we get from products.json
+allProducts = products || [];
 
-        buildCategoryOptions(allProducts);
-        buildCategoryPills(allProducts);
+buildCategoryOptions(allProducts);
+buildCategoryPills(allProducts);
 
-        const withIndex = allProducts.map((p, idx) => ({
-          ...p,
-          __index: idx,
-        }));
+const withIndex = allProducts.map((p, idx) => ({
+  ...p,
+  __index: idx,
+}));
 
-        filteredProducts = sortProducts(withIndex, el.sortSelect?.value || "featured");
-        renderProducts(filteredProducts);
-      } catch (err) {
-        console.error("Error loading products.json:", err);
-        el.productGrid.innerHTML =
-          "<p>There was a problem loading products. Please try again later.</p>";
-      }
-    }
+filteredProducts = sortProducts(withIndex, el.sortSelect?.value || "featured");
+renderProducts(filteredProducts);
 
     function buildCategoryOptions(products) {
       if (!el.filterCategory) return;
