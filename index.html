@@ -2026,7 +2026,33 @@
         }
       });
     }
+// 🔄 Send final order to Google Sheet (Apps Script webhook)
+function sendOrderToSheet(orderPayload) {
+  const url = https://script.google.com/macros/s/AKfycbwyyFmuVca8A5oxH3LuUnavZDC2m_XA5CuSc8d4-wzeeqGfS4_6bc1OnctbIMR0DSja/exec; // 👈 Replace this with your Apps Script URL
 
+  try {
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderPayload),
+    })
+      .then((res) => res.json().catch(() => ({})))
+      .then((data) => {
+        if (!data || data.success === false) {
+          console.error("Google Sheet update failed:", data);
+        } else {
+          console.log("Google Sheet updated:", data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error calling Apps Script:", err);
+      });
+  } catch (err) {
+    console.error("Error sending order to sheet:", err);
+  }
+}
     function initTheme() {
       const stored = localStorage.getItem(THEME_STORAGE_KEY);
       const html = document.documentElement;
@@ -2680,7 +2706,7 @@
           created_at: new Date().toISOString(),
         },
       };
-
+sendOrderToSheet(orderPayload);
       console.log("Stripe-ready order payload:", orderPayload);
 
       const summaryLines = [];
