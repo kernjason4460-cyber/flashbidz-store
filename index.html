@@ -1132,6 +1132,36 @@
       margin-top: 0.25rem;
     }
 
+    .shipping-rate-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.15rem;
+    }
+
+    .shipping-rate-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(255, 255, 255, 0.96);
+      padding: 0.25rem 0.7rem;
+      font-size: 0.72rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .shipping-rate-btn.active {
+      background: linear-gradient(to right, #ef4444, #f97316);
+      color: #f9fafb;
+      border-color: transparent;
+      box-shadow: 0 10px 20px rgba(239, 68, 68, 0.45);
+    }
+
+    [data-theme="dark"] .shipping-rate-btn {
+      background: rgba(15, 23, 42, 0.98);
+      border-color: rgba(55, 65, 81, 0.9);
+      color: #e5e7eb;
+    }
+
     .checkout-form-footer {
       display: flex;
       justify-content: space-between;
@@ -1535,6 +1565,14 @@
           <span>Subtotal</span>
           <span id="cart-subtotal">$0.00</span>
         </div>
+        <div class="cart-summary-row">
+          <span>Sales Tax (6%)</span>
+          <span id="cart-tax">$0.00</span>
+        </div>
+        <div class="cart-summary-row">
+          <span>Shipping</span>
+          <span id="cart-shipping">$0.00</span>
+        </div>
         <div class="cart-summary-row total-row">
           <span>Total</span>
           <span id="cart-total-bottom">$0.00</span>
@@ -1614,6 +1652,16 @@
               <input id="shipping-zip" type="text" placeholder="49071" />
             </div>
           </div>
+          <div class="checkout-form-row">
+            <div>
+              <label>Flat-rate shipping</label>
+              <div class="shipping-rate-options">
+                <button type="button" class="shipping-rate-btn" data-amount="8">$8 (small)</button>
+                <button type="button" class="shipping-rate-btn" data-amount="12">$12 (medium)</button>
+                <button type="button" class="shipping-rate-btn" data-amount="18">$18 (large)</button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -1625,8 +1673,8 @@
         </div>
         <div class="checkout-form-footer">
           <small>
-            We’ll review your cart, confirm availability, estimate shipping (if needed),
-            and send you a link or message with your total and payment details.
+            We’ll review your cart, confirm availability, and follow up with your total
+            and payment details.
           </small>
           <button id="checkout-btn" class="btn btn-primary btn-sm" type="button">
             Submit Cart
@@ -1641,8 +1689,8 @@
       </div>
 
       <p class="cart-note">
-        Pick up at FlashBidz in Mattawan, MI or ask about shipping on many items
-        (calculated separately, e.g., via Pirate Ship).
+        Local pickup at FlashBidz in Mattawan, MI is always available. Shipping is
+        available on many items with simple flat-rate options.
       </p>
     </div>
   </aside>
@@ -1652,11 +1700,11 @@
     <!-- HERO -->
     <section class="hero">
       <div class="hero-inner">
-        <h2>In-Stock Deals • Ready to Buy Now</h2>
+        <h2>In-Stock Deals • Local &amp; Shipping Options</h2>
         <p>
           Everything on this page is ready now — no auctions and no countdowns.
           Add items to your cart and submit when you’re ready. We’ll confirm
-          your total, plus pickup details at our Mattawan location or shipping options if needed.
+          your total and pickup or shipping details from our Mattawan location.
         </p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="#shop">Start Shopping</a>
@@ -1724,7 +1772,7 @@
     <!-- PICKUP INFO -->
     <section id="pickup" class="pickup-section">
       <header class="section-header">
-        <h2>Pickup & Shipping Info</h2>
+        <h2>Pickup Info</h2>
       </header>
       <div class="pickup-content">
         <div class="pickup-card">
@@ -1838,10 +1886,12 @@
   <script>
     const CART_STORAGE_KEY = "flashbidz_cart_v3";
     const THEME_STORAGE_KEY = "flashbidz_theme";
+    const TAX_RATE = 0.06;
 
     let allProducts = [];
     let filteredProducts = [];
     let cart = [];
+    let shippingAmount = 0;
 
     // for the product modal image gallery
     let currentModalImages = [];
@@ -1881,6 +1931,8 @@
       el.cartTotalTop = document.getElementById("cart-total");
       el.cartTotalBottomBar = document.getElementById("cart-total-bottom-bar");
       el.cartMetaSmall = document.getElementById("cart-meta-small");
+      el.cartTax = document.getElementById("cart-tax");
+      el.cartShipping = document.getElementById("cart-shipping");
 
       el.clearCartBtn = document.getElementById("clear-cart-btn");
       el.checkoutBtn = document.getElementById("checkout-btn");
@@ -1899,6 +1951,7 @@
       el.shippingCity = document.getElementById("shipping-city");
       el.shippingState = document.getElementById("shipping-state");
       el.shippingZip = document.getElementById("shipping-zip");
+      el.shippingRateButtons = document.querySelectorAll(".shipping-rate-btn");
 
       el.addToCartSound = document.getElementById("add-to-cart-sound");
 
@@ -1937,6 +1990,14 @@
       // fulfillment selection
       el.fulfillmentPickup?.addEventListener("change", handleFulfillmentChange);
       el.fulfillmentShipping?.addEventListener("change", handleFulfillmentChange);
+
+      // flat-rate shipping buttons
+      el.shippingRateButtons?.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const amount = Number(btn.dataset.amount || 0);
+          setShippingAmount(amount);
+        });
+      });
 
       if (el.modal) {
         el.modal.addEventListener("click", (e) => {
@@ -2016,31 +2077,7 @@
         allProducts = products.filter(
           (p) => p.active !== false && (p.stock === undefined || p.stock > 0)
         );
-// Make sure any saved cart quantities don't exceed current stock
-if (cart.length) {
-  let changed = false;
 
-  cart = cart
-    .map((item) => {
-      const product = allProducts.find((p) => p.sku === item.sku);
-      const maxQty =
-        product && typeof product.stock === "number" ? product.stock : 1;
-
-      const clampedQty = Math.min(item.quantity, maxQty);
-      if (clampedQty !== item.quantity) changed = true;
-
-      return {
-        ...item,
-        quantity: clampedQty,
-      };
-    })
-    .filter((item) => item.quantity > 0);
-
-  if (changed) {
-    saveCartToStorage();
-    renderCart();
-  }
-}
         buildCategoryOptions(allProducts);
         buildCategoryPills(allProducts);
 
@@ -2309,36 +2346,38 @@ if (cart.length) {
     }
 
     function addToCart(product) {
-  const existing = cart.find((item) => item.sku === product.sku);
-  const price = Number(product.price || 0);
-  const image =
-    product.image ||
-    (Array.isArray(product.images) && product.images[0]) ||
-    "img/placeholder.png";
+      const existing = cart.find((item) => item.sku === product.sku);
+      const price = Number(product.price || 0);
+      const image =
+        product.image ||
+        (Array.isArray(product.images) && product.images[0]) ||
+        "img/placeholder.png";
+      const maxQty = typeof product.stock === "number" ? product.stock : Infinity;
 
-  const maxQty =
-    typeof product.stock === "number" ? product.stock : 1;
+      if (existing) {
+        if (existing.quantity >= maxQty && maxQty !== Infinity) {
+          alert("Only " + maxQty + " of this item is available.");
+          return;
+        }
+        existing.quantity += 1;
+      } else {
+        if (maxQty <= 0) {
+          alert("This item is sold out.");
+          return;
+        }
+        cart.push({
+          sku: product.sku,
+          title: product.title,
+          price,
+          image,
+          quantity: 1,
+        });
+      }
 
-  if (existing) {
-    if (existing.quantity >= maxQty) {
-      alert("Only " + maxQty + " of this item are available.");
-      return;
+      saveCartToStorage();
+      renderCart();
+      setCartOpen(true);
     }
-    existing.quantity += 1;
-  } else {
-    cart.push({
-      sku: product.sku,
-      title: product.title,
-      price,
-      image,
-      quantity: 1,
-    });
-  }
-
-  saveCartToStorage();
-  renderCart();
-  setCartOpen(true);
-}
 
     function removeFromCart(sku) {
       cart = cart.filter((item) => item.sku !== sku);
@@ -2347,28 +2386,27 @@ if (cart.length) {
     }
 
     function updateCartQuantity(sku, delta) {
-  const item = cart.find((i) => i.sku === sku);
-  if (!item) return;
+      const item = cart.find((i) => i.sku === sku);
+      if (!item) return;
 
-  const product = allProducts.find((p) => p.sku === sku);
-  const maxQty =
-    product && typeof product.stock === "number" ? product.stock : 1;
+      const product = allProducts.find((p) => p.sku === sku);
+      const maxQty = product && typeof product.stock === "number"
+        ? product.stock
+        : Infinity;
 
-  const nextQty = item.quantity + delta;
+      if (delta > 0 && item.quantity >= maxQty && maxQty !== Infinity) {
+        alert("Only " + maxQty + " of this item is available.");
+        return;
+      }
 
-  if (nextQty <= 0) {
-    // remove if they go to 0
-    cart = cart.filter((i) => i.sku !== sku);
-  } else if (nextQty > maxQty) {
-    item.quantity = maxQty;
-    alert("Only " + maxQty + " of this item are available.");
-  } else {
-    item.quantity = nextQty;
-  }
+      item.quantity += delta;
+      if (item.quantity <= 0) {
+        cart = cart.filter((i) => i.sku !== sku);
+      }
 
-  saveCartToStorage();
-  renderCart();
-}
+      saveCartToStorage();
+      renderCart();
+    }
 
     function clearCart() {
       if (!cart.length) return;
@@ -2393,9 +2431,7 @@ if (cart.length) {
 
           const price = item.price.toFixed(2);
           const lineTotal = (item.price * item.quantity).toFixed(2);
-          const product = allProducts.find((p) => p.sku === item.sku);
-          const maxQty =
-            product && typeof product.stock === "number" ? product.stock : 1;
+
           row.innerHTML = `
             <div class="cart-item-main">
               <div class="cart-item-thumb">
@@ -2425,11 +2461,7 @@ if (cart.length) {
               updateCartQuantity(sku, delta);
             });
           });
-// Disable "+" if already at max
-const plusBtn = row.querySelector('.qty-btn[data-delta="1"]');
-if (plusBtn && item.quantity >= maxQty) {
-  plusBtn.disabled = true;
-}
+
           const removeBtn = row.querySelector(".cart-remove-btn");
           removeBtn.addEventListener("click", () => {
             const sku = removeBtn.getAttribute("data-sku");
@@ -2455,6 +2487,11 @@ if (plusBtn && item.quantity >= maxQty) {
         (sum, item) => sum + item.quantity * item.price,
         0
       );
+      const tax = +(subtotal * TAX_RATE).toFixed(2);
+      const shipping = el.fulfillmentShipping && el.fulfillmentShipping.checked
+        ? shippingAmount
+        : 0;
+      const total = subtotal + tax + shipping;
 
       if (el.cartCount) el.cartCount.textContent = String(itemCount);
       if (el.cartCountS) el.cartCountS.textContent = itemCount === 1 ? "" : "s";
@@ -2466,12 +2503,16 @@ if (plusBtn && item.quantity >= maxQty) {
 
       if (el.cartSubtotal)
         el.cartSubtotal.textContent = "$" + subtotal.toFixed(2);
+      if (el.cartTax)
+        el.cartTax.textContent = "$" + tax.toFixed(2);
+      if (el.cartShipping)
+        el.cartShipping.textContent = "$" + shipping.toFixed(2);
       if (el.cartTotalBottom)
-        el.cartTotalBottom.textContent = "$" + subtotal.toFixed(2);
+        el.cartTotalBottom.textContent = "$" + total.toFixed(2);
       if (el.cartTotalTop)
-        el.cartTotalTop.textContent = "$" + subtotal.toFixed(2);
+        el.cartTotalTop.textContent = "$" + total.toFixed(2);
       if (el.cartTotalBottomBar)
-        el.cartTotalBottomBar.textContent = "$" + subtotal.toFixed(2);
+        el.cartTotalBottomBar.textContent = "$" + total.toFixed(2);
     }
 
     function setCartOpen(isOpen) {
@@ -2541,6 +2582,25 @@ if (plusBtn && item.quantity >= maxQty) {
       if (shippingLabel) {
         shippingLabel.classList.toggle("active", !!el.fulfillmentShipping?.checked);
       }
+
+      if (!shippingSelected) {
+        setShippingAmount(0);
+      }
+
+      updateCartSummary();
+    }
+
+    function setShippingAmount(amount) {
+      shippingAmount = amount || 0;
+
+      if (el.shippingRateButtons) {
+        el.shippingRateButtons.forEach((btn) => {
+          const btnAmount = Number(btn.dataset.amount || 0);
+          btn.classList.toggle("active", btnAmount === shippingAmount);
+        });
+      }
+
+      updateCartSummary();
     }
 
     function handleCheckout() {
@@ -2578,10 +2638,18 @@ if (plusBtn && item.quantity >= maxQty) {
         }
       }
 
+      if (fulfillment === "shipping" && !shippingAmount) {
+        alert("Please choose a flat-rate shipping option ($8, $12, or $18).");
+        return;
+      }
+
       const subtotal = cart.reduce(
         (sum, item) => sum + item.quantity * item.price,
         0
       );
+      const tax = +(subtotal * TAX_RATE).toFixed(2);
+      const shippingCost = fulfillment === "shipping" ? shippingAmount : 0;
+      const grandTotal = subtotal + tax + shippingCost;
 
       const orderPayload = {
         items: cart.map((item) => ({
@@ -2593,8 +2661,9 @@ if (plusBtn && item.quantity >= maxQty) {
         })),
         totals: {
           subtotal,
-          shipping: null, // you can fill this in from Pirate Ship later
-          grand_total: subtotal, // + shipping when you add it
+          tax,
+          shipping: shippingCost,
+          grand_total: grandTotal,
         },
         fulfillment,
         buyer: {
@@ -2639,7 +2708,15 @@ if (plusBtn && item.quantity >= maxQty) {
         );
       });
       summaryLines.push("");
-      summaryLines.push("Total (before shipping): $" + subtotal.toFixed(2));
+      summaryLines.push("Subtotal: $" + subtotal.toFixed(2));
+      summaryLines.push("Sales Tax (6%): $" + tax.toFixed(2));
+      if (fulfillment === "shipping") {
+        summaryLines.push("Shipping: $" + shippingCost.toFixed(2));
+      } else {
+        summaryLines.push("Shipping: $0.00 (pickup)");
+      }
+      summaryLines.push("");
+      summaryLines.push("Total due: $" + grandTotal.toFixed(2));
 
       const text = summaryLines.join("\n");
       console.log("Checkout summary:\n" + text);
@@ -2647,7 +2724,7 @@ if (plusBtn && item.quantity >= maxQty) {
       if (el.checkoutMessage) {
         el.checkoutMessage.innerHTML =
           "<span>Cart submitted!</span> We’ll review availability and follow up with your total" +
-          (fulfillment === "shipping" ? " and shipping options." : " and pickup details.");
+          (fulfillment === "shipping" ? " and shipping details." : " and pickup details.");
         el.checkoutMessage.classList.remove("hidden");
         el.checkoutMessage.classList.add("show");
         setTimeout(() => {
