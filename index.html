@@ -91,33 +91,6 @@
     </div>
   </aside>
 
-  // =========================
-// CART PERSISTENCE
-// =========================
-
-// Save cart to localStorage
-function saveCart() {
-  try {
-    localStorage.setItem("flashbidz_cart", JSON.stringify(CART));
-  } catch (e) {
-    console.warn("Unable to save cart", e);
-  }
-}
-
-// Load cart from localStorage
-function loadCart() {
-  try {
-    const raw = localStorage.getItem("flashbidz_cart");
-    if (!raw) return;
-    const saved = JSON.parse(raw);
-    Object.keys(saved).forEach(sku => {
-      CART[sku] = saved[sku];
-    });
-  } catch (e) {
-    console.warn("Unable to load cart", e);
-  }
-}
-
   <!-- HERO -->
   <section class="hero">
     <h2>Local Deals • Easy Pickup • No Bidding</h2>
@@ -261,23 +234,42 @@ function loadCart() {
     // =========================
     //  SETTINGS
     // =========================
-    const STRIPE_PUBLISHABLE_KEY =
-      "pk_live_51Sa4lgCY2ro7M4zrxnzepY4UR27lu8NuSG1Ig2d29Zg2Mb3bHV58nVMPacWHGbhyOV5qBirT8JTneZODr7UvkuDJ00nwHIISsM";
+    <script>
+  // =========================
+  //  SETTINGS
+  // =========================
+  const STRIPE_PUBLISHABLE_KEY = "pk_live_51Sa4lgCY2ro7M4zrxnzepY4UR27lu8NuSG1Ig2d29Zg2Mb3bHV58nVMPacWHGbhyOV5qBirT8JTneZODr7UvkuDJ00nwHIISsM";
+  const STRIPE_PRICE_ID = "price_REPLACE_ME"; // <-- your real Price ID
+  const MI_TAX_RATE = 0.06; // 6%
 
-    // TODO: Replace this with your real Stripe Price ID for 10¢ units
-    // Example: "price_1SaXXX..."
-    const STRIPE_PRICE_ID = "price_REPLACE_ME";
+  const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
 
-    const MI_TAX_RATE = 0.06; // 6%
+  let PRODUCTS = [];
+  const CART = {}; // { sku: { product, qty } }
 
-    const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-    let PRODUCTS = [];
-    const CART = {}; // { sku: { product, qty } }
-
-    // Basic money formatter
-    function money(n) {
-      return "$" + (Number(n) || 0).toFixed(2);
+  // =========================
+  //  CART PERSISTENCE
+  // =========================
+  function saveCart() {
+    try {
+      localStorage.setItem("flashbidz_cart", JSON.stringify(CART));
+    } catch (e) {
+      console.warn("Unable to save cart", e);
     }
+  }
+
+  function loadCart() {
+    try {
+      const raw = localStorage.getItem("flashbidz_cart");
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      Object.keys(saved).forEach((sku) => {
+        CART[sku] = saved[sku];
+      });
+    } catch (e) {
+      console.warn("Unable to load cart", e);
+    }
+  }
 
     // Normalize images: always use .images[]
     function normalizeProducts(raw) {
