@@ -2378,38 +2378,40 @@
     }
 
     function applyFilters() {
-      const searchTerm = (el.searchInput?.value || "").toLowerCase().trim();
-      const category = el.filterCategory?.value || "all";
-      const sortValue = el.sortSelect?.value || "featured";
+  const searchTerm = (el.searchInput?.value || "").toLowerCase().trim();
+  const category = el.filterCategory?.value || "all";
+  const sortValue = el.sortSelect?.value || "featured";
 
-      let list = allProducts.filter((p) => {
-        const matchesSearch =
-          !searchTerm ||
-          (p.title && p.title.toLowerCase().includes(searchTerm)) ||
-          (p.description &&
-            p.description.toLowerCase().includes(searchTerm)) ||
-          (p.sku && p.sku.toLowerCase().includes(searchTerm));
+  let list = allProducts.filter((p) => {
+    const matchesSearch =
+      !searchTerm ||
+      (p.title && p.title.toLowerCase().includes(searchTerm)) ||
+      (p.description &&
+        p.description.toLowerCase().includes(searchTerm)) ||
+      (p.sku && p.sku.toLowerCase().includes(searchTerm));
 
-        const matchesCategory =
-          category === "all" ||
-          (Array.isArray(p.categories) &&
-            p.categories.includes(category));
+    const matchesCategory =
+      category === "all" ||
+      (Array.isArray(p.categories) &&
+        p.categories.includes(category));
 
-        return matchesSearch && matchesCategory;
-      });
+    return matchesSearch && matchesCategory;
+  });
 
-      list = list.map((p, idx) => ({ ...p, __index: idx }));
-      filteredProducts = sortProducts(list, sortValue);
-      renderProducts(filteredProducts);
+  // 🔴 NEW: hide anything that has stock 0
+  list = list.filter((p) => p.stock === undefined || p.stock > 0);
 
-      if (el.categoryPills) {
-        const activeCat =
-          category === "all" ? "all" : category;
-        el.categoryPills.querySelectorAll(".category-pill").forEach((pill) => {
-          pill.classList.toggle("active", pill.dataset.category === activeCat);
-        });
-      }
-    }
+  list = list.map((p, idx) => ({ ...p, __index: idx }));
+  filteredProducts = sortProducts(list, sortValue);
+  renderProducts(filteredProducts);
+
+  if (el.categoryPills) {
+    const activeCat = category === "all" ? "all" : category;
+    el.categoryPills.querySelectorAll(".category-pill").forEach((pill) => {
+      pill.classList.toggle("active", pill.dataset.category === activeCat);
+    });
+  }
+}
 
     function addToCart(product) {
       const existing = cart.find((item) => item.sku === product.sku);
@@ -2786,7 +2788,8 @@
 
       const text = summaryLines.join("\n");
       console.log("Checkout summary:\n" + text);
-
+      // 🔴 NEW: reduce stock in the browser so sold-out items disappear
+      decrementInventoryFromCart();
       if (el.checkoutMessage) {
         el.checkoutMessage.innerHTML =
           "<span>Order received!</span> We'll match this with your CashApp or Venmo payment and then confirm pickup or shipping.";
@@ -2821,7 +2824,19 @@
         });
       */
     }
+function decrementInventoryFromCart() {
+  if (!cart.length || !allProducts.length) return;
 
+  cart.forEach((item) => {
+    const product = allProducts.find((p) => p.sku === item.sku);
+    if (product && typeof product.stock === "number") {
+      product.stock = Math.max(0, product.stock - item.quantity);
+    }
+  });
+
+  // Re-apply filters so any 0-stock items vanish from the grid
+  applyFilters();
+}
     function setCurrentYear() {
       const yearEl = document.getElementById("year");
       if (yearEl) yearEl.textContent = new Date().getFullYear();
