@@ -2,7 +2,7 @@
   "products": [
     {
       "sku": "FBZ-20251128-0020",
-      "title": "turquoise and coral ring and belt buckleAccessories",
+      "title": "Turquoise and Coral Ring and Belt Buckle",
       "description": "",
       "price": 300,
       "stock": 1,
@@ -19,7 +19,7 @@
     },
     {
       "sku": "FBZ-HOL-20251128-0032",
-      "title": "Holiday Collectible plate",
+      "title": "Holiday Collectible Plate",
       "description": "",
       "price": 15,
       "stock": 3,
@@ -36,7 +36,7 @@
     },
     {
       "sku": "FBZ-HOL-20251128-0029",
-      "title": "Holiday bowl",
+      "title": "Holiday Bowl",
       "description": "",
       "price": 8,
       "stock": 3,
@@ -53,7 +53,7 @@
     },
     {
       "sku": "FBZ-20251128-0015",
-      "title": "Merry Christmas photo frameHome decor",
+      "title": "Merry Christmas Photo Frame",
       "description": "",
       "price": 5,
       "stock": 1,
@@ -70,7 +70,7 @@
     },
     {
       "sku": "FBZ-20251128-0014",
-      "title": "Battery operated Christmas lights with remoteHoliday",
+      "title": "Battery Operated Christmas Lights with Remote",
       "description": "",
       "price": 10,
       "stock": 1,
@@ -87,7 +87,7 @@
     },
     {
       "sku": "FBZ-20251128-0013",
-      "title": "Fall wood block decor setHome decor",
+      "title": "Fall Wood Block Decor Set",
       "description": "",
       "price": 10,
       "stock": 1,
@@ -104,7 +104,7 @@
     },
     {
       "sku": "FBZ-20251128-0011",
-      "title": "Ceramic Christmas ornament setHoliday",
+      "title": "Ceramic Christmas Ornament Set",
       "description": "",
       "price": 3,
       "stock": 3,
@@ -121,7 +121,7 @@
     },
     {
       "sku": "FBZ-20251128-0010",
-      "title": "Wooden Santa Christmas decorholiday",
+      "title": "Wooden Santa Christmas Decor",
       "description": "",
       "price": 3,
       "stock": 1,
@@ -138,7 +138,7 @@
     },
     {
       "sku": "FBZ-20251128-0009",
-      "title": "Let it snow wooden signHoliday",
+      "title": "Let It Snow Wooden Sign",
       "description": "",
       "price": 3,
       "stock": 1,
@@ -155,7 +155,7 @@
     },
     {
       "sku": "FBZ-HOM-20251128-0015",
-      "title": "Indoor/outdoor Let it snow decorative rugHome decor",
+      "title": "Indoor/Outdoor \"Let It Snow\" Decorative Rug",
       "description": "",
       "price": 15,
       "stock": 1,
@@ -172,7 +172,7 @@
     },
     {
       "sku": "FBZ-HOL-20251128-0014",
-      "title": "flocked mini Christmas trees with rustic wood log baseHoliday",
+      "title": "Flocked Mini Christmas Trees with Rustic Wood Log Base",
       "description": "",
       "price": 10,
       "stock": 1,
@@ -191,7 +191,7 @@
     },
     {
       "sku": "FBZ-GEN-20251125-0005",
-      "title": "Black cottager frame pictureHome decor",
+      "title": "Black Cottage Frame Picture",
       "description": "",
       "price": 10,
       "stock": 1,
@@ -208,7 +208,7 @@
     },
     {
       "sku": "FBZ-20251124-0001",
-      "title": "100th Anniversary Cocoa baby bean vasehome decor",
+      "title": "100th Anniversary Cocoa Baby Bean Vase",
       "description": "",
       "price": 15,
       "stock": 1,
@@ -225,7 +225,7 @@
     },
     {
       "sku": "FBZ-20251122-0001",
-      "title": "White House historical ornament collectionholiday",
+      "title": "White House Historical Ornament Collection",
       "description": "",
       "price": 500,
       "stock": 1,
@@ -242,7 +242,7 @@
     },
     {
       "sku": "FBZ-20251202-0001",
-      "title": " Mud Pie Pulp Tree Decor ",
+      "title": "Mud Pie Pulp Tree Decor",
       "description": "Neutral white Mud Pie decorative tree.\nSize: 12 x 9 perfect for shelves, mantels, tier trays, or minimal Christmas decor. Matches any style!",
       "price": 10,
       "stock": 1,
@@ -272,7 +272,7 @@
         "img/Topper4.jpeg"
       ],
       "categories": [
-        "holiday"
+        "Holiday"
       ],
       "badge": "",
       "added_at": "2025-12-02",
