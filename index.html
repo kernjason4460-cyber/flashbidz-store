@@ -2016,7 +2016,31 @@
         allProducts = products.filter(
           (p) => p.active !== false && (p.stock === undefined || p.stock > 0)
         );
+// Make sure any saved cart quantities don't exceed current stock
+if (cart.length) {
+  let changed = false;
 
+  cart = cart
+    .map((item) => {
+      const product = allProducts.find((p) => p.sku === item.sku);
+      const maxQty =
+        product && typeof product.stock === "number" ? product.stock : 1;
+
+      const clampedQty = Math.min(item.quantity, maxQty);
+      if (clampedQty !== item.quantity) changed = true;
+
+      return {
+        ...item,
+        quantity: clampedQty,
+      };
+    })
+    .filter((item) => item.quantity > 0);
+
+  if (changed) {
+    saveCartToStorage();
+    renderCart();
+  }
+}
         buildCategoryOptions(allProducts);
         buildCategoryPills(allProducts);
 
@@ -2285,29 +2309,36 @@
     }
 
     function addToCart(product) {
-      const existing = cart.find((item) => item.sku === product.sku);
-      const price = Number(product.price || 0);
-      const image =
-        product.image ||
-        (Array.isArray(product.images) && product.images[0]) ||
-        "img/placeholder.png";
+  const existing = cart.find((item) => item.sku === product.sku);
+  const price = Number(product.price || 0);
+  const image =
+    product.image ||
+    (Array.isArray(product.images) && product.images[0]) ||
+    "img/placeholder.png";
 
-      if (existing) {
-        existing.quantity += 1;
-      } else {
-        cart.push({
-          sku: product.sku,
-          title: product.title,
-          price,
-          image,
-          quantity: 1,
-        });
-      }
+  const maxQty =
+    typeof product.stock === "number" ? product.stock : 1;
 
-      saveCartToStorage();
-      renderCart();
-      setCartOpen(true);
+  if (existing) {
+    if (existing.quantity >= maxQty) {
+      alert("Only " + maxQty + " of this item are available.");
+      return;
     }
+    existing.quantity += 1;
+  } else {
+    cart.push({
+      sku: product.sku,
+      title: product.title,
+      price,
+      image,
+      quantity: 1,
+    });
+  }
+
+  saveCartToStorage();
+  renderCart();
+  setCartOpen(true);
+}
 
     function removeFromCart(sku) {
       cart = cart.filter((item) => item.sku !== sku);
@@ -2316,17 +2347,28 @@
     }
 
     function updateCartQuantity(sku, delta) {
-      const item = cart.find((i) => i.sku === sku);
-      if (!item) return;
+  const item = cart.find((i) => i.sku === sku);
+  if (!item) return;
 
-      item.quantity += delta;
-      if (item.quantity <= 0) {
-        cart = cart.filter((i) => i.sku !== sku);
-      }
+  const product = allProducts.find((p) => p.sku === sku);
+  const maxQty =
+    product && typeof product.stock === "number" ? product.stock : 1;
 
-      saveCartToStorage();
-      renderCart();
-    }
+  const nextQty = item.quantity + delta;
+
+  if (nextQty <= 0) {
+    // remove if they go to 0
+    cart = cart.filter((i) => i.sku !== sku);
+  } else if (nextQty > maxQty) {
+    item.quantity = maxQty;
+    alert("Only " + maxQty + " of this item are available.");
+  } else {
+    item.quantity = nextQty;
+  }
+
+  saveCartToStorage();
+  renderCart();
+}
 
     function clearCart() {
       if (!cart.length) return;
@@ -2351,7 +2393,9 @@
 
           const price = item.price.toFixed(2);
           const lineTotal = (item.price * item.quantity).toFixed(2);
-
+          const product = allProducts.find((p) => p.sku === item.sku);
+          const maxQty =
+            product && typeof product.stock === "number" ? product.stock : 1;
           row.innerHTML = `
             <div class="cart-item-main">
               <div class="cart-item-thumb">
@@ -2381,7 +2425,11 @@
               updateCartQuantity(sku, delta);
             });
           });
-
+// Disable "+" if already at max
+const plusBtn = row.querySelector('.qty-btn[data-delta="1"]');
+if (plusBtn && item.quantity >= maxQty) {
+  plusBtn.disabled = true;
+}
           const removeBtn = row.querySelector(".cart-remove-btn");
           removeBtn.addEventListener("click", () => {
             const sku = removeBtn.getAttribute("data-sku");
