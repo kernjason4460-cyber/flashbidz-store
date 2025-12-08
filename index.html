@@ -1085,31 +1085,6 @@
       resize: vertical;
     }
 
-    /* PAYMENT SECTION */
-
-    .payment-section {
-      margin-top: 0.4rem;
-      padding-top: 0.35rem;
-      border-top: 1px dashed rgba(148, 163, 184, 0.6);
-    }
-
-    .payment-help {
-      margin: 0.25rem 0 0.4rem;
-      font-size: 0.7rem;
-      color: var(--muted);
-    }
-
-    .payment-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-    }
-
-    .payment-buttons .btn {
-      flex: 1;
-      justify-content: center;
-    }
-
     /* SHIPPING / PICKUP TOGGLE */
 
     .checkout-shipping-toggle {
@@ -1696,28 +1671,13 @@
             placeholder="Pickup timing, shipping questions, or anything else."
           ></textarea>
         </div>
-
-        <div class="payment-section">
-          <label>Pay Now</label>
-          <p class="payment-help">
-            Use the total above and tap a button to pay instantly with CashApp or Venmo. Then come back here and submit your order so we can match your payment.
-          </p>
-          <div class="payment-buttons">
-            <button id="pay-cashapp" type="button" class="btn btn-primary">
-              Pay with CashApp
-            </button>
-            <button id="pay-venmo" type="button" class="btn btn-ghost">
-              Pay with Venmo
-            </button>
-          </div>
-        </div>
-
         <div class="checkout-form-footer">
           <small>
-            1) Send payment using CashApp or Venmo. 2) Click “Submit Order” so we can match your payment and schedule pickup or shipping.
+            We’ll review your cart, confirm availability, and follow up with your total
+            and payment details.
           </small>
           <button id="checkout-btn" class="btn btn-primary btn-sm" type="button">
-            Submit Order (I've Paid)
+            Submit Cart
           </button>
         </div>
       </div>
@@ -1927,8 +1887,6 @@
     const CART_STORAGE_KEY = "flashbidz_cart_v3";
     const THEME_STORAGE_KEY = "flashbidz_theme";
     const TAX_RATE = 0.06;
-    const CASHAPP_URL = "https://cash.app/$Kern4460";
-    const VENMO_URL = "https://venmo.com/u/Jason_Kern4460";
 
     let allProducts = [];
     let filteredProducts = [];
@@ -1995,9 +1953,6 @@
       el.shippingZip = document.getElementById("shipping-zip");
       el.shippingRateButtons = document.querySelectorAll(".shipping-rate-btn");
 
-      el.payCashappBtn = document.getElementById("pay-cashapp");
-      el.payVenmoBtn = document.getElementById("pay-venmo");
-
       el.addToCartSound = document.getElementById("add-to-cart-sound");
 
       el.themeToggle = document.getElementById("theme-toggle");
@@ -2042,27 +1997,6 @@
           const amount = Number(btn.dataset.amount || 0);
           setShippingAmount(amount);
         });
-      });
-
-      // payment buttons
-      el.payCashappBtn?.addEventListener("click", () => {
-        const totalText = el.cartTotalBottom?.textContent || "";
-        alert(
-          "Your total is " +
-            totalText +
-            ". We'll open CashApp so you can send payment now."
-        );
-        window.open(CASHAPP_URL, "_blank");
-      });
-
-      el.payVenmoBtn?.addEventListener("click", () => {
-        const totalText = el.cartTotalBottom?.textContent || "";
-        alert(
-          "Your total is " +
-            totalText +
-            ". We'll open Venmo so you can send payment now."
-        );
-        window.open(VENMO_URL, "_blank");
       });
 
       if (el.modal) {
@@ -2378,40 +2312,41 @@
     }
 
     function applyFilters() {
-  const searchTerm = (el.searchInput?.value || "").toLowerCase().trim();
-  const category = el.filterCategory?.value || "all";
-  const sortValue = el.sortSelect?.value || "featured";
+      const searchTerm = (el.searchInput?.value || "").toLowerCase().trim();
+      const category = el.filterCategory?.value || "all";
+      const sortValue = el.sortSelect?.value || "featured";
 
-  let list = allProducts.filter((p) => {
-    const matchesSearch =
-      !searchTerm ||
-      (p.title && p.title.toLowerCase().includes(searchTerm)) ||
-      (p.description &&
-        p.description.toLowerCase().includes(searchTerm)) ||
-      (p.sku && p.sku.toLowerCase().includes(searchTerm));
+      let list = allProducts.filter((p) => {
+        const matchesSearch =
+          !searchTerm ||
+          (p.title && p.title.toLowerCase().includes(searchTerm)) ||
+          (p.description &&
+            p.description.toLowerCase().includes(searchTerm)) ||
+          (p.sku && p.sku.toLowerCase().includes(searchTerm));
 
-    const matchesCategory =
-      category === "all" ||
-      (Array.isArray(p.categories) &&
-        p.categories.includes(category));
+        const matchesCategory =
+          category === "all" ||
+          (Array.isArray(p.categories) &&
+            p.categories.includes(category));
 
-    return matchesSearch && matchesCategory;
-  });
+        return matchesSearch && matchesCategory;
+      });
 
-  // 🔴 NEW: hide anything that has stock 0
-  list = list.filter((p) => p.stock === undefined || p.stock > 0);
+      // Hide any products that are out of stock after client-side updates
+      list = list.filter((p) => p.stock === undefined || p.stock > 0);
 
-  list = list.map((p, idx) => ({ ...p, __index: idx }));
-  filteredProducts = sortProducts(list, sortValue);
-  renderProducts(filteredProducts);
+      list = list.map((p, idx) => ({ ...p, __index: idx }));
+      filteredProducts = sortProducts(list, sortValue);
+      renderProducts(filteredProducts);
 
-  if (el.categoryPills) {
-    const activeCat = category === "all" ? "all" : category;
-    el.categoryPills.querySelectorAll(".category-pill").forEach((pill) => {
-      pill.classList.toggle("active", pill.dataset.category === activeCat);
-    });
-  }
-}
+      if (el.categoryPills) {
+        const activeCat =
+          category === "all" ? "all" : category;
+        el.categoryPills.querySelectorAll(".category-pill").forEach((pill) => {
+          pill.classList.toggle("active", pill.dataset.category === activeCat);
+        });
+      }
+    }
 
     function addToCart(product) {
       const existing = cart.find((item) => item.sku === product.sku);
@@ -2788,11 +2723,14 @@
 
       const text = summaryLines.join("\n");
       console.log("Checkout summary:\n" + text);
-      // 🔴 NEW: reduce stock in the browser so sold-out items disappear
+
+      // NEW: reduce inventory in the browser so sold-out items disappear after checkout
       decrementInventoryFromCart();
+
       if (el.checkoutMessage) {
         el.checkoutMessage.innerHTML =
-          "<span>Order received!</span> We'll match this with your CashApp or Venmo payment and then confirm pickup or shipping.";
+          "<span>Cart submitted!</span> We’ll review availability and follow up with your total" +
+          (fulfillment === "shipping" ? " and shipping details." : " and pickup details.");
         el.checkoutMessage.classList.remove("hidden");
         el.checkoutMessage.classList.add("show");
         setTimeout(() => {
@@ -2801,7 +2739,7 @@
       }
 
       alert(
-        "Your order has been submitted.\n\nIf you haven't already, please send payment now using CashApp or Venmo using the total shown in your cart.\n\nYou can copy this summary for your records:\n\n" +
+        "Your cart has been submitted.\n\nYou can copy this summary if you’d like:\n\n" +
           text
       );
 
@@ -2824,19 +2762,22 @@
         });
       */
     }
-function decrementInventoryFromCart() {
-  if (!cart.length || !allProducts.length) return;
 
-  cart.forEach((item) => {
-    const product = allProducts.find((p) => p.sku === item.sku);
-    if (product && typeof product.stock === "number") {
-      product.stock = Math.max(0, product.stock - item.quantity);
+    // NEW: Decrement in-browser inventory based on what was just submitted
+    function decrementInventoryFromCart() {
+      if (!cart.length || !allProducts.length) return;
+
+      cart.forEach((item) => {
+        const product = allProducts.find((p) => p.sku === item.sku);
+        if (product && typeof product.stock === "number") {
+          product.stock = Math.max(0, product.stock - item.quantity);
+        }
+      });
+
+      // Re-apply filters so any items that hit stock 0 vanish from the grid
+      applyFilters();
     }
-  });
 
-  // Re-apply filters so any 0-stock items vanish from the grid
-  applyFilters();
-}
     function setCurrentYear() {
       const yearEl = document.getElementById("year");
       if (yearEl) yearEl.textContent = new Date().getFullYear();
