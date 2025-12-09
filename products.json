@@ -2,7 +2,7 @@
   "products": [
     {
       "sku": "FBZ-20251128-0020",
-      "title": "turquoise and coral ring and belt buckleAccessories",
+      "title": "turquoise and coral ring and belt buckle",
       "description": "",
       "price": 300,
       "stock": 4,
@@ -13,7 +13,7 @@
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-HOL-20251128-0032",
@@ -28,7 +28,7 @@
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-HOL-20251128-0029",
@@ -43,11 +43,11 @@
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-20251128-0015",
-      "title": "Merry Christmas photo frameHome decor",
+      "title": "Merry Christmas photo frame",
       "description": "",
       "price": 5,
       "stock": 1,
@@ -58,11 +58,11 @@
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-20251128-0014",
-      "title": "Battery operated Christmas lights with remoteHoliday",
+      "title": "Battery operated Christmas lights with remote",
       "description": "",
       "price": 10,
       "stock": 1,
@@ -73,11 +73,11 @@
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-20251128-0013",
-      "title": "Fall wood block decor setHome decor",
+      "title": "Fall wood block decor set",
       "description": "",
       "price": 10,
       "stock": 1,
@@ -88,11 +88,11 @@
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-20251128-0011",
-      "title": "Ceramic Christmas ornament setHoliday",
+      "title": "Ceramic Christmas ornament set",
       "description": "",
       "price": 3,
       "stock": 3,
@@ -103,11 +103,11 @@
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-20251128-0010",
-      "title": "Wooden Santa Christmas decorholiday",
+      "title": "Wooden Santa Christmas",
       "description": "",
       "price": 3,
       "stock": 1,
@@ -118,11 +118,11 @@
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-20251128-0009",
-      "title": "Let it snow wooden signHoliday",
+      "title": "Let it snow wooden sign",
       "description": "",
       "price": 3,
       "stock": 1,
@@ -133,11 +133,11 @@
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-HOM-20251128-0015",
-      "title": "Indoor/outdoor Let it snow decorative rugHome decor",
+      "title": "Indoor/outdoor Let it snow decorative rug",
       "description": "",
       "price": 15,
       "stock": 1,
@@ -148,30 +148,30 @@
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-HOL-20251128-0014",
-      "title": "flocked mini Christmas trees with rustic wood log baseHoliday",
+      "title": "flocked mini Christmas trees with rustic wood log base",
       "description": "",
       "price": 10,
       "stock": 1,
       "image": "img/flocked.jpeg",
       "images": [
-        "img/flocked.jpeg",
-        "img/flocked2.jpeg",
-        "img/flocked3.jpeg"
+        "flocked.jpeg",
+        "flocked2.jpeg",
+        "flocked3.jpeg"
       ],
       "categories": [
         "Holiday"
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-GEN-20251125-0005",
-      "title": "Black cottager frame pictureHome decor",
+      "title": "Black cottager frame picture",
       "description": "",
       "price": 10,
       "stock": 1,
@@ -182,11 +182,11 @@
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-20251124-0001",
-      "title": "100th Anniversary Cocoa baby bean vasehome decor",
+      "title": "100th Anniversary Cocoa baby bean vase",
       "description": "",
       "price": 15,
       "stock": 1,
@@ -197,11 +197,11 @@
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-20251122-0001",
-      "title": "White House historical ornament collectionholiday",
+      "title": "White House historical ornament collection",
       "description": "",
       "price": 500,
       "stock": 1,
@@ -212,25 +212,25 @@
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-20251202-0001",
-      "title": "Mud Pie Pulp Tree Decor",
+      "title": " Mud Pie Pulp Tree ",
       "description": "Neutral white Mud Pie decorative tree.\nSize: 12 x 9 perfect for shelves, mantels, tier trays, or minimal Christmas decor. Matches any style!",
       "price": 10,
       "stock": 1,
       "image": "img/Mud_Pie.jpg",
       "images": [
-        "img/Mud_Pie.jpg",
-        "img/Mud_Pie2.jpeg"
+        "Mud_Pie.jpg",
+        "Mud_Pie2.jpeg"
       ],
       "categories": [
         "Holiday"
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     },
     {
       "sku": "FBZ-20251202-0002",
@@ -240,17 +240,17 @@
       "stock": 1,
       "image": "img/Topper.jpeg",
       "images": [
-        "img/Topper.jpeg",
-        "img/Topper2.jpeg",
-        "img/Topper3.jpeg",
-        "img/Topper4.jpeg"
+        "Topper.jpeg",
+        "Topper2.jpeg",
+        "Topper3.jpeg",
+        "Topper4.jpeg"
       ],
       "categories": [
         "holiday"
       ],
       "badge": "",
       "active": true,
-      "added_at": "2025-12-08"
+      "added_at": "2025-12-09"
     }
   ]
 }
