@@ -1043,7 +1043,37 @@
     .checkout-form-row--3 {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
+.payment-methods {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(148, 163, 184, 0.6);
+  font-size: 0.75rem;
+}
 
+.payment-title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.payment-buttons {
+  margin-top: 0.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.payment-btn {
+  flex: 1;
+  justify-content: center;
+  font-size: 0.78rem;
+  padding-block: 0.4rem;
+}
+
+.payment-hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
     @media (max-width: 480px) {
       .checkout-form-row,
       .checkout-form-row--3 {
@@ -1670,7 +1700,20 @@
           </button>
         </div>
       </div>
-
+<div class="payment-methods">
+  <p class="payment-title">Pay online (Cash App or Venmo)</p>
+  <div class="payment-buttons">
+    <button id="pay-cashapp-btn" class="btn payment-btn" type="button">
+      Pay with Cash App
+    </button>
+    <button id="pay-venmo-btn" class="btn payment-btn" type="button">
+      Pay with Venmo
+    </button>
+  </div>
+  <p class="payment-hint">
+    Amount is based on your cart total. We’ll match your payment using your name and contact info.
+  </p>
+</div>
       <div class="cart-actions">
         <button id="clear-cart-btn" class="btn btn-link" type="button">
           Clear cart
@@ -1881,7 +1924,8 @@
     let filteredProducts = [];
     let cart = [];
     let shippingAmount = 0;
-
+    let currentCartTotal = 0;
+    
     // for the product modal image gallery
     let currentModalImages = [];
     let currentModalImageIndex = 0;
@@ -1930,7 +1974,10 @@
       el.checkoutName = document.getElementById("checkout-name");
       el.checkoutContact = document.getElementById("checkout-contact");
       el.checkoutNotes = document.getElementById("checkout-notes");
-
+      
+      el.payCashAppBtn = document.getElementById("pay-cashapp-btn");
+      el.payVenmoBtn = document.getElementById("pay-venmo-btn");
+      
       // fulfillment + shipping fields
       el.fulfillmentPickup = document.getElementById("fulfillment-pickup");
       el.fulfillmentShipping = document.getElementById("fulfillment-shipping");
@@ -1973,7 +2020,8 @@
 
       el.clearCartBtn?.addEventListener("click", clearCart);
       el.checkoutBtn?.addEventListener("click", handleCheckout);
-
+      el.payCashAppBtn?.addEventListener("click", handleCashAppPay);
+      el.payVenmoBtn?.addEventListener("click", handleVenmoPay);
       el.themeToggle?.addEventListener("click", toggleTheme);
 
       // fulfillment selection
@@ -2460,7 +2508,7 @@
         ? shippingAmount
         : 0;
       const total = subtotal + tax + shipping;
-
+      currentCartTotal = total;
       if (el.cartCount) el.cartCount.textContent = String(itemCount);
       if (el.cartCountS) el.cartCountS.textContent = itemCount === 1 ? "" : "s";
 
@@ -2845,7 +2893,31 @@
       localStorage.setItem(THEME_STORAGE_KEY, next);
       updateThemeLabel();
     }
+function handleCashAppPay() {
+  if (!currentCartTotal) {
+    alert("Add at least one item to your cart first.");
+    return;
+  }
 
+  const amount = currentCartTotal.toFixed(2);
+  const note = encodeURIComponent("FlashBidz Store order");
+  // Your Cash App cashtag: $Kern4460
+  const url = `https://cash.app/$Kern4460/${amount}?note=${note}`;
+  window.open(url, "_blank");
+}
+
+function handleVenmoPay() {
+  if (!currentCartTotal) {
+    alert("Add at least one item to your cart first.");
+    return;
+  }
+
+  const amount = currentCartTotal.toFixed(2);
+  const note = encodeURIComponent("FlashBidz Store order");
+  // Your Venmo: @Jason_Kern4460
+  const url = `https://venmo.com/?txn=pay&audience=private&recipients=Jason_Kern4460&amount=${amount}&note=${note}`;
+  window.open(url, "_blank");
+}
     function updateThemeLabel() {
       const theme = document.documentElement.getAttribute("data-theme") || "light";
       if (!el.themeLabel) return;
