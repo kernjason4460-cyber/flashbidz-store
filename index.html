@@ -2618,79 +2618,20 @@
       updateCartSummary();
     }
 
-    function handleCheckout() {
-      if (!cart.length) return;
+  // Decrement in-browser inventory based on what was just submitted
+function decrementInventoryFromCart(cartSnapshot) {
+  if (!cartSnapshot || !cartSnapshot.length || !allProducts.length) return;
 
-      const name = (el.checkoutName?.value || "").trim();
-      const contact = (el.checkoutContact?.value || "").trim();
-      const notes = (el.checkoutNotes?.value || "").trim();
+  cartSnapshot.forEach((item) => {
+    const product = allProducts.find((p) => p.sku === item.sku);
+    if (product && typeof product.stock === "number") {
+      product.stock = Math.max(0, product.stock - item.quantity);
+    }
+  });
 
-      const fulfillment =
-        el.fulfillmentShipping && el.fulfillmentShipping.checked
-          ? "shipping"
-          : "pickup";
-
-      const shipping = fulfillment === "shipping"
-        ? {
-            address1: (el.shippingAddress1?.value || "").trim(),
-            address2: (el.shippingAddress2?.value || "").trim(),
-            city: (el.shippingCity?.value || "").trim(),
-            state: (el.shippingState?.value || "").trim(),
-            zip: (el.shippingZip?.value || "").trim(),
-          }
-        : null;
-
-      if (!name || !contact) {
-        alert("Please enter your name and the best way to reach you.");
-        return;
-      }
-
-      if (fulfillment === "shipping" && shipping) {
-        if (!shipping.address1 || !shipping.city || !shipping.state || !shipping.zip) {
-          alert("Please fill in your full shipping address.");
-          return;
-        }
-      }
-
-      if (fulfillment === "shipping" && !shippingAmount) {
-        alert("Please choose a flat-rate shipping option ($8, $12, or $18).");
-        return;
-      }
-
-      const subtotal = cart.reduce(
-        (sum, item) => sum + item.quantity * item.price,
-        0
-      );
-      const tax = +(subtotal * TAX_RATE).toFixed(2);
-      const shippingCost = fulfillment === "shipping" ? shippingAmount : 0;
-      const grandTotal = subtotal + tax + shippingCost;
-
-      const orderPayload = {
-        items: cart.map((item) => ({
-          sku: item.sku,
-          title: item.title,
-          quantity: item.quantity,
-          unit_price: item.price,
-          line_total: item.price * item.quantity,
-        })),
-        totals: {
-          subtotal,
-          tax,
-          shipping: shippingCost,
-          grand_total: grandTotal,
-        },
-        fulfillment,
-        buyer: {
-          name,
-          contact,
-          notes,
-          shipping,
-        },
-        meta: {
-          source: "flashbidz_store",
-          created_at: new Date().toISOString(),
-        },
-      };
+  // Re-apply filters so any items that hit stock 0 vanish from the grid
+  applyFilters();
+}
 
       sendOrderToSheet(orderPayload);
 
