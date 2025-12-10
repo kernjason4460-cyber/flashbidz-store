@@ -2796,32 +2796,22 @@ function decrementInventoryFromCart(cartSnapshot) {
   applyFilters();
 }
 
-    function sendOrderToSheet(orderPayload) {
-      if (!APPS_SCRIPT_URL) return;
+  function sendOrderToSheet(orderPayload) {
+  if (!APPS_SCRIPT_URL) return;
 
-      try {
-        fetch(APPS_SCRIPT_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(orderPayload),
-        })
-          .then((res) => res.json().catch(() => ({})))
-          .then((data) => {
-            if (!data || data.success === false) {
-              console.error("Google Sheet update failed:", data);
-            } else {
-              console.log("Google Sheet updated:", data);
-            }
-          })
-          .catch((err) => {
-            console.error("Error calling Apps Script:", err);
-          });
-      } catch (err) {
-        console.error("Error sending order to sheet:", err);
-      }
-    }
+  try {
+    // Use no-cors and no custom headers so the browser does NOT do a CORS preflight.
+    fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify(orderPayload)
+    }).catch((err) => {
+      console.error("Error calling Apps Script (network):", err);
+    });
+  } catch (err) {
+    console.error("Error sending order to sheet:", err);
+  }
+}
 
     function clearCartAfterCheckout() {
       cart = [];
