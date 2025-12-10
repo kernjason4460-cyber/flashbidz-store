@@ -2618,41 +2618,111 @@
       updateCartSummary();
     }
 
-  // Decrement in-browser inventory based on what was just submitted
-function decrementInventoryFromCart(cartSnapshot) {
-  if (!cartSnapshot || !cartSnapshot.length || !allProducts.length) return;
+     function handleCheckout() {
+      if (!cart.length) {
+        alert("Add at least one item to your cart first.");
+        return;
+      }
 
-  cartSnapshot.forEach((item) => {
-    const product = allProducts.find((p) => p.sku === item.sku);
-    if (product && typeof product.stock === "number") {
-      product.stock = Math.max(0, product.stock - item.quantity);
-    }
-  });
+      const name = (el.checkoutName?.value || "").trim();
+      const contact = (el.checkoutContact?.value || "").trim();
+      const notes = (el.checkoutNotes?.value || "").trim();
+      const fulfillment = el.fulfillmentShipping?.checked ? "shipping" : "pickup";
 
-  // Re-apply filters so any items that hit stock 0 vanish from the grid
-  applyFilters();
-}
+      if (!name) {
+        alert("Please enter your name.");
+        return;
+      }
+      if (!contact) {
+        alert("Please enter the best way to reach you.");
+        return;
+      }
 
+      let shipping = null;
+      let shippingCost = 0;
+
+      if (fulfillment === "shipping") {
+        const address1 = (el.shippingAddress1?.value || "").trim();
+        const address2 = (el.shippingAddress2?.value || "").trim();
+        const city = (el.shippingCity?.value || "").trim();
+        const state = (el.shippingState?.value || "").trim();
+        const zip = (el.shippingZip?.value || "").trim();
+
+        if (!address1 || !city || !state || !zip) {
+          alert("Please complete the shipping address.");
+          return;
+        }
+
+        shipping = { address1, address2, city, state, zip };
+        shippingCost = shippingAmount || 0;
+      }
+
+      const subtotal = cart.reduce(
+        (sum, item) => sum + item.quantity * item.price,
+        0
+      );
+      const tax = +(subtotal * TAX_RATE).toFixed(2);
+      const grandTotal =
+        subtotal + tax + (fulfillment === "shipping" ? shippingCost : 0);
+
+      // keep this in sync for the Cash App / Venmo buttons
+      currentCartTotal = grandTotal;
+
+      const orderPayload = {
+        buyer: {
+          name,
+          contact,
+        },
+        notes,
+        fulfillment,
+        shipping,
+        totals: {
+          subtotal,
+          tax,
+          shipping: fulfillment === "shipping" ? shippingCost : 0,
+          grand_total: grandTotal,
+        },
+        items: cart.map((item) => ({
+          sku: item.sku,
+          title: item.title,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+      };
+
+      // Send to Google Sheet
       sendOrderToSheet(orderPayload);
 
+      // Build plain-text summary
       const summaryLines = [];
       summaryLines.push("FLASHBIDZ STORE ORDER");
       summaryLines.push("---------------------");
-      summaryLines.push("Fulfillment: " + (fulfillment === "shipping" ? "Ship to Me" : "Local Pickup"));
+      summaryLines.push(
+        "Fulfillment: " +
+          (fulfillment === "shipping" ? "Ship to Me" : "Local Pickup")
+      );
       summaryLines.push("Name: " + name);
       summaryLines.push("Contact: " + contact);
+
       if (fulfillment === "shipping" && shipping) {
         summaryLines.push("Shipping address:");
         summaryLines.push("  " + shipping.address1);
         if (shipping.address2) summaryLines.push("  " + shipping.address2);
         summaryLines.push(
-          "  " + shipping.city + ", " + shipping.state + " " + shipping.zip
+          "  " +
+            shipping.city +
+            ", " +
+            shipping.state +
+            " " +
+            shipping.zip
         );
       }
+
       if (notes) {
         summaryLines.push("");
         summaryLines.push("Notes: " + notes);
       }
+
       summaryLines.push("");
       summaryLines.push("ITEMS:");
       cart.forEach((item) => {
@@ -2662,6 +2732,7 @@ function decrementInventoryFromCart(cartSnapshot) {
           )} = $${(item.quantity * item.price).toFixed(2)}`
         );
       });
+
       summaryLines.push("");
       summaryLines.push("Subtotal: $" + subtotal.toFixed(2));
       summaryLines.push("Sales Tax (6%): $" + tax.toFixed(2));
@@ -2680,6 +2751,7 @@ function decrementInventoryFromCart(cartSnapshot) {
       const text = summaryLines.join("\n");
       console.log("Checkout summary:\n" + text);
 
+      // Update in-browser inventory so sold-out items vanish
       decrementInventoryFromCart();
       clearCartAfterCheckout();
 
