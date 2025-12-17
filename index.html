@@ -2689,7 +2689,7 @@ function handleCheckout() {
   };
 
   // Send to sheet (non-blocking)
-  sendOrderToSheet(orderPayload);
+ 
 
   // Human-readable summary
   const summaryLines = [];
@@ -2753,8 +2753,23 @@ function decrementInventoryFromCart(cartSnapshot) {
   renderCart();
 }
 
+// ✅ Paste your Web App /exec URL here
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwRQO2QS3Zn9dpbVY2E5FTi8Dh9J7uxQO00g2qEl45P2EyWwmbxrHtbsaLAA8sPnluC/exec";
+
 function sendOrderToSheet(orderPayload) {
   if (!APPS_SCRIPT_URL) return;
+
+  try {
+    const encoded = encodeURIComponent(JSON.stringify(orderPayload));
+    const url = APPS_SCRIPT_URL + "?payload=" + encoded + "&t=" + Date.now();
+
+    // Keep a reference so Safari doesn’t garbage-collect early
+    window.__flashbidzBeacon = new Image();
+    window.__flashbidzBeacon.src = url;
+  } catch (e) {
+    console.error("sendOrderToSheet failed:", e);
+  }
+}
 
   try {
     const encoded = encodeURIComponent(JSON.stringify(orderPayload));
