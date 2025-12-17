@@ -1887,7 +1887,6 @@
   <source src="sounds/remove-from-cart.mp3" type="audio/mpeg" />
 </audio>
 -->
--->
   <!-- PRODUCT DETAILS MODAL -->
   <div id="product-modal" class="modal" aria-hidden="true">
     <div class="modal-dialog">
@@ -2622,7 +2621,7 @@
       updateCartSummary();
     }
 
-    function handleCheckout() {
+function handleCheckout() {
   if (!cart.length) {
     alert("Your cart is empty.");
     return;
@@ -2638,9 +2637,7 @@
   }
 
   const fulfillment =
-    el.fulfillmentShipping && el.fulfillmentShipping.checked
-      ? "shipping"
-      : "pickup";
+    el.fulfillmentShipping && el.fulfillmentShipping.checked ? "shipping" : "pickup";
 
   // Build shipping object if needed
   let shipping = null;
@@ -2665,52 +2662,40 @@
       zip,
     };
 
-    // Use the current shippingAmount selected from the flat-rate buttons
     shippingCost = shippingAmount || 0;
   }
 
-  // Take a snapshot of the cart BEFORE we clear it
+  // Snapshot BEFORE we clear anything
   const cartSnapshot = cart.map((item) => ({ ...item }));
 
   // Totals
-  const subtotal = cartSnapshot.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const subtotal = cartSnapshot.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = +(subtotal * TAX_RATE).toFixed(2);
   const grandTotal = subtotal + tax + (fulfillment === "shipping" ? shippingCost : 0);
 
-  // Build payload for Apps Script (this is what updates the Sheet)
+  // Payload to Apps Script / Sheet
   const orderPayload = {
-    items: cartSnapshot.map((item) => ({
-      sku: item.sku,
-      quantity: item.quantity,
-    })),
+    items: cartSnapshot.map((item) => ({ sku: item.sku, quantity: item.quantity })),
     totals: {
       subtotal,
       tax,
       shipping: fulfillment === "shipping" ? shippingCost : 0,
       grand_total: grandTotal,
     },
-    buyer: {
-      name,
-      contact,
-    },
+    buyer: { name, contact },
     fulfillment,
     shipping,
     notes,
   };
 
-  // Send to Google Sheets via Apps Script
+  // Send to sheet (non-blocking)
   sendOrderToSheet(orderPayload);
 
-  // Build a human-readable summary for you & the buyer
+  // Human-readable summary
   const summaryLines = [];
   summaryLines.push("FLASHBIDZ STORE ORDER");
   summaryLines.push("---------------------");
-  summaryLines.push(
-    "Fulfillment: " + (fulfillment === "shipping" ? "Ship to Me" : "Local Pickup")
-  );
+  summaryLines.push("Fulfillment: " + (fulfillment === "shipping" ? "Ship to Me" : "Local Pickup"));
   summaryLines.push("Name: " + name);
   summaryLines.push("Contact: " + contact);
 
@@ -2719,9 +2704,7 @@
     summaryLines.push("Shipping address:");
     summaryLines.push("  " + shipping.address1);
     if (shipping.address2) summaryLines.push("  " + shipping.address2);
-    summaryLines.push(
-      "  " + shipping.city + ", " + shipping.state + " " + shipping.zip
-    );
+    summaryLines.push("  " + shipping.city + ", " + shipping.state + " " + shipping.zip);
   }
 
   if (notes) {
@@ -2733,20 +2716,18 @@
   summaryLines.push("ITEMS:");
   cartSnapshot.forEach((item) => {
     summaryLines.push(
-      `- ${item.title} (SKU: ${item.sku}) x${item.quantity} @ $${item.price.toFixed(
-        2
-      )} = $${(item.quantity * item.price).toFixed(2)}`
+      `- ${item.title} (SKU: ${item.sku}) x${item.quantity} @ $${item.price.toFixed(2)} = $${(
+        item.quantity * item.price
+      ).toFixed(2)}`
     );
   });
 
   summaryLines.push("");
   summaryLines.push("Subtotal: $" + subtotal.toFixed(2));
   summaryLines.push("Sales Tax (6%): $" + tax.toFixed(2));
-  if (fulfillment === "shipping") {
-    summaryLines.push("Shipping: $" + shippingCost.toFixed(2));
-  } else {
-    summaryLines.push("Shipping: $0.00 (pickup)");
-  }
+  summaryLines.push(
+    fulfillment === "shipping" ? "Shipping: $" + shippingCost.toFixed(2) : "Shipping: $0.00 (pickup)"
+  );
   summaryLines.push("");
   summaryLines.push("Total due: $" + grandTotal.toFixed(2));
   summaryLines.push("");
@@ -2757,31 +2738,6 @@
   const text = summaryLines.join("\n");
   console.log("Checkout summary:\n" + text);
 
-  // Decrement in-browser inventory based on what was just submitted
-  decrementInventoryFromCart(cartSnapshot);
-
-  // Clear cart in the UI
-  clearCartAfterCheckout();
-
-  if (el.checkoutMessage) {
-    el.checkoutMessage.innerHTML =
-      `<span>Cart submitted!</span> Your total is <strong>$${grandTotal.toFixed(
-        2
-      )}</strong>. Please pay via Cash App $Kern4460 or Venmo @Jason_Kern4460.`;
-    el.checkoutMessage.classList.remove("hidden");
-    el.checkoutMessage.classList.add("show");
-    setTimeout(() => {
-      el.checkoutMessage.classList.remove("show");
-    }, 8000);
-  }
-
-  alert(
-    "Your order has been submitted.\n\nHere is a copy of your order details and total. You can keep this for your records:\n\n" +
-      text
-  );
-}
-
-// Use the snapshot so we only decrement once per order
 function decrementInventoryFromCart(cartSnapshot) {
   if (!cartSnapshot || !cartSnapshot.length || !allProducts.length) return;
 
@@ -2792,18 +2748,21 @@ function decrementInventoryFromCart(cartSnapshot) {
     }
   });
 
-  // Re-apply filters so any items that hit stock 0 vanish from the grid
+  // Re-render so anything that hit 0 disappears
   applyFilters();
+  renderCart();
 }
 
-  function sendOrderToSheet(orderPayload) {
+function sendOrderToSheet(orderPayload) {
   if (!APPS_SCRIPT_URL) return;
 
   try {
-    // Encode the payload into the URL so the browser just does a simple GET.
     const encoded = encodeURIComponent(JSON.stringify(orderPayload));
-    const img = new Image();
-    img.src = APPS_SCRIPT_URL + "?payload=" + encoded;
+    const url = APPS_SCRIPT_URL + "?payload=" + encoded + "&t=" + Date.now();
+
+    // Keep a reference so Safari doesn't garbage-collect early
+    window.__flashbidzBeacon = new Image();
+    window.__flashbidzBeacon.src = url;
   } catch (err) {
     console.error("Error building Apps Script request:", err);
   }
@@ -2813,19 +2772,6 @@ function decrementInventoryFromCart(cartSnapshot) {
       cart = [];
       saveCartToStorage();
       renderCart();
-    }
-
-    function decrementInventoryFromCart() {
-      if (!cart.length || !allProducts.length) return;
-
-      cart.forEach((item) => {
-        const product = allProducts.find((p) => p.sku === item.sku);
-        if (product && typeof product.stock === "number") {
-          product.stock = Math.max(0, product.stock - item.quantity);
-        }
-      });
-
-      applyFilters();
     }
 
     function setCurrentYear() {
