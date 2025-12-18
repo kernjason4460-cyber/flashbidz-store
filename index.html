@@ -2689,6 +2689,7 @@ function handleCheckout() {
   };
 
   // Send to sheet (non-blocking)
+  sendOrderToSheet(orderPayload);
  
 
   // Human-readable summary
@@ -2709,44 +2710,46 @@ function handleCheckout() {
 
   if (notes) {
     summaryLines.push("");
-    summaryLines.push("Notes: " + notes);
+    summaryLines.push("Notes:");
+    summaryLines.push(notes);
   }
 
   summaryLines.push("");
   summaryLines.push("ITEMS:");
   cartSnapshot.forEach((item) => {
     summaryLines.push(
-      `- ${item.title} (SKU: ${item.sku}) x${item.quantity} @ $${item.price.toFixed(2)} = $${(
-        item.quantity * item.price
-      ).toFixed(2)}`
+      `- ${item.title} (SKU: ${item.sku}) x${item.quantity} @ $${Number(item.price).toFixed(2)}`
     );
   });
 
   summaryLines.push("");
-  summaryLines.push("Subtotal: $" + subtotal.toFixed(2));
-  summaryLines.push("Sales Tax (6%): $" + tax.toFixed(2));
+  summaryLines.push(`Subtotal: $${subtotal.toFixed(2)}`);
+  summaryLines.push(`Sales Tax (${Math.round(TAX_RATE * 100)}%): $${tax.toFixed(2)}`);
   summaryLines.push(
-    fulfillment === "shipping" ? "Shipping: $" + shippingCost.toFixed(2) : "Shipping: $0.00 (pickup)"
+    `Shipping: $${(fulfillment === "shipping" ? shippingCost : 0).toFixed(2)}`
   );
   summaryLines.push("");
-  summaryLines.push("Total due: $" + grandTotal.toFixed(2));
+  summaryLines.push(`Total due: $${grandTotal.toFixed(2)}`);
   summaryLines.push("");
   summaryLines.push("To pay now:");
   summaryLines.push("• Cash App: $Kern4460");
   summaryLines.push("• Venmo: @Jason_Kern4460");
 
-  const text = summaryLines.join("\n");
-  console.log("Checkout summary:\n" + text);
+  console.log("Checkout summary:\n" + summaryLines.join("\n"));
 
-function decrementInventoryFromCart(cartSnapshot) {
-  if (!cartSnapshot || !cartSnapshot.length || !allProducts.length) return;
+  if (el.checkoutMessage) {
+    el.checkoutMessage.textContent =
+      `Cart submitted! Total: $${grandTotal.toFixed(2)}. ` +
+      `Pay via Cash App $Kern4460 or Venmo @Jason_Kern4460.`;
+    el.checkoutMessage.classList.remove("hidden");
+    el.checkoutMessage.classList.add("show");
+    setTimeout(() => el.checkoutMessage.classList.remove("show"), 8000);
+  }
 
-  cartSnapshot.forEach((item) => {
-    const product = allProducts.find((p) => p.sku === item.sku);
-    if (product && typeof product.stock === "number") {
-      product.stock = Math.max(0, product.stock - item.quantity);
-    }
-  });
+  clearCartAfterCheckout();
+  applyFilters();
+  renderCart();
+}
 
   // Re-render so anything that hit 0 disappears
   applyFilters();
