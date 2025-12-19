@@ -1926,7 +1926,16 @@
     let cart = [];
     let shippingAmount = 0;
     let currentCartTotal = 0;
-    
+    let lastOrderId = "";
+
+function getOrderId_() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const rand = Math.random().toString(36).slice(2, 7).toUpperCase();
+  return `FBZ-${y}${m}${day}-${rand}`;
+}
     // for the product modal image gallery
     let currentModalImages = [];
     let currentModalImageIndex = 0;
@@ -2522,6 +2531,8 @@ async function loadProducts() {
         : 0;
       const total = subtotal + tax + shipping;
       currentCartTotal = total;
+      if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay with Cash App ($${total.toFixed(2)})`;
+if      (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo ($${total.toFixed(2)})`;
       if (el.cartCount) el.cartCount.textContent = String(itemCount);
       if (el.cartCountS) el.cartCountS.textContent = itemCount === 1 ? "" : "s";
 
@@ -2684,19 +2695,20 @@ function handleCheckout() {
   const grandTotal = subtotal + tax + (fulfillment === "shipping" ? shippingCost : 0);
 
   // Payload to Apps Script / Sheet
-  const orderPayload = {
-    items: cartSnapshot.map((item) => ({ sku: item.sku, quantity: item.quantity })),
-    totals: {
-      subtotal,
-      tax,
-      shipping: fulfillment === "shipping" ? shippingCost : 0,
-      grand_total: grandTotal,
-    },
-    buyer: { name, contact },
-    fulfillment,
-    shipping,
-    notes,
-  };
+ const orderPayload = {
+  orderId: lastOrderId,
+  items: cartSnapshot.map((item) => ({ sku: item.sku, quantity: item.quantity })),
+  totals: {
+    subtotal,
+    tax,
+    shipping: fulfillment === "shipping" ? shippingCost : 0,
+    grand_total: grandTotal,
+  },
+  buyer: { name, contact },
+  fulfillment,
+  shipping,
+  notes,
+};
 
  // Send to sheet (non-blocking)
 sendOrderToSheet(orderPayload);
@@ -2711,6 +2723,9 @@ setTimeout(() => loadProducts(), 1500);
     el.checkoutMessage.classList.remove("hidden");
     el.checkoutMessage.classList.add("show");
     setTimeout(() => el.checkoutMessage.classList.remove("show"), 8000);
+  el.checkoutMessage.textContent =
+  `Cart submitted! Total: $${grandTotal.toFixed(2)} (${lastOrderId}). ` +
+  `Pay via Cash App $Kern4460 or Venmo @Jason_Kern4460.`;
   }
 
   clearCartAfterCheckout();
@@ -2834,9 +2849,10 @@ function handleCashAppPay() {
     return;
   }
 
-  const amount = currentCartTotal.toFixed(2);
-  const note = encodeURIComponent("FlashBidz Store order");
-  // Your Cash App cashtag: $Kern4460
+  const amount = Number(currentCartTotal).toFixed(2);
+  const orderId = lastOrderId || getOrderId_();
+  const note = encodeURIComponent(`FlashBidz Store • Total $${amount} • ${orderId}`);
+
   const url = `https://cash.app/$Kern4460/${amount}?note=${note}`;
   window.open(url, "_blank");
 }
@@ -2847,9 +2863,10 @@ function handleVenmoPay() {
     return;
   }
 
-  const amount = currentCartTotal.toFixed(2);
-  const note = encodeURIComponent("FlashBidz Store order");
-  // Your Venmo: @Jason_Kern4460
+  const amount = Number(currentCartTotal).toFixed(2);
+  const orderId = lastOrderId || getOrderId_();
+  const note = encodeURIComponent(`FlashBidz Store • Total $${amount} • ${orderId}`);
+
   const url = `https://venmo.com/?txn=pay&audience=private&recipients=Jason_Kern4460&amount=${amount}&note=${note}`;
   window.open(url, "_blank");
 }
