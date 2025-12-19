@@ -2769,18 +2769,6 @@ function sendOrderToSheet(orderPayload) {
   }
 }
 
-  try {
-    const encoded = encodeURIComponent(JSON.stringify(orderPayload));
-    const url = APPS_SCRIPT_URL + "?payload=" + encoded + "&t=" + Date.now();
-
-    // Keep a reference so Safari doesn't garbage-collect early
-    window.__flashbidzBeacon = new Image();
-    window.__flashbidzBeacon.src = url;
-  } catch (err) {
-    console.error("Error building Apps Script request:", err);
-  }
-}
-
     function clearCartAfterCheckout() {
       cart = [];
       saveCartToStorage();
