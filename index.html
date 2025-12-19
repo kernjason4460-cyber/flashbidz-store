@@ -2073,14 +2073,24 @@ async function loadProducts() {
 
     const response = await fetch(url, {
       method: "GET",
-      cache: "no-store", // prevents browser cache
+      cache: "no-store",
       headers: { "Accept": "application/json" }
     });
 
     if (!response.ok) throw new Error("HTTP " + response.status);
 
     const data = await response.json();
-    const products = Array.isArray(data) ? data : (data && data.products) ? data.products : [];
+    const products = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.products)
+        ? data.products
+        : null;
+
+    // 🛑 SAFETY GUARD — prevents wiping the grid on bad response
+    if (!Array.isArray(products)) {
+      console.warn("Products response invalid:", data);
+      return;
+    }
 
     if (!products.length) {
       el.productGrid.innerHTML = "<p>No products found.</p>";
@@ -2101,10 +2111,13 @@ async function loadProducts() {
 
     const withIndex = allProducts.map((p, idx) => ({ ...p, __index: idx }));
     filteredProducts = sortProducts(withIndex, el.sortSelect?.value || "featured");
+
     renderProducts(filteredProducts);
+
   } catch (err) {
     console.error("Error loading products:", err);
-    el.productGrid.innerHTML = "<p>Could not load products. Please refresh and try again.</p>";
+    el.productGrid.innerHTML =
+      "<p>Could not load products. Please refresh and try again.</p>";
   }
 }
     function buildCategoryOptions(products) {
