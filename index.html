@@ -1927,7 +1927,10 @@
     let shippingAmount = 0;
     let currentCartTotal = 0;
     let lastOrderId = "";
-
+    let lastSubmittedTotal = 0;
+    let lastSubmittedTotal = 0;
+    let checkoutSubmitted = false;
+    
 function getOrderId_() {
   const d = new Date();
   const y = d.getFullYear();
@@ -1950,8 +1953,31 @@ function getOrderId_() {
       loadProducts();
       setCurrentYear();
       handleFulfillmentChange();
+      setPayButtonsEnabled(false);
     });
+function setPayButtonsEnabled(enabled) {
+  [el.payCashAppBtn, el.payVenmoBtn].forEach((btn) => {
+    if (!btn) return;
+    btn.disabled = !enabled;
+    btn.style.opacity = enabled ? "1" : "0.45";
+    btn.style.cursor = enabled ? "pointer" : "not-allowed";
+  });
+}
+function updatePayButtonLabels() {
+  const amount = Number(lastSubmittedTotal || 0);
+  if (!amount) return;
 
+  const label = `$${amount.toFixed(2)}`;
+
+  if (el.payCashAppBtn) {
+    el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
+  }
+
+  if (el.payVenmoBtn) {
+    el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
+  }
+}
+    
     function cacheDom() {
       el.productGrid = document.getElementById("product-grid");
       el.noResults = document.getElementById("no-results");
@@ -2693,7 +2719,15 @@ function handleCheckout() {
   const subtotal = cartSnapshot.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = +(subtotal * TAX_RATE).toFixed(2);
   const grandTotal = subtotal + tax + (fulfillment === "shipping" ? shippingCost : 0);
+  lastSubmittedTotal = grandTotal;
+currentCartTotal = grandTotal;
+checkoutSubmitted = true;
 
+// Enable pay buttons and update labels
+updatePayButtonLabels();
+setPayButtonsEnabled(true);
+  lastSubmittedTotal = grandTotal;
+currentCartTotal = grandTotal; // keep pay buttons happy even after cart clears
   // Payload to Apps Script / Sheet
  const orderPayload = {
   orderId: lastOrderId,
@@ -2844,32 +2878,29 @@ function sendOrderToSheet(orderPayload) {
       updateThemeLabel();
     }
 function handleCashAppPay() {
-  if (!currentCartTotal) {
-    alert("Add at least one item to your cart first.");
+  if (!checkoutSubmitted || !lastSubmittedTotal) {
+    alert("Please submit your cart first.");
     return;
   }
 
-  const amount = Number(currentCartTotal).toFixed(2);
-  const orderId = lastOrderId || getOrderId_();
-  const note = encodeURIComponent(`FlashBidz Store • Total $${amount} • ${orderId}`);
-
+  const amount = lastSubmittedTotal.toFixed(2);
+  const note = encodeURIComponent(`FlashBidz Store • Total $${amount}`);
   const url = `https://cash.app/$Kern4460/${amount}?note=${note}`;
   window.open(url, "_blank");
 }
 
 function handleVenmoPay() {
-  if (!currentCartTotal) {
-    alert("Add at least one item to your cart first.");
+  if (!checkoutSubmitted || !lastSubmittedTotal) {
+    alert("Please submit your cart first.");
     return;
   }
 
-  const amount = Number(currentCartTotal).toFixed(2);
-  const orderId = lastOrderId || getOrderId_();
-  const note = encodeURIComponent(`FlashBidz Store • Total $${amount} • ${orderId}`);
-
+  const amount = lastSubmittedTotal.toFixed(2);
+  const note = encodeURIComponent(`FlashBidz Store • Total $${amount}`);
   const url = `https://venmo.com/?txn=pay&audience=private&recipients=Jason_Kern4460&amount=${amount}&note=${note}`;
   window.open(url, "_blank");
 }
+    
     function updateThemeLabel() {
       const theme = document.documentElement.getAttribute("data-theme") || "light";
       if (!el.themeLabel) return;
