@@ -2637,6 +2637,7 @@ function handleCheckout() {
   const fulfillment =
     el.fulfillmentShipping && el.fulfillmentShipping.checked ? "shipping" : "pickup";
 
+  // Build shipping object if needed
   let shipping = null;
   let shippingCost = 0;
 
@@ -2662,12 +2663,15 @@ function handleCheckout() {
     shippingCost = shippingAmount || 0;
   }
 
+  // Snapshot BEFORE we clear anything
   const cartSnapshot = cart.map((item) => ({ ...item }));
 
+  // Totals
   const subtotal = cartSnapshot.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = +(subtotal * TAX_RATE).toFixed(2);
   const grandTotal = subtotal + tax + (fulfillment === "shipping" ? shippingCost : 0);
 
+  // Payload to Apps Script / Sheet
   const orderPayload = {
     items: cartSnapshot.map((item) => ({ sku: item.sku, quantity: item.quantity })),
     totals: {
@@ -2682,8 +2686,10 @@ function handleCheckout() {
     notes,
   };
 
+  // Send to sheet (non-blocking)
   sendOrderToSheet(orderPayload);
 
+  // Toast message
   if (el.checkoutMessage) {
     el.checkoutMessage.textContent =
       `Cart submitted! Total: $${grandTotal.toFixed(2)}. ` +
@@ -2695,7 +2701,7 @@ function handleCheckout() {
 
   clearCartAfterCheckout();
 
-  // Re-render after checkout
+  // Re-render UI
   applyFilters();
   renderCart();
 }
