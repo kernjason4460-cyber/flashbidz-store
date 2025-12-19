@@ -1919,7 +1919,6 @@
     const CART_STORAGE_KEY = "flashbidz_cart_v3";
     const THEME_STORAGE_KEY = "flashbidz_theme";
     const TAX_RATE = 0.06;
-    // ✅ Paste your Web App /exec URL here
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzowPxsTHcKnd3g8OKcwUffksJGEp9QfwLgJSg7NkcpuIsm4-ke4zOM1Gg-qUJwhru8/exec";
     let allProducts = [];
     let filteredProducts = [];
@@ -1928,8 +1927,32 @@
     let currentCartTotal = 0;
     let lastOrderId = "";
     let lastSubmittedTotal = 0;
-    let lastSubmittedTotal = 0;
     let checkoutSubmitted = false;
+    
+// ✅ Keeps the last submitted total available for the Pay buttons (even after cart clears)
+let lastSubmittedTotal = 0;
+const LAST_TOTAL_KEY = "flashbidz_last_submitted_total_v1";
+
+function setLastSubmittedTotal(amount) {
+  lastSubmittedTotal = Number(amount || 0);
+  try {
+    sessionStorage.setItem(LAST_TOTAL_KEY, String(lastSubmittedTotal));
+  } catch (_) {}
+}
+
+function getPayTotal() {
+  // Prefer current cart total if cart has items; otherwise use last submitted total
+  if (cart && cart.length && Number(currentCartTotal) > 0) return Number(currentCartTotal);
+
+  // If page refreshed, recover last submitted total
+  if (!lastSubmittedTotal) {
+    try {
+      const saved = Number(sessionStorage.getItem(LAST_TOTAL_KEY) || 0);
+      if (saved > 0) lastSubmittedTotal = saved;
+    } catch (_) {}
+  }
+  return Number(lastSubmittedTotal || 0);
+}
     
 function getOrderId_() {
   const d = new Date();
@@ -2719,7 +2742,7 @@ function handleCheckout() {
   const subtotal = cartSnapshot.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = +(subtotal * TAX_RATE).toFixed(2);
   const grandTotal = subtotal + tax + (fulfillment === "shipping" ? shippingCost : 0);
-  lastSubmittedTotal = grandTotal;
+  setLastSubmittedTotal = grandTotal;
 currentCartTotal = grandTotal;
 checkoutSubmitted = true;
 
@@ -2878,25 +2901,27 @@ function sendOrderToSheet(orderPayload) {
       updateThemeLabel();
     }
 function handleCashAppPay() {
-  if (!checkoutSubmitted || !lastSubmittedTotal) {
-    alert("Please submit your cart first.");
+  const total = getPayTotal();
+  if (!total) {
+    alert("Submit your cart first (or add at least one item).");
     return;
   }
 
-  const amount = lastSubmittedTotal.toFixed(2);
-  const note = encodeURIComponent(`FlashBidz Store • Total $${amount}`);
+  const amount = total.toFixed(2);
+  const note = encodeURIComponent("FlashBidz Store order");
   const url = `https://cash.app/$Kern4460/${amount}?note=${note}`;
   window.open(url, "_blank");
 }
 
 function handleVenmoPay() {
-  if (!checkoutSubmitted || !lastSubmittedTotal) {
-    alert("Please submit your cart first.");
+  const total = getPayTotal();
+  if (!total) {
+    alert("Submit your cart first (or add at least one item).");
     return;
   }
 
-  const amount = lastSubmittedTotal.toFixed(2);
-  const note = encodeURIComponent(`FlashBidz Store • Total $${amount}`);
+  const amount = total.toFixed(2);
+  const note = encodeURIComponent("FlashBidz Store order");
   const url = `https://venmo.com/?txn=pay&audience=private&recipients=Jason_Kern4460&amount=${amount}&note=${note}`;
   window.open(url, "_blank");
 }
