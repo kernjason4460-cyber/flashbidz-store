@@ -2069,7 +2069,7 @@
       if (!el.productGrid) return;
 
       try {
-        const response = await fetch("products.json?_=" + Date.now());
+        const response = await fetch(APPS_SCRIPT_URL + "?action=products&t=" + Date.now());
         if (!response.ok) {
           throw new Error("HTTP " + response.status);
         }
@@ -2688,7 +2688,7 @@ function handleCheckout() {
 
   // Send to sheet (non-blocking)
   sendOrderToSheet(orderPayload);
-
+  setTimeout(loadProducts, 900);
   // Toast message
   if (el.checkoutMessage) {
     el.checkoutMessage.textContent =
