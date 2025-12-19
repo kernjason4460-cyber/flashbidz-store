@@ -2637,7 +2637,6 @@ function handleCheckout() {
   const fulfillment =
     el.fulfillmentShipping && el.fulfillmentShipping.checked ? "shipping" : "pickup";
 
-  // Build shipping object if needed
   let shipping = null;
   let shippingCost = 0;
 
@@ -2663,15 +2662,12 @@ function handleCheckout() {
     shippingCost = shippingAmount || 0;
   }
 
-  // Snapshot BEFORE we clear anything
   const cartSnapshot = cart.map((item) => ({ ...item }));
 
-  // Totals
   const subtotal = cartSnapshot.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = +(subtotal * TAX_RATE).toFixed(2);
   const grandTotal = subtotal + tax + (fulfillment === "shipping" ? shippingCost : 0);
 
-  // Payload to Apps Script / Sheet
   const orderPayload = {
     items: cartSnapshot.map((item) => ({ sku: item.sku, quantity: item.quantity })),
     totals: {
@@ -2686,54 +2682,7 @@ function handleCheckout() {
     notes,
   };
 
-  // Send to sheet (non-blocking)
   sendOrderToSheet(orderPayload);
- 
-
-  // Human-readable summary
-  const summaryLines = [];
-  summaryLines.push("FLASHBIDZ STORE ORDER");
-  summaryLines.push("---------------------");
-  summaryLines.push("Fulfillment: " + (fulfillment === "shipping" ? "Ship to Me" : "Local Pickup"));
-  summaryLines.push("Name: " + name);
-  summaryLines.push("Contact: " + contact);
-
-  if (fulfillment === "shipping" && shipping) {
-    summaryLines.push("");
-    summaryLines.push("Shipping address:");
-    summaryLines.push("  " + shipping.address1);
-    if (shipping.address2) summaryLines.push("  " + shipping.address2);
-    summaryLines.push("  " + shipping.city + ", " + shipping.state + " " + shipping.zip);
-  }
-
-  if (notes) {
-    summaryLines.push("");
-    summaryLines.push("Notes:");
-    summaryLines.push(notes);
-  }
-
-  summaryLines.push("");
-  summaryLines.push("ITEMS:");
-  cartSnapshot.forEach((item) => {
-    summaryLines.push(
-      `- ${item.title} (SKU: ${item.sku}) x${item.quantity} @ $${Number(item.price).toFixed(2)}`
-    );
-  });
-
-  summaryLines.push("");
-  summaryLines.push(`Subtotal: $${subtotal.toFixed(2)}`);
-  summaryLines.push(`Sales Tax (${Math.round(TAX_RATE * 100)}%): $${tax.toFixed(2)}`);
-  summaryLines.push(
-    `Shipping: $${(fulfillment === "shipping" ? shippingCost : 0).toFixed(2)}`
-  );
-  summaryLines.push("");
-  summaryLines.push(`Total due: $${grandTotal.toFixed(2)}`);
-  summaryLines.push("");
-  summaryLines.push("To pay now:");
-  summaryLines.push("• Cash App: $Kern4460");
-  summaryLines.push("• Venmo: @Jason_Kern4460");
-
-  console.log("Checkout summary:\n" + summaryLines.join("\n"));
 
   if (el.checkoutMessage) {
     el.checkoutMessage.textContent =
@@ -2745,11 +2694,8 @@ function handleCheckout() {
   }
 
   clearCartAfterCheckout();
-  applyFilters();
-  renderCart();
-}
 
-  // Re-render so anything that hit 0 disappears
+  // Re-render after checkout
   applyFilters();
   renderCart();
 }
