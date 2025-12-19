@@ -2065,49 +2065,48 @@
       });
     }
 
-    async function loadProducts() {
-      if (!el.productGrid) return;
+async function loadProducts() {
+  if (!el.productGrid) return;
 
-      try {
-        const response = await fetch(APPS_SCRIPT_URL + "?action=products&t=" + Date.now());
-        if (!response.ok) {
-          throw new Error("HTTP " + response.status);
-        }
+  try {
+    const url = APPS_SCRIPT_URL + "?action=products&t=" + Date.now();
 
-        const data = await response.json();
-        const products = Array.isArray(data) ? data : data.products;
+    const response = await fetch(url, {
+      method: "GET",
+      cache: "no-store", // prevents browser cache
+      headers: { "Accept": "application/json" }
+    });
 
-        if (!products || !products.length) {
-          el.productGrid.innerHTML = "<p>No products found.</p>";
-          return;
-        }
+    if (!response.ok) throw new Error("HTTP " + response.status);
 
-        // Only show active items with stock > 0 (or no stock specified)
-        allProducts = (products || []).filter((p) => {
-          const active = p.active !== false;
-          const hasStock = p.stock === undefined || p.stock > 0;
-          return active && hasStock;
-        });
+    const data = await response.json();
+    const products = Array.isArray(data) ? data : (data && data.products) ? data.products : [];
 
-        buildCategoryOptions(allProducts);
-        buildCategoryPills(allProducts);
-
-        const withIndex = allProducts.map((p, idx) => ({
-          ...p,
-          __index: idx,
-        }));
-
-        filteredProducts = sortProducts(withIndex, el.sortSelect?.value || "featured");
-        renderProducts(filteredProducts);
-      } catch (err) {
-        console.error("Error loading products:", err);
-        if (el.productGrid) {
-          el.productGrid.innerHTML =
-            "<p>Could not load products. Please refresh and try again.</p>";
-        }
-      }
+    if (!products.length) {
+      el.productGrid.innerHTML = "<p>No products found.</p>";
+      allProducts = [];
+      filteredProducts = [];
+      return;
     }
 
+    // Only show active items with stock > 0
+    allProducts = products.filter((p) => {
+      const active = p.active !== false;
+      const hasStock = p.stock === undefined || Number(p.stock) > 0;
+      return active && hasStock;
+    });
+
+    buildCategoryOptions(allProducts);
+    buildCategoryPills(allProducts);
+
+    const withIndex = allProducts.map((p, idx) => ({ ...p, __index: idx }));
+    filteredProducts = sortProducts(withIndex, el.sortSelect?.value || "featured");
+    renderProducts(filteredProducts);
+  } catch (err) {
+    console.error("Error loading products:", err);
+    el.productGrid.innerHTML = "<p>Could not load products. Please refresh and try again.</p>";
+  }
+}
     function buildCategoryOptions(products) {
       if (!el.filterCategory) return;
 
@@ -2686,9 +2685,11 @@ function handleCheckout() {
     notes,
   };
 
-  // Send to sheet (non-blocking)
-  sendOrderToSheet(orderPayload);
-  setTimeout(loadProducts, 900);
+ // Send to sheet (non-blocking)
+sendOrderToSheet(orderPayload);
+
+// Refresh products after Sheets stock updates
+setTimeout(() => loadProducts(), 1500);
   // Toast message
   if (el.checkoutMessage) {
     el.checkoutMessage.textContent =
