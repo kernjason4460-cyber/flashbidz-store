@@ -1932,23 +1932,26 @@
 const LAST_TOTAL_KEY = "flashbidz_last_submitted_total_v1";
 
 function setLastSubmittedTotal(amount) {
-  lastSubmittedTotal = Number(amount || 0);
+  const val = Number(amount || 0);
+  lastSubmittedTotal = val;
+
   try {
-    sessionStorage.setItem(LAST_TOTAL_KEY, String(lastSubmittedTotal));
+    sessionStorage.setItem(LAST_TOTAL_KEY, String(val));
+  } catch (_) {}
+}
+
+function loadLastSubmittedTotal() {
+  try {
+    const saved = Number(sessionStorage.getItem(LAST_TOTAL_KEY) || 0);
+    if (saved > 0) lastSubmittedTotal = saved;
   } catch (_) {}
 }
 
 function getPayTotal() {
-  // Prefer current cart total if cart has items; otherwise use last submitted total
+  // If cart has items, pay total is current cart total
   if (cart && cart.length && Number(currentCartTotal) > 0) return Number(currentCartTotal);
 
-  // If page refreshed, recover last submitted total
-  if (!lastSubmittedTotal) {
-    try {
-      const saved = Number(sessionStorage.getItem(LAST_TOTAL_KEY) || 0);
-      if (saved > 0) lastSubmittedTotal = saved;
-    } catch (_) {}
-  }
+  // If cart is empty, use last submitted total (for paying after submit)
   return Number(lastSubmittedTotal || 0);
 }
     
@@ -1971,10 +1974,12 @@ function getOrderId_() {
       initTheme();
       bindEvents();
       loadCartFromStorage();
+      loadLastSubmittedTotal();
       loadProducts();
       setCurrentYear();
       handleFulfillmentChange();
       setPayButtonsEnabled(false);
+      renderPaymentDue();
     });
 function setPayButtonsEnabled(enabled) {
   [el.payCashAppBtn, el.payVenmoBtn].forEach((btn) => {
@@ -2555,41 +2560,50 @@ async function loadProducts() {
       updateCartSummary();
     }
 
-    function updateCartSummary() {
-      const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-      const subtotal = cart.reduce(
-        (sum, item) => sum + item.quantity * item.price,
-        0
-      );
-      const tax = +(subtotal * TAX_RATE).toFixed(2);
-      const shipping = el.fulfillmentShipping && el.fulfillmentShipping.checked
-        ? shippingAmount
-        : 0;
-      const total = subtotal + tax + shipping;
-      currentCartTotal = total;
-      if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay with Cash App ($${total.toFixed(2)})`;
-if      (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo ($${total.toFixed(2)})`;
-      if (el.cartCount) el.cartCount.textContent = String(itemCount);
-      if (el.cartCountS) el.cartCountS.textContent = itemCount === 1 ? "" : "s";
+function updateCartSummary() {
+  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-      if (el.cartCountBottom)
-        el.cartCountBottom.textContent = String(itemCount);
-      if (el.cartCountBottomS)
-        el.cartCountBottomS.textContent = itemCount === 1 ? "" : "s";
+  const subtotal = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
+  const tax = +(subtotal * TAX_RATE).toFixed(2);
 
-      if (el.cartSubtotal)
-        el.cartSubtotal.textContent = "$" + subtotal.toFixed(2);
-      if (el.cartTax)
-        el.cartTax.textContent = "$" + tax.toFixed(2);
-      if (el.cartShipping)
-        el.cartShipping.textContent = "$" + shipping.toFixed(2);
-      if (el.cartTotalBottom)
-        el.cartTotalBottom.textContent = "$" + total.toFixed(2);
-      if (el.cartTotalTop)
-        el.cartTotalTop.textContent = "$" + total.toFixed(2);
-      if (el.cartTotalBottomBar)
-        el.cartTotalBottomBar.textContent = "$" + total.toFixed(2);
-    }
+  const shipping = el.fulfillmentShipping && el.fulfillmentShipping.checked
+    ? Number(shippingAmount || 0)
+    : 0;
+
+  const total = subtotal + tax + shipping;
+
+  // Track current cart total
+  currentCartTotal = total;
+
+  // UI counts
+  if (el.cartCount) el.cartCount.textContent = String(itemCount);
+  if (el.cartCountS) el.cartCountS.textContent = itemCount === 1 ? "" : "s";
+  if (el.cartCountBottom) el.cartCountBottom.textContent = String(itemCount);
+  if (el.cartCountBottomS) el.cartCountBottomS.textContent = itemCount === 1 ? "" : "s";
+
+  // UI totals (cart panel)
+  if (el.cartSubtotal) el.cartSubtotal.textContent = "$" + subtotal.toFixed(2);
+  if (el.cartTax) el.cartTax.textContent = "$" + tax.toFixed(2);
+  if (el.cartShipping) el.cartShipping.textContent = "$" + shipping.toFixed(2);
+  if (el.cartTotalBottom) el.cartTotalBottom.textContent = "$" + total.toFixed(2);
+
+  // UI totals (top bars)
+  if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + total.toFixed(2);
+  if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + total.toFixed(2);
+
+  // ✅ Pay buttons:
+  // - If cart has items, show current cart total
+  // - If cart empty, show last submitted total (if any)
+  const payTotal = getPayTotal();
+  if (payTotal > 0) {
+    const label = `$${payTotal.toFixed(2)}`;
+    if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
+    if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
+  } else {
+    if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay with Cash App`;
+    if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo`;
+  }
+}
 
     function setCartOpen(isOpen) {
       if (!el.cartPanel || !el.cartOverlay) return;
@@ -2678,6 +2692,17 @@ if      (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo ($${total.
       updateCartSummary();
     }
 
+function renderPaymentDue() {
+  const total = getPayTotal();
+  if (!total) return;
+
+  // Enable and label pay buttons with the payment due amount
+  setPayButtonsEnabled(true);
+
+  const label = `$${Number(total).toFixed(2)}`;
+  if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
+  if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
+}
 function handleCheckout() {
   if (!cart.length) {
     alert("Your cart is empty.");
@@ -2719,8 +2744,11 @@ function handleCheckout() {
       zip,
     };
 
-    shippingCost = shippingAmount || 0;
+    shippingCost = Number(shippingAmount || 0);
   }
+
+  // Order ID for matching payments
+  lastOrderId = getOrderId_();
 
   // Snapshot BEFORE we clear anything
   const cartSnapshot = cart.map((item) => ({ ...item }));
@@ -2729,56 +2757,50 @@ function handleCheckout() {
   const subtotal = cartSnapshot.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = +(subtotal * TAX_RATE).toFixed(2);
   const grandTotal = subtotal + tax + (fulfillment === "shipping" ? shippingCost : 0);
-  setLastSubmittedTotal = grandTotal;
-currentCartTotal = grandTotal;
-checkoutSubmitted = true;
 
-// Enable pay buttons and update labels
-updatePayButtonLabels();
-setPayButtonsEnabled(true);
-// Persist submitted total for payment-after-cart-clear
-lastSubmittedTotal = grandTotal;
-currentCartTotal = grandTotal; // allows CashApp/Venmo after cart clears
-localStorage.setItem("fbz_lastSubmittedTotal", String(grandTotal));
-renderPaymentDue();
-  
+  // ✅ Save payment due BEFORE clearing cart
+  setLastSubmittedTotal(grandTotal);
+  checkoutSubmitted = true;
+
   // Payload to Apps Script / Sheet
- const orderPayload = {
-  orderId: lastOrderId,
-  items: cartSnapshot.map((item) => ({ sku: item.sku, quantity: item.quantity })),
-  totals: {
-    subtotal,
-    tax,
-    shipping: fulfillment === "shipping" ? shippingCost : 0,
-    grand_total: grandTotal,
-  },
-  buyer: { name, contact },
-  fulfillment,
-  shipping,
-  notes,
-};
+  const orderPayload = {
+    orderId: lastOrderId,
+    items: cartSnapshot.map((item) => ({ sku: item.sku, quantity: item.quantity })),
+    totals: {
+      subtotal,
+      tax,
+      shipping: fulfillment === "shipping" ? shippingCost : 0,
+      grand_total: grandTotal,
+    },
+    buyer: { name, contact },
+    fulfillment,
+    shipping,
+    notes,
+  };
 
- // Send to sheet (non-blocking)
-sendOrderToSheet(orderPayload);
+  // Send to sheet (non-blocking)
+  sendOrderToSheet(orderPayload);
 
-// Refresh products after Sheets stock updates
-setTimeout(() => loadProducts(), 1500);
+  // Refresh products after Sheets stock updates
+  setTimeout(() => loadProducts(), 1500);
+
   // Toast message
   if (el.checkoutMessage) {
     el.checkoutMessage.textContent =
-      `Cart submitted! Total: $${grandTotal.toFixed(2)}. ` +
+      `Cart submitted! Total: $${grandTotal.toFixed(2)} • Order ${lastOrderId}. ` +
       `Pay via Cash App $Kern4460 or Venmo @Jason_Kern4460.`;
     el.checkoutMessage.classList.remove("hidden");
     el.checkoutMessage.classList.add("show");
     setTimeout(() => el.checkoutMessage.classList.remove("show"), 8000);
-  el.checkoutMessage.textContent =
-  `Cart submitted! Total: $${grandTotal.toFixed(2)} (${lastOrderId}). ` +
-  `Pay via Cash App $Kern4460 or Venmo @Jason_Kern4460.`;
   }
 
+  // ✅ Keep pay buttons active for the submitted total
+  renderPaymentDue();
+
+  // Clear cart AFTER submit
   clearCartAfterCheckout();
 
-  // Re-render UI
+  // Re-render
   applyFilters();
   renderCart();
 }
