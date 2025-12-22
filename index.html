@@ -1927,7 +1927,7 @@
     let currentCartTotal = 0;
     let lastOrderId = "";
     let checkoutSubmitted = false;
-    
+    let lastSubmittedTotal = 0;  
 // ✅ Keeps the last submitted total available for the Pay buttons (even after cart clears)
 let lastSubmittedTotal = 0;
 const LAST_TOTAL_KEY = "flashbidz_last_submitted_total_v1";
@@ -2748,6 +2748,8 @@ currentCartTotal = grandTotal; // keep pay buttons happy even after cart clears
     tax,
     shipping: fulfillment === "shipping" ? shippingCost : 0,
     grand_total: grandTotal,
+  lastSubmittedTotal = grandTotal;
+currentCartTotal = grandTotal; // so CashApp/Venmo buttons use the submitted total
   },
   buyer: { name, contact },
   fulfillment,
