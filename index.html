@@ -2126,48 +2126,28 @@ function updatePayButtonLabels() {
 async function loadProducts() {
   if (!el.productGrid) return;
 
+  const url = APPS_SCRIPT_URL + "?action=products&t=" + Date.now();
+  console.log("Fetching products from:", url);
+
   try {
-    const res = await fetch(
-      APPS_SCRIPT_URL + "?action=products&t=" + Date.now(),
-      { cache: "no-store" }
+    const res = await fetch(url, { cache: "no-store" });
+    const text = await res.text(); // <-- read raw first
+
+    console.log("HTTP:", res.status);
+    console.log("RAW RESPONSE (first 200 chars):", text.slice(0, 200));
+
+    const data = JSON.parse(text); // <-- now parse
+    if (!data || !Array.isArray(data.products)) throw new Error("No data.products array");
+
+    allProducts = data.products.filter(p =>
+      (p.active !== false) && (p.stock === undefined || Number(p.stock) > 0)
     );
 
-    if (!res.ok) throw new Error("HTTP " + res.status);
-
-    const data = await res.json();
-
-    // Apps Script ALWAYS returns { products: [] }
-    if (!data || !Array.isArray(data.products)) {
-      throw new Error("Invalid products response");
-    }
-
-    allProducts = data.products;
-
-    // Filter: active + in stock
-    allProducts = allProducts.filter(p =>
-      (p.active !== false) &&
-      (p.stock === undefined || Number(p.stock) > 0)
-    );
-
-    if (!allProducts.length) {
-      el.productGrid.innerHTML = "<p>No products available.</p>";
-      return;
-    }
-
-    buildCategoryOptions(allProducts);
-    buildCategoryPills(allProducts);
-
-    filteredProducts = sortProducts(
-      allProducts.map((p, i) => ({ ...p, __index: i })),
-      el.sortSelect?.value || "featured"
-    );
-
-    renderProducts(filteredProducts);
+    renderProducts(allProducts.map((p, i) => ({ ...p, __index: i })));
 
   } catch (err) {
     console.error("loadProducts failed:", err);
-    el.productGrid.innerHTML =
-      "<p>Could not load products. Please refresh.</p>";
+    el.productGrid.innerHTML = "<p>Could not load products.</p>";
   }
 }
     function buildCategoryOptions(products) {
