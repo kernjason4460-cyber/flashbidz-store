@@ -2127,55 +2127,47 @@ async function loadProducts() {
   if (!el.productGrid) return;
 
   try {
-    const url = APPS_SCRIPT_URL + "?action=products&t=" + Date.now();
+    const res = await fetch(
+      APPS_SCRIPT_URL + "?action=products&t=" + Date.now(),
+      { cache: "no-store" }
+    );
 
-    const response = await fetch(url, {
-      method: "GET",
-      cache: "no-store",
-      headers: { "Accept": "application/json" }
-    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
 
-    if (!response.ok) throw new Error("HTTP " + response.status);
+    const data = await res.json();
 
-    const data = await response.json();
-    const products = Array.isArray(data)
-      ? data
-      : Array.isArray(data?.products)
-        ? data.products
-        : null;
-
-    // 🛑 SAFETY GUARD — prevents wiping the grid on bad response
-    if (!Array.isArray(products)) {
-      console.warn("Products response invalid:", data);
-      return;
+    // Apps Script ALWAYS returns { products: [] }
+    if (!data || !Array.isArray(data.products)) {
+      throw new Error("Invalid products response");
     }
 
-    if (!products.length) {
-      el.productGrid.innerHTML = "<p>No products found.</p>";
-      allProducts = [];
-      filteredProducts = [];
+    allProducts = data.products;
+
+    // Filter: active + in stock
+    allProducts = allProducts.filter(p =>
+      (p.active !== false) &&
+      (p.stock === undefined || Number(p.stock) > 0)
+    );
+
+    if (!allProducts.length) {
+      el.productGrid.innerHTML = "<p>No products available.</p>";
       return;
     }
-
-    // Only show active items with stock > 0
-    allProducts = products.filter((p) => {
-      const active = p.active !== false;
-      const hasStock = p.stock === undefined || Number(p.stock) > 0;
-      return active && hasStock;
-    });
 
     buildCategoryOptions(allProducts);
     buildCategoryPills(allProducts);
 
-    const withIndex = allProducts.map((p, idx) => ({ ...p, __index: idx }));
-    filteredProducts = sortProducts(withIndex, el.sortSelect?.value || "featured");
+    filteredProducts = sortProducts(
+      allProducts.map((p, i) => ({ ...p, __index: i })),
+      el.sortSelect?.value || "featured"
+    );
 
     renderProducts(filteredProducts);
 
   } catch (err) {
-    console.error("Error loading products:", err);
+    console.error("loadProducts failed:", err);
     el.productGrid.innerHTML =
-      "<p>Could not load products. Please refresh and try again.</p>";
+      "<p>Could not load products. Please refresh.</p>";
   }
 }
     function buildCategoryOptions(products) {
