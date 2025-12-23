@@ -2591,18 +2591,17 @@ function updateCartSummary() {
   if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + total.toFixed(2);
   if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + total.toFixed(2);
 
-  // ✅ Pay buttons:
-  // - If cart has items, show current cart total
-  // - If cart empty, show last submitted total (if any)
-  const payTotal = getPayTotal();
-  if (payTotal > 0) {
-    const label = `$${payTotal.toFixed(2)}`;
-    if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
-    if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
-  } else {
-    if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay with Cash App`;
-    if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo`;
-  }
+ // ✅ Pay buttons — persist submitted total after cart clears
+const payTotal = getPayTotal();
+
+if (payTotal > 0) {
+  const label = `$${payTotal.toFixed(2)}`;
+  if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
+  if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
+} else {
+  if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay with Cash App`;
+  if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo`;
+}
 }
 
     function setCartOpen(isOpen) {
@@ -2758,9 +2757,13 @@ function handleCheckout() {
   const tax = +(subtotal * TAX_RATE).toFixed(2);
   const grandTotal = subtotal + tax + (fulfillment === "shipping" ? shippingCost : 0);
 
-  // ✅ Save payment due BEFORE clearing cart
-  setLastSubmittedTotal(grandTotal);
-  checkoutSubmitted = true;
+ setLastSubmittedTotal(grandTotal);   // ✅ call the function
+currentCartTotal = grandTotal;
+checkoutSubmitted = true;
+
+updateCartSummary();                // refresh UI numbers
+setPayButtonsEnabled(true);         // enable pay buttons
+updatePayButtonLabels();            // (optional) ok to keep
 
   // Payload to Apps Script / Sheet
   const orderPayload = {
