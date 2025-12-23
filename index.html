@@ -2562,57 +2562,28 @@ async function loadProducts() {
       updateCartSummary();
     }
 
-function updateCartSummary() {
-  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-  const subtotal = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
-  const tax = +(subtotal * TAX_RATE).toFixed(2);
-
-  const shipping = el.fulfillmentShipping && el.fulfillmentShipping.checked
-    ? Number(shippingAmount || 0)
-    : 0;
-
-  const total = subtotal + tax + shipping;
-
-  // Track current cart total (when cart has items)
-  currentCartTotal = total;
-
-  // ✅ If cart is empty, keep showing last submitted total (amount due)
+  // ✅ Pay buttons ALWAYS show Amount Due if it exists (even if cart has items)
   const amountDue = Number(lastSubmittedTotal || 0);
 
-// If there’s an amount due, keep showing it everywhere until it’s cleared
-const displayTotal = amountDue > 0 ? amountDue : total;
-
-  // UI counts
-  if (el.cartCount) el.cartCount.textContent = String(itemCount);
-  if (el.cartCountS) el.cartCountS.textContent = itemCount === 1 ? "" : "s";
-  if (el.cartCountBottom) el.cartCountBottom.textContent = String(itemCount);
-  if (el.cartCountBottomS) el.cartCountBottomS.textContent = itemCount === 1 ? "" : "s";
-
-  // UI totals (cart panel)
-  if (el.cartSubtotal) el.cartSubtotal.textContent = "$" + subtotal.toFixed(2);
-  if (el.cartTax) el.cartTax.textContent = "$" + tax.toFixed(2);
-  if (el.cartShipping) el.cartShipping.textContent = "$" + shipping.toFixed(2);
-  if (el.cartTotalBottom) el.cartTotalBottom.textContent = "$" + displayTotal.toFixed(2);
-
-  // UI totals (top bars)
-  if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + displayTotal.toFixed(2);
-  if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + displayTotal.toFixed(2);
-
-  // ✅ Pay buttons should ALWAYS use the last submitted total (amount due) if it exists
-const payTotal = amountDue > 0 ? amountDue : displayTotal;
-
-if (payTotal > 0) {
-  const label = `$${payTotal.toFixed(2)}`;
-  if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
-  if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
-  setPayButtonsEnabled(true);
-} else {
-  if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay with Cash App`;
-  if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo`;
-  setPayButtonsEnabled(false);
-}
-}
+  if (amountDue > 0) {
+    const label = `$${amountDue.toFixed(2)}`;
+    if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
+    if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
+    setPayButtonsEnabled(true);
+  } else {
+    // If there is no amount due, pay buttons can use the current cart total (if any)
+    const payTotal = Number(cart.length ? total : 0);
+    if (payTotal > 0) {
+      const label = `$${payTotal.toFixed(2)}`;
+      if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
+      if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
+      setPayButtonsEnabled(true);
+    } else {
+      if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay with Cash App`;
+      if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo`;
+      setPayButtonsEnabled(false);
+    }
+  }
 
     function setCartOpen(isOpen) {
       if (!el.cartPanel || !el.cartOverlay) return;
@@ -2925,31 +2896,33 @@ function sendOrderToSheet(orderPayload) {
       updateThemeLabel();
     }
 function handleCashAppPay() {
-  const total = getPayTotal();
+  const amountDue = Number(lastSubmittedTotal || 0);
+  const total = amountDue > 0 ? amountDue : Number(currentCartTotal || 0);
+
   if (!total) {
     alert("Submit your cart first (or add at least one item).");
     return;
   }
 
   const amount = total.toFixed(2);
-  const note = encodeURIComponent("FlashBidz Store order");
+  const note = encodeURIComponent(lastOrderId ? `FlashBidz ${lastOrderId}` : "FlashBidz Store order");
   const url = `https://cash.app/$Kern4460/${amount}?note=${note}`;
   window.open(url, "_blank");
-  clearAmountDue();
 }
 
 function handleVenmoPay() {
-  const total = getPayTotal();
+  const amountDue = Number(lastSubmittedTotal || 0);
+  const total = amountDue > 0 ? amountDue : Number(currentCartTotal || 0);
+
   if (!total) {
     alert("Submit your cart first (or add at least one item).");
     return;
   }
 
   const amount = total.toFixed(2);
-  const note = encodeURIComponent("FlashBidz Store order");
+  const note = encodeURIComponent(lastOrderId ? `FlashBidz ${lastOrderId}` : "FlashBidz Store order");
   const url = `https://venmo.com/?txn=pay&audience=private&recipients=Jason_Kern4460&amount=${amount}&note=${note}`;
   window.open(url, "_blank");
-  clearAmountDue();
 }
     
     function updateThemeLabel() {
