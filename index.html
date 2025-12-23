@@ -1947,6 +1947,12 @@ function getPayTotal() {
   // If cart has items, pay total is current cart total
   if (cart && cart.length) return Number(currentCartTotal || 0);
 
+ function clearAmountDue() {
+  lastSubmittedTotal = 0;
+  try { localStorage.removeItem(LAST_TOTAL_KEY); } catch (_) {}
+  updateCartSummary();
+} 
+  
   // If cart is empty, use last submitted total
   return Number(lastSubmittedTotal || 0);
 } // ✅ CLOSES getPayTotal()
@@ -2572,7 +2578,10 @@ function updateCartSummary() {
   currentCartTotal = total;
 
   // ✅ If cart is empty, keep showing last submitted total (amount due)
-  const displayTotal = cart.length ? total : Number(lastSubmittedTotal || 0);
+  const amountDue = Number(lastSubmittedTotal || 0);
+
+// If there’s an amount due, keep showing it everywhere until it’s cleared
+const displayTotal = amountDue > 0 ? amountDue : total;
 
   // UI counts
   if (el.cartCount) el.cartCount.textContent = String(itemCount);
@@ -2590,19 +2599,19 @@ function updateCartSummary() {
   if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + displayTotal.toFixed(2);
   if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + displayTotal.toFixed(2);
 
-  // ✅ Pay buttons
-  const payTotal = displayTotal;
+  // ✅ Pay buttons should ALWAYS use the last submitted total (amount due) if it exists
+const payTotal = amountDue > 0 ? amountDue : displayTotal;
 
-  if (payTotal > 0) {
-    const label = `$${payTotal.toFixed(2)}`;
-    if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
-    if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
-    setPayButtonsEnabled(true);
-  } else {
-    if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay with Cash App`;
-    if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo`;
-    setPayButtonsEnabled(false);
-  }
+if (payTotal > 0) {
+  const label = `$${payTotal.toFixed(2)}`;
+  if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
+  if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
+  setPayButtonsEnabled(true);
+} else {
+  if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay with Cash App`;
+  if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo`;
+  setPayButtonsEnabled(false);
+}
 }
 
     function setCartOpen(isOpen) {
@@ -2926,6 +2935,7 @@ function handleCashAppPay() {
   const note = encodeURIComponent("FlashBidz Store order");
   const url = `https://cash.app/$Kern4460/${amount}?note=${note}`;
   window.open(url, "_blank");
+  clearAmountDue();
 }
 
 function handleVenmoPay() {
@@ -2939,6 +2949,7 @@ function handleVenmoPay() {
   const note = encodeURIComponent("FlashBidz Store order");
   const url = `https://venmo.com/?txn=pay&audience=private&recipients=Jason_Kern4460&amount=${amount}&note=${note}`;
   window.open(url, "_blank");
+  clearAmountDue();
 }
     
     function updateThemeLabel() {
