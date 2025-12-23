@@ -1933,10 +1933,7 @@ const LAST_TOTAL_KEY = "flashbidz_last_submitted_total_v1";
 function setLastSubmittedTotal(amount) {
   const val = Number(amount || 0);
   lastSubmittedTotal = val;
-
-  try {
-    localStorage.setItem(LAST_TOTAL_KEY, String(val));
-  } catch (_) {}
+  try { localStorage.setItem(LAST_TOTAL_KEY, String(val)); } catch (_) {}
 }
 
 function loadLastSubmittedTotal() {
@@ -2570,8 +2567,11 @@ function updateCartSummary() {
 
   const total = subtotal + tax + shipping;
 
-  // Track current cart total
-  currentCartTotal = total;
+  // Track current cart total (live cart total)
+currentCartTotal = total;
+
+// ✅ Display total: if cart empty, show last submitted total instead of $0
+const displayTotal = cart.length ? total : Number(lastSubmittedTotal || 0);
 
   // UI counts
   if (el.cartCount) el.cartCount.textContent = String(itemCount);
@@ -2583,22 +2583,23 @@ function updateCartSummary() {
   if (el.cartSubtotal) el.cartSubtotal.textContent = "$" + subtotal.toFixed(2);
   if (el.cartTax) el.cartTax.textContent = "$" + tax.toFixed(2);
   if (el.cartShipping) el.cartShipping.textContent = "$" + shipping.toFixed(2);
-  if (el.cartTotalBottom) el.cartTotalBottom.textContent = "$" + total.toFixed(2);
+  if (el.cartTotalBottom) el.cartTotalBottom.textContent = "$" + displayTotal.toFixed(2);
+  
+  // UI totals (top bar)
+  if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + displayTotal.toFixed(2);
+  if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + displayTotal.toFixed(2);
 
-  // UI totals (top bars)
-  if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + total.toFixed(2);
-  if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + total.toFixed(2);
-
- // ✅ Pay buttons — persist submitted total after cart clears
-const payTotal = getPayTotal();
+ const payTotal = displayTotal;
 
 if (payTotal > 0) {
   const label = `$${payTotal.toFixed(2)}`;
   if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
   if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
+  setPayButtonsEnabled(true);
 } else {
   if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay with Cash App`;
   if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo`;
+  setPayButtonsEnabled(false);
 }
 }
 
