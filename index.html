@@ -1928,7 +1928,6 @@
     let lastOrderId = "";
     let checkoutSubmitted = false;
     let lastSubmittedTotal = 0;  
-// ✅ Keeps the last submitted total available for the Pay buttons (even after cart clears)
 const LAST_TOTAL_KEY = "flashbidz_last_submitted_total_v1";
 
 function setLastSubmittedTotal(amount) {
@@ -1936,24 +1935,23 @@ function setLastSubmittedTotal(amount) {
   lastSubmittedTotal = val;
 
   try {
-    sessionStorage.setItem(LAST_TOTAL_KEY, String(val));
+    localStorage.setItem(LAST_TOTAL_KEY, String(val));
   } catch (_) {}
 }
 
 function loadLastSubmittedTotal() {
   try {
-    const saved = Number(sessionStorage.getItem(LAST_TOTAL_KEY) || 0);
+    const saved = Number(localStorage.getItem(LAST_TOTAL_KEY) || 0);
     if (saved > 0) lastSubmittedTotal = saved;
   } catch (_) {}
 }
 
 function getPayTotal() {
   // If cart has items, pay total is current cart total
-  if (cart && cart.length && Number(currentCartTotal) > 0) return Number(currentCartTotal);
+  if (cart && cart.length) return Number(currentCartTotal || 0);
 
-  // If cart is empty, use last submitted total (for paying after submit)
-  return Number(lastSubmittedTotal || 0);
-}
+  // If cart is empty, use last submitted total
+  return Number(lastSubmittedTotal ||0);
     
 function getOrderId_() {
   const d = new Date();
@@ -2797,12 +2795,10 @@ updatePayButtonLabels();            // (optional) ok to keep
     setTimeout(() => el.checkoutMessage.classList.remove("show"), 8000);
   }
 
-  // ✅ Keep pay buttons active for the submitted total
-  renderPaymentDue();
-
   // Clear cart AFTER submit
   clearCartAfterCheckout();
-
+  renderPaymentDue();
+  updateCartSummary();
   // Re-render
   applyFilters();
   renderCart();
