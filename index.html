@@ -1948,8 +1948,9 @@ function getPayTotal() {
   if (cart && cart.length) return Number(currentCartTotal || 0);
 
   // If cart is empty, use last submitted total
-  return Number(lastSubmittedTotal ||0);
-    
+  return Number(lastSubmittedTotal || 0);
+} // ✅ CLOSES getPayTotal()
+
 function getOrderId_() {
   const d = new Date();
   const y = d.getFullYear();
