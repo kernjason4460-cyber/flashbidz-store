@@ -1991,7 +1991,14 @@ function setPayButtonsEnabled(enabled) {
     btn.style.cursor = enabled ? "pointer" : "not-allowed";
   });
 }
-function updatePayButtonLabels() {
+
+function clearAmountDue() {
+  lastSubmittedTotal = 0;
+  try { localStorage.removeItem(LAST_TOTAL_KEY); } catch (_) {}
+  updateCartSummary();
+}    
+  
+  function updatePayButtonLabels() {
   const amount = Number(lastSubmittedTotal || 0);
   if (!amount) return;
 
@@ -2908,6 +2915,7 @@ function handleCashAppPay() {
   const note = encodeURIComponent(lastOrderId ? `FlashBidz ${lastOrderId}` : "FlashBidz Store order");
   const url = `https://cash.app/$Kern4460/${amount}?note=${note}`;
   window.open(url, "_blank");
+  clearAmountDue();
 }
 
 function handleVenmoPay() {
@@ -2923,6 +2931,7 @@ function handleVenmoPay() {
   const note = encodeURIComponent(lastOrderId ? `FlashBidz ${lastOrderId}` : "FlashBidz Store order");
   const url = `https://venmo.com/?txn=pay&audience=private&recipients=Jason_Kern4460&amount=${amount}&note=${note}`;
   window.open(url, "_blank");
+  clearAmountDue();
 }
     
     function updateThemeLabel() {
