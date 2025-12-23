@@ -1943,19 +1943,19 @@ function loadLastSubmittedTotal() {
   } catch (_) {}
 }
 
+function clearAmountDue() {
+  lastSubmittedTotal = 0;
+  try { localStorage.removeItem(LAST_TOTAL_KEY); } catch (_) {}
+  updateCartSummary();
+}
+
 function getPayTotal() {
   // If cart has items, pay total is current cart total
   if (cart && cart.length) return Number(currentCartTotal || 0);
 
- function clearAmountDue() {
-  lastSubmittedTotal = 0;
-  try { localStorage.removeItem(LAST_TOTAL_KEY); } catch (_) {}
-  updateCartSummary();
-} 
-  
   // If cart is empty, use last submitted total
   return Number(lastSubmittedTotal || 0);
-} // ✅ CLOSES getPayTotal()
+}
 
 function getOrderId_() {
   const d = new Date();
