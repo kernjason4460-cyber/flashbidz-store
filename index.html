@@ -1990,13 +1990,7 @@ function setPayButtonsEnabled(enabled) {
     btn.style.opacity = enabled ? "1" : "0.45";
     btn.style.cursor = enabled ? "pointer" : "not-allowed";
   });
-}
-
-function clearAmountDue() {
-  lastSubmittedTotal = 0;
-  try { localStorage.removeItem(LAST_TOTAL_KEY); } catch (_) {}
-  updateCartSummary();
-}    
+}   
   
   function updatePayButtonLabels() {
   const amount = Number(lastSubmittedTotal || 0);
@@ -2502,6 +2496,55 @@ async function loadProducts() {
       renderCart();
     }
 
+    function updateCartSummary() {
+  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const subtotal = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
+  const tax = +(subtotal * TAX_RATE).toFixed(2);
+
+  const shipping = el.fulfillmentShipping && el.fulfillmentShipping.checked
+    ? Number(shippingAmount || 0)
+    : 0;
+
+  const total = subtotal + tax + shipping;
+
+  // Track current cart total
+  currentCartTotal = total;
+
+  // If cart is empty, show last submitted total (amount due)
+  const displayTotal = cart.length ? total : Number(lastSubmittedTotal || 0);
+
+  // Counts
+  if (el.cartCount) el.cartCount.textContent = String(itemCount);
+  if (el.cartCountS) el.cartCountS.textContent = itemCount === 1 ? "" : "s";
+  if (el.cartCountBottom) el.cartCountBottom.textContent = String(itemCount);
+  if (el.cartCountBottomS) el.cartCountBottomS.textContent = itemCount === 1 ? "" : "s";
+
+  // Totals in cart panel
+  if (el.cartSubtotal) el.cartSubtotal.textContent = "$" + subtotal.toFixed(2);
+  if (el.cartTax) el.cartTax.textContent = "$" + tax.toFixed(2);
+  if (el.cartShipping) el.cartShipping.textContent = "$" + shipping.toFixed(2);
+  if (el.cartTotalBottom) el.cartTotalBottom.textContent = "$" + displayTotal.toFixed(2);
+
+  // Totals in top/bottom bars
+  if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + displayTotal.toFixed(2);
+  if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + displayTotal.toFixed(2);
+
+  // Pay buttons: always use amount due if it exists
+  const amountDue = Number(lastSubmittedTotal || 0);
+  const payTotal = amountDue > 0 ? amountDue : (cart.length ? total : 0);
+
+  if (payTotal > 0) {
+    const label = `$${payTotal.toFixed(2)}`;
+    if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
+    if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
+    setPayButtonsEnabled(true);
+  } else {
+    if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay with Cash App`;
+    if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo`;
+    setPayButtonsEnabled(false);
+  }
+}
     function renderCart() {
       if (!el.cartItems) return;
 
@@ -2568,29 +2611,6 @@ async function loadProducts() {
 
       updateCartSummary();
     }
-
-  // ✅ Pay buttons ALWAYS show Amount Due if it exists (even if cart has items)
-  const amountDue = Number(lastSubmittedTotal || 0);
-
-  if (amountDue > 0) {
-    const label = `$${amountDue.toFixed(2)}`;
-    if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
-    if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
-    setPayButtonsEnabled(true);
-  } else {
-    // If there is no amount due, pay buttons can use the current cart total (if any)
-    const payTotal = Number(cart.length ? total : 0);
-    if (payTotal > 0) {
-      const label = `$${payTotal.toFixed(2)}`;
-      if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
-      if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
-      setPayButtonsEnabled(true);
-    } else {
-      if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay with Cash App`;
-      if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo`;
-      setPayButtonsEnabled(false);
-    }
-  }
 
     function setCartOpen(isOpen) {
       if (!el.cartPanel || !el.cartOverlay) return;
