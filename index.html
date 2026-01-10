@@ -1497,23 +1497,7 @@
       justify-content: center;
     }
   </style>
-  <script>
-  fetch("https://admin.flashbidz.net/me", {
-    credentials: "include"
-  })
-  .then(res => {
-    if (!res.ok) throw new Error("Not logged in");
-    return res.json();
-  })
-  .then(user => {
-    console.log("Logged in as:", user.username);
-  })
-  .catch(() => {
-    window.location.href =
-      "https://admin.flashbidz.net/login?next=" +
-      encodeURIComponent(window.location.href);
-  });
-</script>
+
 </head>
 <body>
   <!-- HEADER -->
