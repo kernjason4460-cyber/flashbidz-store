@@ -1939,8 +1939,6 @@ function getOrderId_() {
       loadProducts();
       setCurrentYear();
       handleFulfillmentChange();
-      setPayButtonsEnabled(false);
-      renderPaymentDue();
     });
     
     function cacheDom() {
@@ -2460,21 +2458,6 @@ async function loadProducts() {
   // Totals in top/bottom bars
   if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + displayTotal.toFixed(2);
   if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + displayTotal.toFixed(2);
-
-  // Pay buttons: always use amount due if it exists
-  const amountDue = Number(lastSubmittedTotal || 0);
-  const payTotal = amountDue > 0 ? amountDue : (cart.length ? total : 0);
-
-  if (payTotal > 0) {
-    const label = `$${payTotal.toFixed(2)}`;
-    if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
-    if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
-    setPayButtonsEnabled(true);
-  } else {
-    if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay with Cash App`;
-    if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay with Venmo`;
-    setPayButtonsEnabled(false);
-  }
 }
     function renderCart() {
       if (!el.cartItems) return;
