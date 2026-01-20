@@ -1,48 +1,92 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Payment Success</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment Success • FlashBidz</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 24px; }
+    .card { max-width: 720px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 16px; padding: 18px; }
+    .ok { font-weight: 800; font-size: 20px; }
+    .muted { color: #6b7280; }
+    pre { white-space: pre-wrap; background: #f3f4f6; padding: 12px; border-radius: 12px; overflow:auto; }
+    a { color: inherit; }
+  </style>
 </head>
 <body>
-  <h2>Payment received ✅</h2>
-  <p>Finalizing your order…</p>
+  <div class="card">
+    <div class="ok">Payment received ✅</div>
+    <p class="muted">Finalizing your order and updating inventory…</p>
+    <p id="status">Working…</p>
+    <pre id="debug" style="display:none"></pre>
+    <p><a href="index.html">Back to store</a></p>
+  </div>
 
   <script>
-    const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxV6DzPPsVe2CuZPXez1BTnNwFfEjdvAvg29aq2C5qXLYmZh4p7rmrqJN1SjGWl_R29/exec";
+    // MUST match your index.html constants/keys
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxV6DzPPsVe2CuZPXez1BTnNwFfEjdvAvg29aq2C5qXLYmZh4p7rmrqJN1SjGWl_R29/exec";
+    const CART_STORAGE_KEY = "flashbidz_cart_v3";
 
-    const params = new URLSearchParams(location.search);
-    const order_id = params.get("order_id");
-    const session_id = params.get("session_id");
+    const statusEl = document.getElementById("status");
+    const debugEl = document.getElementById("debug");
 
-    // Pull cart from localStorage (this must match how your store saves the cart)
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    function showDebug(obj) {
+      debugEl.style.display = "block";
+      debugEl.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+    }
 
-    // IMPORTANT: Use the same secret your store already uses for stock updates
-    // If your store currently uses payload.secret, paste the same value here:
-    const POS_SECRET = localStorage.getItem("POS_SECRET") || "";
+    async function finalize() {
+      const params = new URLSearchParams(location.search);
+      const session_id = params.get("session_id");
+      const order_id = params.get("order_id");
 
-    fetch(WEBAPP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "finalize_checkout",
-        order_id,
-        session_id,
-        secret: POS_SECRET,
-        items: cart
-      })
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (!data.success) throw new Error(data.error || "Finalize failed");
-      localStorage.removeItem("cart");
-      document.body.innerHTML = "<h2>All set ✅</h2><p>Your order is confirmed. Thank you!</p><p><a href='index.html'>Back to store</a></p>";
-    })
-    .catch(err => {
-      document.body.innerHTML = "<h2>Payment received ✅</h2><p>But we couldn’t finalize inventory automatically.</p><p>Please contact FlashBidz.</p><pre style='white-space:pre-wrap'>" + String(err) + "</pre>";
-    });
+      if (!session_id || !order_id) {
+        statusEl.textContent = "Missing session_id or order_id in URL.";
+        showDebug({ session_id, order_id, hint: "Your Apps Script success_url must include both." });
+        return;
+      }
+
+      let cartSnapshot = [];
+      try {
+        cartSnapshot = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
+      } catch (_) {}
+
+      if (!Array.isArray(cartSnapshot) || cartSnapshot.length === 0) {
+        // Not fatal — some browsers clear storage, but it’s helpful to know
+        statusEl.textContent = "Paid ✅ but cart snapshot not found. Finalizing anyway…";
+      }
+
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "finalize_checkout",
+            orderId: order_id,
+            session_id,
+            items: cartSnapshot
+          })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+          statusEl.textContent = "Payment received ✅ but finalize failed.";
+          showDebug(data);
+          return;
+        }
+
+        // Clear cart after finalization
+        try { localStorage.removeItem(CART_STORAGE_KEY); } catch (_) {}
+
+        statusEl.innerHTML = "All set ✅ Your order is confirmed.<br><br><strong>Order:</strong> " + order_id;
+      } catch (err) {
+        statusEl.textContent = "Payment received ✅ but finalize request crashed.";
+        showDebug(String(err));
+      }
+    }
+
+    finalize();
   </script>
 </body>
 </html>
