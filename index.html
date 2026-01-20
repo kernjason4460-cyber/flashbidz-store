@@ -1692,28 +1692,14 @@
         </div>
         <div class="checkout-form-footer">
           <small>
-            After you submit, you’ll see your total (with tax and shipping if selected)
-            and payment info for Cash App / Venmo.
+            After you submit, you’ll be taken to Stripe to pay securely.
           </small>
           <button id="checkout-btn" class="btn btn-primary btn-sm" type="button">
             Submit Cart
           </button>
         </div>
       </div>
-<div class="payment-methods">
-  <p class="payment-title">Pay online (Cash App or Venmo)</p>
-  <div class="payment-buttons">
-    <button id="pay-cashapp-btn" class="btn payment-btn" type="button">
-      Pay with Cash App
-    </button>
-    <button id="pay-venmo-btn" class="btn payment-btn" type="button">
-      Pay with Venmo
-    </button>
-  </div>
-  <p class="payment-hint">
-    Amount is based on your cart total. We’ll match your payment using your name and contact info.
-  </p>
-</div>
+
       <div class="cart-actions">
         <button id="clear-cart-btn" class="btn btn-link" type="button">
           Clear cart
@@ -1920,7 +1906,7 @@
     const CART_STORAGE_KEY = "flashbidz_cart_v3";
     const THEME_STORAGE_KEY = "flashbidz_theme";
     const TAX_RATE = 0.06;
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzowPxsTHcKnd3g8OKcwUffksJGEp9QfwLgJSg7NkcpuIsm4-ke4zOM1Gg-qUJwhru8/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxV6DzPPsVe2CuZPXez1BTnNwFfEjdvAvg29aq2C5qXLYmZh4p7rmrqJN1SjGWl_R29/exec";
     let allProducts = [];
     let filteredProducts = [];
     let cart = [];
@@ -1929,34 +1915,6 @@
     let lastOrderId = "";
     let checkoutSubmitted = false;
     let lastSubmittedTotal = 0;  
-const LAST_TOTAL_KEY = "flashbidz_last_submitted_total_v1";
-
-function setLastSubmittedTotal(amount) {
-  const val = Number(amount || 0);
-  lastSubmittedTotal = val;
-  try { localStorage.setItem(LAST_TOTAL_KEY, String(val)); } catch (_) {}
-}
-
-function loadLastSubmittedTotal() {
-  try {
-    const saved = Number(localStorage.getItem(LAST_TOTAL_KEY) || 0);
-    if (saved > 0) lastSubmittedTotal = saved;
-  } catch (_) {}
-}
-
-function clearAmountDue() {
-  lastSubmittedTotal = 0;
-  try { localStorage.removeItem(LAST_TOTAL_KEY); } catch (_) {}
-  updateCartSummary();
-}
-
-function getPayTotal() {
-  // If cart has items, pay total is current cart total
-  if (cart && cart.length) return Number(currentCartTotal || 0);
-
-  // If cart is empty, use last submitted total
-  return Number(lastSubmittedTotal || 0);
-}
 
 function getOrderId_() {
   const d = new Date();
@@ -1984,29 +1942,6 @@ function getOrderId_() {
       setPayButtonsEnabled(false);
       renderPaymentDue();
     });
-function setPayButtonsEnabled(enabled) {
-  [el.payCashAppBtn, el.payVenmoBtn].forEach((btn) => {
-    if (!btn) return;
-    btn.disabled = !enabled;
-    btn.style.opacity = enabled ? "1" : "0.45";
-    btn.style.cursor = enabled ? "pointer" : "not-allowed";
-  });
-}   
-  
-  function updatePayButtonLabels() {
-  const amount = Number(lastSubmittedTotal || 0);
-  if (!amount) return;
-
-  const label = `$${amount.toFixed(2)}`;
-
-  if (el.payCashAppBtn) {
-    el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
-  }
-
-  if (el.payVenmoBtn) {
-    el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
-  }
-}
     
     function cacheDom() {
       el.productGrid = document.getElementById("product-grid");
@@ -2040,9 +1975,6 @@ function setPayButtonsEnabled(enabled) {
       el.checkoutName = document.getElementById("checkout-name");
       el.checkoutContact = document.getElementById("checkout-contact");
       el.checkoutNotes = document.getElementById("checkout-notes");
-      
-      el.payCashAppBtn = document.getElementById("pay-cashapp-btn");
-      el.payVenmoBtn = document.getElementById("pay-venmo-btn");
       
       // fulfillment + shipping fields
       el.fulfillmentPickup = document.getElementById("fulfillment-pickup");
@@ -2086,8 +2018,6 @@ function setPayButtonsEnabled(enabled) {
 
       el.clearCartBtn?.addEventListener("click", clearCart);
       el.checkoutBtn?.addEventListener("click", handleCheckout);
-      el.payCashAppBtn?.addEventListener("click", handleCashAppPay);
-      el.payVenmoBtn?.addEventListener("click", handleVenmoPay);
       el.themeToggle?.addEventListener("click", toggleTheme);
 
       // fulfillment selection
@@ -2700,18 +2630,7 @@ async function loadProducts() {
       updateCartSummary();
     }
 
-function renderPaymentDue() {
-  const total = getPayTotal();
-  if (!total) return;
-
-  // Enable and label pay buttons with the payment due amount
-  setPayButtonsEnabled(true);
-
-  const label = `$${Number(total).toFixed(2)}`;
-  if (el.payCashAppBtn) el.payCashAppBtn.textContent = `Pay ${label} with Cash App`;
-  if (el.payVenmoBtn) el.payVenmoBtn.textContent = `Pay ${label} with Venmo`;
-}
-function handleCheckout() {
+async function handleCheckout() {
   if (!cart.length) {
     alert("Your cart is empty.");
     return;
@@ -2755,10 +2674,7 @@ function handleCheckout() {
     shippingCost = Number(shippingAmount || 0);
   }
 
-  // Order ID for matching payments
-  lastOrderId = getOrderId_();
-
-  // Snapshot BEFORE we clear anything
+  // Snapshot cart
   const cartSnapshot = cart.map((item) => ({ ...item }));
 
   // Totals
@@ -2766,67 +2682,65 @@ function handleCheckout() {
   const tax = +(subtotal * TAX_RATE).toFixed(2);
   const grandTotal = subtotal + tax + (fulfillment === "shipping" ? shippingCost : 0);
 
- setLastSubmittedTotal(grandTotal);   // ✅ call the function
-currentCartTotal = grandTotal;
-checkoutSubmitted = true;
+  // Create order ID
+  lastOrderId = getOrderId_();
 
-updateCartSummary();                // refresh UI numbers
-setPayButtonsEnabled(true);         // enable pay buttons
-updatePayButtonLabels();            // (optional) ok to keep
+  // ✅ Save cart snapshot for success.html (so we can finalize stock after payment)
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartSnapshot));
+  } catch (_) {}
 
-  // Payload to Apps Script / Sheet
-  const orderPayload = {
+  // Payload to Apps Script to create Stripe Checkout session
+  const payload = {
+    action: "create_checkout",
+    channel: "FBZ_STORE",
     orderId: lastOrderId,
-    items: cartSnapshot.map((item) => ({ sku: item.sku, quantity: item.quantity })),
+    buyer: { name, contact },
+    fulfillment,
+    shipping,
+    notes,
     totals: {
       subtotal,
       tax,
       shipping: fulfillment === "shipping" ? shippingCost : 0,
       grand_total: grandTotal,
     },
-    buyer: { name, contact },
-    fulfillment,
-    shipping,
-    notes,
+    items: cartSnapshot.map((item) => ({
+      sku: item.sku,
+      title: item.title,
+      qty: item.quantity,
+      price: item.price,
+    })),
   };
 
-  // Send to sheet (non-blocking)
-  sendOrderToSheet(orderPayload);
-
-  // Refresh products after Sheets stock updates
-  setTimeout(() => loadProducts(), 1500);
-
-  // Toast message
-  if (el.checkoutMessage) {
-    el.checkoutMessage.textContent =
-      `Cart submitted! Total: $${grandTotal.toFixed(2)} • Order ${lastOrderId}. ` +
-      `Pay via Cash App $Kern4460 or Venmo @Jason_Kern4460.`;
-    el.checkoutMessage.classList.remove("hidden");
-    el.checkoutMessage.classList.add("show");
-    setTimeout(() => el.checkoutMessage.classList.remove("show"), 8000);
-  }
-
-  // Clear cart AFTER submit
-  clearCartAfterCheckout();
-  renderPaymentDue();
-  updateCartSummary();
-  // Re-render
-  applyFilters();
-  renderCart();
-}
-
-function sendOrderToSheet(orderPayload) {
-  if (!APPS_SCRIPT_URL) return;
-
   try {
-    const encoded = encodeURIComponent(JSON.stringify(orderPayload));
-    const url = APPS_SCRIPT_URL + "?payload=" + encoded + "&t=" + Date.now();
+    if (el.checkoutBtn) {
+      el.checkoutBtn.disabled = true;
+      el.checkoutBtn.style.opacity = "0.7";
+    }
 
-    // Keep a reference so Safari doesn’t garbage-collect early
-    window.__flashbidzBeacon = new Image();
-    window.__flashbidzBeacon.src = url;
-  } catch (e) {
-    console.error("sendOrderToSheet failed:", e);
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (!data.success || !data.checkout_url) {
+      throw new Error(data.error || "Could not create Stripe Checkout session.");
+    }
+
+    // ✅ Redirect to Stripe Checkout
+    window.location.href = data.checkout_url;
+
+  } catch (err) {
+    console.error(err);
+    alert("Checkout error: " + (err.message || err));
+  } finally {
+    if (el.checkoutBtn) {
+      el.checkoutBtn.disabled = false;
+      el.checkoutBtn.style.opacity = "1";
+    }
   }
 }
 
@@ -2923,37 +2837,6 @@ function sendOrderToSheet(orderPayload) {
       localStorage.setItem(THEME_STORAGE_KEY, next);
       updateThemeLabel();
     }
-function handleCashAppPay() {
-  const amountDue = Number(lastSubmittedTotal || 0);
-  const total = amountDue > 0 ? amountDue : Number(currentCartTotal || 0);
-
-  if (!total) {
-    alert("Submit your cart first (or add at least one item).");
-    return;
-  }
-
-  const amount = total.toFixed(2);
-  const note = encodeURIComponent(lastOrderId ? `FlashBidz ${lastOrderId}` : "FlashBidz Store order");
-  const url = `https://cash.app/$Kern4460/${amount}?note=${note}`;
-  window.open(url, "_blank");
-  clearAmountDue();
-}
-
-function handleVenmoPay() {
-  const amountDue = Number(lastSubmittedTotal || 0);
-  const total = amountDue > 0 ? amountDue : Number(currentCartTotal || 0);
-
-  if (!total) {
-    alert("Submit your cart first (or add at least one item).");
-    return;
-  }
-
-  const amount = total.toFixed(2);
-  const note = encodeURIComponent(lastOrderId ? `FlashBidz ${lastOrderId}` : "FlashBidz Store order");
-  const url = `https://venmo.com/?txn=pay&audience=private&recipients=Jason_Kern4460&amount=${amount}&note=${note}`;
-  window.open(url, "_blank");
-  clearAmountDue();
-}
     
     function updateThemeLabel() {
       const theme = document.documentElement.getAttribute("data-theme") || "light";
