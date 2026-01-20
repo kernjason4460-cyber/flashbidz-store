@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment Success</title>
+</head>
+<body>
+  <h2>Payment received ✅</h2>
+  <p>Finalizing your order…</p>
+
+  <script>
+    const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxV6DzPPsVe2CuZPXez1BTnNwFfEjdvAvg29aq2C5qXLYmZh4p7rmrqJN1SjGWl_R29/exec";
+
+    const params = new URLSearchParams(location.search);
+    const order_id = params.get("order_id");
+    const session_id = params.get("session_id");
+
+    // Pull cart from localStorage (this must match how your store saves the cart)
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    // IMPORTANT: Use the same secret your store already uses for stock updates
+    // If your store currently uses payload.secret, paste the same value here:
+    const POS_SECRET = localStorage.getItem("POS_SECRET") || "";
+
+    fetch(WEBAPP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "finalize_checkout",
+        order_id,
+        session_id,
+        secret: POS_SECRET,
+        items: cart
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) throw new Error(data.error || "Finalize failed");
+      localStorage.removeItem("cart");
+      document.body.innerHTML = "<h2>All set ✅</h2><p>Your order is confirmed. Thank you!</p><p><a href='index.html'>Back to store</a></p>";
+    })
+    .catch(err => {
+      document.body.innerHTML = "<h2>Payment received ✅</h2><p>But we couldn’t finalize inventory automatically.</p><p>Please contact FlashBidz.</p><pre style='white-space:pre-wrap'>" + String(err) + "</pre>";
+    });
+  </script>
+</body>
+</html>
