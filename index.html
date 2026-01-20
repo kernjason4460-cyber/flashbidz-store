@@ -1906,7 +1906,8 @@
     const CART_STORAGE_KEY = "flashbidz_cart_v3";
     const THEME_STORAGE_KEY = "flashbidz_theme";
     const TAX_RATE = 0.06;
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx0EwPE0_qa5M4NZyO-9862xLusrMFTtPiGwigbYxesITBuCpbuoS7yfKIDoVFCVBos/exec";
+    window.APPS_SCRIPT_URL = window.APPS_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbx0EwPE0_qa5M4NZyO-9862xLusrMFTtPiGwigbYxesITBuCpbuoS7yfKIDoVFCVBos/exec";
+    window.setPayButtonsEnabled = window.setPayButtonsEnabled || function(){};
     let allProducts = [];
     let filteredProducts = [];
     let cart = [];
@@ -2061,7 +2062,7 @@ function getOrderId_() {
 async function loadProducts() {
   if (!el.productGrid) return;
 
-  const url = APPS_SCRIPT_URL + "?action=products&t=" + Date.now();
+  const url = window.APPS_SCRIPT_URL + "?action=products&t=" + Date.now();
   console.log("Loading products from:", url);
 
   try {
@@ -2702,7 +2703,7 @@ async function handleCheckout() {
       el.checkoutBtn.style.opacity = "0.7";
     }
 
-    const res = await fetch(APPS_SCRIPT_URL, {
+    const res = await fetch(window.APPS_SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
