@@ -125,7 +125,8 @@
     const STRIPE_PRICE_ID = "price_REPLACE_ME"; // same Price ID you use on index.html
     const MI_TAX_RATE = 0.06;
     const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx0EwPE0_qa5M4NZyO-9862xLusrMFTtPiGwigbYxesITBuCpbuoS7yfKIDoVFCVBos/exec";
+    
     let PRODUCTS = [];
     let CART = {};
     const CART_KEY = "flashbidz_cart_v1";
@@ -396,15 +397,15 @@
         return;
       }
 
-      try {
-        const res = await fetch("products.json?" + Date.now());
-        const data = await res.json();
-        PRODUCTS = data.products || [];
-      } catch (err) {
-        console.error("Error loading products.json", err);
-        renderProductDetail(null);
-        return;
-      }
+     try {
+  const res = await fetch(APPS_SCRIPT_URL + "?action=products&t=" + Date.now());
+  const data = await res.json();
+  PRODUCTS = data.products || [];
+} catch (err) {
+  console.error("Error loading products from Apps Script", err);
+  renderProductDetail(null);
+  return;
+}
 
       restoreCartFromStorage();
 
