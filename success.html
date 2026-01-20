@@ -1,92 +1,67 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Payment Success • FlashBidz</title>
+  <title>Payment Successful — FlashBidz</title>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 24px; }
-    .card { max-width: 720px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 16px; padding: 18px; }
-    .ok { font-weight: 800; font-size: 20px; }
-    .muted { color: #6b7280; }
-    pre { white-space: pre-wrap; background: #f3f4f6; padding: 12px; border-radius: 12px; overflow:auto; }
-    a { color: inherit; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; padding: 24px; background:#0b1220; color:#fff; }
+    .card { max-width: 720px; margin: 0 auto; background:#111b33; border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:20px; }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    p { margin: 10px 0; color: rgba(255,255,255,.85); line-height:1.5; }
+    .muted { color: rgba(255,255,255,.7); font-size: 14px; }
+    .ok { display:inline-block; margin-top: 10px; padding:10px 14px; border-radius:999px; background: linear-gradient(90deg,#ef4444,#f97316); color:#fff; font-weight:700; border:0; }
+    .err { color: #fecaca; background: rgba(239,68,68,.12); padding: 10px 12px; border-radius: 12px; border:1px solid rgba(239,68,68,.35); }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="ok">Payment received ✅</div>
-    <p class="muted">Finalizing your order and updating inventory…</p>
-    <p id="status">Working…</p>
-    <pre id="debug" style="display:none"></pre>
-    <p><a href="index.html">Back to store</a></p>
+    <h1>✅ Payment successful</h1>
+    <p id="status">Finalizing your order…</p>
+    <p class="muted" id="orderid"></p>
+    <div id="error" class="err" style="display:none;"></div>
+    <a class="ok" href="/">Back to Store</a>
   </div>
 
   <script>
-    // MUST match your index.html constants/keys
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxV6DzPPsVe2CuZPXez1BTnNwFfEjdvAvg29aq2C5qXLYmZh4p7rmrqJN1SjGWl_R29/exec";
-    const CART_STORAGE_KEY = "flashbidz_cart_v3";
+    const APPS_SCRIPT_URL = "YOUR_APPS_SCRIPT_EXEC_URL_HERE"; // <-- paste your /exec URL here
 
-    const statusEl = document.getElementById("status");
-    const debugEl = document.getElementById("debug");
-
-    function showDebug(obj) {
-      debugEl.style.display = "block";
-      debugEl.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+    function qs(name) {
+      return new URLSearchParams(window.location.search).get(name);
     }
 
-    async function finalize() {
-      const params = new URLSearchParams(location.search);
-      const session_id = params.get("session_id");
-      const order_id = params.get("order_id");
-
-      if (!session_id || !order_id) {
-        statusEl.textContent = "Missing session_id or order_id in URL.";
-        showDebug({ session_id, order_id, hint: "Your Apps Script success_url must include both." });
+    async function run() {
+      const sessionId = qs("session_id");
+      if (!sessionId) {
+        document.getElementById("status").textContent = "Missing session_id. Please contact FlashBidz.";
         return;
-      }
-
-      let cartSnapshot = [];
-      try {
-        cartSnapshot = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
-      } catch (_) {}
-
-      if (!Array.isArray(cartSnapshot) || cartSnapshot.length === 0) {
-        // Not fatal — some browsers clear storage, but it’s helpful to know
-        statusEl.textContent = "Paid ✅ but cart snapshot not found. Finalizing anyway…";
       }
 
       try {
         const res = await fetch(APPS_SCRIPT_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "finalize_checkout",
-            orderId: order_id,
-            session_id,
-            items: cartSnapshot
-          })
+          body: JSON.stringify({ action: "finalize_checkout", session_id: sessionId })
         });
 
         const data = await res.json();
+        if (!data.success) throw new Error(data.error || "Could not finalize order.");
 
-        if (!data.success) {
-          statusEl.textContent = "Payment received ✅ but finalize failed.";
-          showDebug(data);
-          return;
+        document.getElementById("status").textContent =
+          "Order confirmed! Inventory has been updated. We’ll contact you if needed.";
+        if (data.orderId) {
+          document.getElementById("orderid").textContent = "Order ID: " + data.orderId;
         }
-
-        // Clear cart after finalization
-        try { localStorage.removeItem(CART_STORAGE_KEY); } catch (_) {}
-
-        statusEl.innerHTML = "All set ✅ Your order is confirmed.<br><br><strong>Order:</strong> " + order_id;
       } catch (err) {
-        statusEl.textContent = "Payment received ✅ but finalize request crashed.";
-        showDebug(String(err));
+        document.getElementById("status").textContent =
+          "Payment received, but we could not finalize inventory automatically.";
+        const box = document.getElementById("error");
+        box.style.display = "block";
+        box.textContent = "Error: " + (err.message || err);
       }
     }
 
-    finalize();
+    run();
   </script>
 </body>
 </html>
