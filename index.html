@@ -1917,6 +1917,24 @@
     let checkoutSubmitted = false;
     let lastSubmittedTotal = 0;  
 
+const LAST_SUBMITTED_TOTAL_KEY = "flashbidz_last_submitted_total_v1";
+
+function loadLastSubmittedTotal() {
+  try {
+    const raw = localStorage.getItem(LAST_SUBMITTED_TOTAL_KEY);
+    lastSubmittedTotal = raw ? Number(raw) : 0;
+    if (Number.isNaN(lastSubmittedTotal)) lastSubmittedTotal = 0;
+  } catch (e) {
+    lastSubmittedTotal = 0;
+  }
+}
+
+function saveLastSubmittedTotal(total) {
+  try {
+    localStorage.setItem(LAST_SUBMITTED_TOTAL_KEY, String(Number(total || 0)));
+  } catch (e) {}
+}
+    
 function getOrderId_() {
   const d = new Date();
   const y = d.getFullYear();
@@ -2674,7 +2692,8 @@ async function handleCheckout() {
   const subtotal = cartSnapshot.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = +(subtotal * TAX_RATE).toFixed(2);
   const grandTotal = subtotal + tax + (fulfillment === "shipping" ? shippingCost : 0);
-
+lastSubmittedTotal = grandTotal;
+saveLastSubmittedTotal(grandTotal);
   // Create order ID
   lastOrderId = getOrderId_();
 
