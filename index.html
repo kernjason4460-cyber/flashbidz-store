@@ -2069,8 +2069,17 @@ async function loadProducts() {
     const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) throw new Error("HTTP " + response.status);
 
-    const data = await response.json();
-    console.log("Products raw response:", data);
+    const text = await response.text();
+console.log("Products raw text:", text.slice(0, 300)); // shows first 300 chars
+
+let data;
+try {
+  data = JSON.parse(text);
+} catch (e) {
+  throw new Error("Not JSON returned from Apps Script. First 300 chars: " + text.slice(0, 300));
+}
+
+console.log("Products raw response (JSON):", data);
 
     const products = Array.isArray(data?.products) ? data.products : [];
 
