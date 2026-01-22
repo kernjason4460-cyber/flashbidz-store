@@ -2433,7 +2433,7 @@ console.log("Products raw response (JSON):", data);
       renderCart();
     }
 
-    function updateCartSummary() {
+function updateCartSummary() {
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const subtotal = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
@@ -2445,11 +2445,8 @@ console.log("Products raw response (JSON):", data);
 
   const total = subtotal + tax + shipping;
 
-  // Track current cart total
-  currentCartTotal = total;
-
-  // If cart is empty, show last submitted total (amount due)
-  
+  // ✅ Always display the current cart total (no "last submitted total" feature)
+  const displayTotal = total;
 
   // Counts
   if (el.cartCount) el.cartCount.textContent = String(itemCount);
