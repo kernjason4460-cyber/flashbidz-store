@@ -2446,7 +2446,7 @@ function updateCartSummary() {
   const total = subtotal + tax + shipping;
 
   // ✅ Always display the current cart total (no "last submitted total" feature)
-  const displayTotal = total;
+  const total = total;
 
   // Counts
   if (el.cartCount) el.cartCount.textContent = String(itemCount);
@@ -2458,11 +2458,11 @@ function updateCartSummary() {
   if (el.cartSubtotal) el.cartSubtotal.textContent = "$" + subtotal.toFixed(2);
   if (el.cartTax) el.cartTax.textContent = "$" + tax.toFixed(2);
   if (el.cartShipping) el.cartShipping.textContent = "$" + shipping.toFixed(2);
-  if (el.cartTotalBottom) el.cartTotalBottom.textContent = "$" + displayTotal.toFixed(2);
+  if (el.cartTotalBottom) el.cartTotalBottom.textContent = "$" + total.toFixed(2);
 
   // Totals in top/bottom bars
-  if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + displayTotal.toFixed(2);
-  if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + displayTotal.toFixed(2);
+  if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + total.toFixed(2);
+  if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + total.toFixed(2);
 }
     function renderCart() {
       if (!el.cartItems) return;
