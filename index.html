@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+// Always show the current cart total (no "last submitted total" feature)
+const displayTotal = total;<!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
@@ -2436,18 +2437,17 @@ console.log("Products raw response (JSON):", data);
 function updateCartSummary() {
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  
   const subtotal = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
   const tax = +(subtotal * TAX_RATE).toFixed(2);
 
-const shipping = el.fulfillmentShipping && el.fulfillmentShipping.checked
-  ? Number(shippingAmount || 0)
-  : 0;
+  const shipping = el.fulfillmentShipping && el.fulfillmentShipping.checked
+    ? Number(shippingAmount || 0)
+    : 0;
 
-const total = subtotal + tax + shipping;
+  const total = subtotal + tax + shipping;
 
-// Always show the current cart total (no "last submitted total" feature)
-const displayTotal = total;
+  // Always show the current cart total (no "last submitted total" feature)
+  const displayTotal = total;
 
   // Counts
   if (el.cartCount) el.cartCount.textContent = String(itemCount);
@@ -2459,11 +2459,11 @@ const displayTotal = total;
   if (el.cartSubtotal) el.cartSubtotal.textContent = "$" + subtotal.toFixed(2);
   if (el.cartTax) el.cartTax.textContent = "$" + tax.toFixed(2);
   if (el.cartShipping) el.cartShipping.textContent = "$" + shipping.toFixed(2);
-  if (el.cartTotalBottom) el.cartTotalBottom.textContent = "$" + displaytotal.toFixed(2);
+  if (el.cartTotalBottom) el.cartTotalBottom.textContent = "$" + displayTotal.toFixed(2);
 
   // Totals in top/bottom bars
-  if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + displaytotal.toFixed(2);
-  if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + displaytotal.toFixed(2);
+  if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + displayTotal.toFixed(2);
+  if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + displayTotal.toFixed(2);
 }
     function renderCart() {
       if (!el.cartItems) return;
