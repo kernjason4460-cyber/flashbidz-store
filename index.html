@@ -2436,14 +2436,18 @@ console.log("Products raw response (JSON):", data);
 function updateCartSummary() {
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  
   const subtotal = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
   const tax = +(subtotal * TAX_RATE).toFixed(2);
 
-  const shipping = el.fulfillmentShipping && el.fulfillmentShipping.checked
-    ? Number(shippingAmount || 0)
-    : 0;
+const shipping = el.fulfillmentShipping && el.fulfillmentShipping.checked
+  ? Number(shippingAmount || 0)
+  : 0;
 
-  const total = subtotal + tax + shipping;
+const total = subtotal + tax + shipping;
+
+// If cart is empty, show last submitted total (amount due)
+const displayTotal = cart.length ? total : Number(lastSubmittedTotal || 0);
 
   // Counts
   if (el.cartCount) el.cartCount.textContent = String(itemCount);
