@@ -2445,9 +2445,6 @@ function updateCartSummary() {
 
   const total = subtotal + tax + shipping;
 
-  // ✅ Always display the current cart total (no "last submitted total" feature)
-  const total = total;
-
   // Counts
   if (el.cartCount) el.cartCount.textContent = String(itemCount);
   if (el.cartCountS) el.cartCountS.textContent = itemCount === 1 ? "" : "s";
