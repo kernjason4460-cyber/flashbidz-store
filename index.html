@@ -32,6 +32,33 @@ const displayTotal = total;<!DOCTYPE html>
       --shadow-soft: 0 14px 30px rgba(15, 23, 42, 0.16);
     }
 
+    /* Toast popup */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 90px;
+  transform: translateX(-50%);
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #fff;
+  font-size: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease;
+  z-index: 9999;
+  max-width: calc(100vw - 24px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-6px);
+}
+    
     [data-theme="dark"] {
       --bg: #020617;
       --bg-alt: #020617;
@@ -1871,6 +1898,8 @@ const displayTotal = total;<!DOCTYPE html>
   <source src="sounds/add-to-cart.mp3" type="audio/mpeg" />
 </audio>
 
+<div id="toast" class="toast hidden"></div>
+  
 <audio id="remove-from-cart-sound" preload="auto">
   <source src="sounds/remove-from-cart.mp3" type="audio/mpeg" />
 </audio>
@@ -2052,8 +2081,8 @@ function getOrderId_() {
         const product = allProducts.find((p) => p.sku === el.modal.dataset.sku);
         if (product) {
           addToCart(product);
-          playAddToCartSound();
-          closeModal();
+playAddToCartSound();
+showToast("Added: " + (product.title || "item"));
         }
       });
     }
@@ -2078,6 +2107,32 @@ try {
   throw new Error("Not JSON returned from Apps Script. First 300 chars: " + text.slice(0, 300));
 }
 
+    async function fetchJson(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20000); // 20s timeout
+
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+
+    const text = await res.text(); // read text first so we can diagnose non-JSON
+    let data = null;
+    try { data = JSON.parse(text); } catch (_) {}
+
+    if (!res.ok) {
+      const msg = (data && (data.error || data.message)) || `HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+
+    if (!data) {
+      throw new Error("Server did not return JSON (check Apps Script deployment)");
+    }
+
+    return data;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+    
 console.log("Products raw response (JSON):", data);
 
     const products = Array.isArray(data?.products) ? data.products : [];
@@ -2104,12 +2159,12 @@ console.log("Products raw response (JSON):", data);
     renderProducts(filteredProducts);
 
   } catch (err) {
-    console.error("Error loading products:", err);
-
-    // This message will show on the page so you don’t stare at a blank grid
-    el.productGrid.innerHTML =
-      "<p>Could not load products. Open DevTools → Console. If you see a CORS error, tell me.</p>";
-  }
+  console.error("Checkout error:", err);
+  alert(
+    "Checkout error: " +
+      (err.message || err) +
+      "\n\nTip: If this keeps happening, refresh and try once more. If it still fails, tell me what you see in DevTools → Console."
+  );
 }
     function buildCategoryOptions(products) {
       if (!el.filterCategory) return;
@@ -2266,7 +2321,8 @@ console.log("Products raw response (JSON):", data);
         const addBtn = card.querySelector(".add-to-cart-btn");
         addBtn.addEventListener("click", () => {
           addToCart(product);
-          playAddToCartSound();
+playAddToCartSound();
+showToast("Added: " + (product.title || "item"));
         });
 
         const detailsBtn = card.querySelector(".view-details-btn");
@@ -2428,6 +2484,8 @@ console.log("Products raw response (JSON):", data);
 
     function clearCart() {
       if (!cart.length) return;
+      if (checkoutSubmitted) return;
+      checkoutSubmitted = true;
       if (!confirm("Clear all items from your cart?")) return;
       cart = [];
       saveCartToStorage();
@@ -2485,10 +2543,10 @@ function updateCartSummary() {
           row.innerHTML = `
             <div class="cart-item-main">
               <div class="cart-item-thumb">
-                <img src="${item.image}" alt="${escapeHtml(item.title)}">
+                <img src="${item.image}" alt="${(item.title)}">
               </div>
               <div class="cart-item-info">
-                <div class="cart-item-title">${escapeHtml(item.title)}</div>
+                <div class="cart-item-title">${(item.title)}</div>
                 <div class="cart-item-sku">SKU: ${item.sku}</div>
                 <div class="cart-item-price">$${price}</div>
               </div>
@@ -2619,12 +2677,50 @@ function updateCartSummary() {
       updateCartSummary();
     }
 
+    async function fetchJson(url, options = {}, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(url, {
+      mode: "cors",
+      cache: "no-store",
+      ...options,
+      signal: controller.signal,
+    });
+
+    // Some failures come back as HTML instead of JSON (Apps Script errors)
+    const text = await res.text();
+    let data = null;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch (_) {}
+
+    if (!res.ok) {
+      const msg = (data && (data.error || data.message)) || text || `HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+
+    if (!data) throw new Error("Server returned non-JSON response.");
+    return data;
+
+  } catch (err) {
+    if (err.name === "AbortError") throw new Error("Request timed out. Try again.");
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+    
 async function handleCheckout() {
   if (!cart.length) {
     alert("Your cart is empty.");
     return;
   }
 
+  if (checkoutSubmitted) return;
+checkoutSubmitted = true;
+  
   const name = (el.checkoutName?.value || "").trim();
   const contact = (el.checkoutContact?.value || "").trim();
   const notes = (el.checkoutNotes?.value || "").trim();
@@ -2708,11 +2804,15 @@ async function handleCheckout() {
       el.checkoutBtn.style.opacity = "0.7";
     }
 
-    const res = await fetch(window.APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const data = await fetchJson(
+  window.APPS_SCRIPT_URL,
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  },
+  20000 // 20s timeout
+);
 
     const data = await res.json();
     if (!data.success || !data.checkout_url) {
@@ -2726,6 +2826,7 @@ async function handleCheckout() {
     console.error(err);
     alert("Checkout error: " + (err.message || err));
   } finally {
+    checkoutSubmitted = false;
     if (el.checkoutBtn) {
       el.checkoutBtn.disabled = false;
       el.checkoutBtn.style.opacity = "1";
@@ -2760,6 +2861,31 @@ async function handleCheckout() {
         .replace(/'/g, "&#039;");
     }
 
+  let toastTimer = null;
+
+function showToast(message) {
+  const t = document.getElementById("toast");
+  if (!t) return;
+
+  t.textContent = message || "Added to cart";
+  t.classList.add("show");
+
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 1600);
+}
+
+function playAddToCartSound() {
+  const audio = document.getElementById("add-to-cart-sound");
+  if (!audio) return;
+
+  // Avoid autoplay restrictions: only plays when triggered by a user click
+  try {
+    audio.currentTime = 0;
+    const p = audio.play();
+    if (p && typeof p.catch === "function") p.catch(() => {});
+  } catch (_) {}
+}
+  
     function openProductModal(product) {
       if (!el.modal) return;
 
@@ -2843,5 +2969,13 @@ async function handleCheckout() {
       }
     }
   </script>
+<!-- Toast (little popup confirmation) -->
+<div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Add-to-cart sound -->
+<audio id="add-to-cart-sound" preload="auto">
+  <!-- You can replace this file path with any mp3 you upload -->
+  <source src="sounds/add.mp3" type="audio/mpeg">
+</audio>
 </body>
 </html>
