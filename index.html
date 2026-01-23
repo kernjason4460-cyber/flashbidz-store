@@ -1934,8 +1934,8 @@ function getOrderId_() {
       cacheDom();
       initTheme();
       bindEvents();
-      loadCartFromStorage();
       loadProducts();
+      loadCartFromStorage();
       setCurrentYear();
       handleFulfillmentChange();
     });
@@ -2446,8 +2446,8 @@ const shipping = el.fulfillmentShipping && el.fulfillmentShipping.checked
 
 const total = subtotal + tax + shipping;
 
-// If cart is empty, show last submitted total (amount due)
-const displayTotal = cart.length ? total : Number(lastSubmittedTotal || 0);
+// Always show the current cart total (no "last submitted total" feature)
+const displayTotal = total;
 
   // Counts
   if (el.cartCount) el.cartCount.textContent = String(itemCount);
@@ -2459,11 +2459,11 @@ const displayTotal = cart.length ? total : Number(lastSubmittedTotal || 0);
   if (el.cartSubtotal) el.cartSubtotal.textContent = "$" + subtotal.toFixed(2);
   if (el.cartTax) el.cartTax.textContent = "$" + tax.toFixed(2);
   if (el.cartShipping) el.cartShipping.textContent = "$" + shipping.toFixed(2);
-  if (el.cartTotalBottom) el.cartTotalBottom.textContent = "$" + total.toFixed(2);
+  if (el.cartTotalBottom) el.cartTotalBottom.textContent = "$" + displaytotal.toFixed(2);
 
   // Totals in top/bottom bars
-  if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + total.toFixed(2);
-  if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + total.toFixed(2);
+  if (el.cartTotalTop) el.cartTotalTop.textContent = "$" + displaytotal.toFixed(2);
+  if (el.cartTotalBottomBar) el.cartTotalBottomBar.textContent = "$" + displaytotal.toFixed(2);
 }
     function renderCart() {
       if (!el.cartItems) return;
