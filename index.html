@@ -2106,22 +2106,6 @@ try {
   throw new Error("Not JSON returned from Apps Script. First 300 chars: " + text.slice(0, 300));
 }
 
-    async function fetchJson(url, options = {}) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20000); // 20s timeout
-
-  try {
-    const res = await fetch(url, { ...options, signal: controller.signal });
-
-    const text = await res.text(); // read text first so we can diagnose non-JSON
-    let data = null;
-    try { data = JSON.parse(text); } catch (_) {}
-
-    if (!res.ok) {
-      const msg = (data && (data.error || data.message)) || `HTTP ${res.status}`;
-      throw new Error(msg);
-    }
-
     if (!data) {
       throw new Error("Server did not return JSON (check Apps Script deployment)");
     }
@@ -2157,14 +2141,13 @@ console.log("Products raw response (JSON):", data);
     filteredProducts = sortProducts(withIndex, el.sortSelect?.value || "featured");
     renderProducts(filteredProducts);
 
-  } catch (err) {
-  console.error("Checkout error:", err);
-  alert(
-    "Checkout error: " +
-      (err.message || err) +
-      "\n\nTip: If this keeps happening, refresh and try once more. If it still fails, tell me what you see in DevTools → Console."
-  );
-}
+    } catch (err) {
+    console.error("Products load error:", err);
+    el.productGrid.innerHTML =
+      "<p style='padding:12px'>Could not load products. Check DevTools Console.</p>";
+  }
+} // ✅ THIS closes loadProducts()
+    
     function buildCategoryOptions(products) {
       if (!el.filterCategory) return;
 
