@@ -2813,7 +2813,6 @@ checkoutSubmitted = true;
   20000 // 20s timeout
 );
 
-    const data = await res.json();
     if (!data.success || !data.checkout_url) {
       throw new Error(data.error || "Could not create Stripe Checkout session.");
     }
