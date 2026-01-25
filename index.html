@@ -2086,7 +2086,37 @@ showToast("Added: " + (product.title || "item"));
       });
     }
 
-async function loadProducts() {
+async function fetchJson(url, options = {}, timeoutMs = 20000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        "Accept": "application/json",
+        ...(options.headers || {})
+      }
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`HTTP ${res.status}: ${text}`);
+    }
+
+    return await res.json();
+  } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error("Request timed out.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(id);
+  }
+}
+    
+  async function loadProducts() {
   if (!el.productGrid) return;
 
   const url = window.APPS_SCRIPT_URL + "?action=products&t=" + Date.now();
@@ -2452,14 +2482,15 @@ showToast("Added: " + (product.title || "item"));
     }
 
     function clearCart() {
-      if (!cart.length) return;
-      if (checkoutSubmitted) return;
-      checkoutSubmitted = true;
-      if (!confirm("Clear all items from your cart?")) return;
-      cart = [];
-      saveCartToStorage();
-      renderCart();
-    }
+  if (!cart.length) return;
+  if (checkoutSubmitted) return;
+
+  if (!confirm("Clear all items from your cart?")) return;
+
+  cart = [];
+  saveCartToStorage();
+  renderCart();
+}
 
 function updateCartSummary() {
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -2688,8 +2719,7 @@ async function handleCheckout() {
   }
 
   if (checkoutSubmitted) return;
-checkoutSubmitted = true;
-  
+
   const name = (el.checkoutName?.value || "").trim();
   const contact = (el.checkoutContact?.value || "").trim();
   const notes = (el.checkoutNotes?.value || "").trim();
@@ -2728,6 +2758,9 @@ checkoutSubmitted = true;
     shippingCost = Number(shippingAmount || 0);
   }
 
+  // ✅ Lock submission ONLY after all validation passes
+  checkoutSubmitted = true;
+
   // Snapshot cart
   const cartSnapshot = cart.map((item) => ({ ...item }));
 
@@ -2739,12 +2772,12 @@ checkoutSubmitted = true;
   // Create order ID
   lastOrderId = getOrderId_();
 
-  // ✅ Save cart snapshot for success.html (so we can finalize stock after payment)
+  // Save cart snapshot (optional)
   try {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartSnapshot));
   } catch (_) {}
 
-  // Payload to Apps Script to create Stripe Checkout session
+  // Payload
   const payload = {
     action: "create_checkout",
     channel: "FBZ_STORE",
@@ -2773,21 +2806,19 @@ checkoutSubmitted = true;
       el.checkoutBtn.style.opacity = "0.7";
     }
 
-    const data = await fetchJson(
-  window.APPS_SCRIPT_URL,
-  {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(payload),
-  },
-  20000
-);
+    // ✅ IMPORTANT: use GET with payload param to avoid CORS/405
+    const url =
+      window.APPS_SCRIPT_URL +
+      "?payload=" +
+      encodeURIComponent(JSON.stringify(payload)) +
+      "&t=" + Date.now();
+
+    const data = await fetchJson(url, { method: "GET" }, 20000);
 
     if (!data.success || !data.checkout_url) {
       throw new Error(data.error || "Could not create Stripe Checkout session.");
     }
 
-    // ✅ Redirect to Stripe Checkout
     window.location.href = data.checkout_url;
 
   } catch (err) {
