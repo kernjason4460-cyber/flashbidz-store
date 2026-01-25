@@ -1932,16 +1932,6 @@
 
   <!-- MAIN SCRIPT -->
   <script>
-   function fetchJsonp(url, timeoutMs = 15000) {
-  return new Promise((resolve, reject) => {
-    const cb = "__jp" + Math.random().toString(36).slice(2);
-    const sep = url.includes("?") ? "&" : "?";
-    const script = document.createElement("script");
-
-    const cleanup = () => {
-      if (script.parentNode) script.parentNode.removeChild(script);
-      try { delete window[cb]; } catch (_) { window[cb] = undefined; }
-    };
 
     const timer = setTimeout(() => {
       cleanup();
@@ -2147,6 +2137,41 @@ async function fetchJson(url, options = {}, timeoutMs = 20000) {
   } finally {
     clearTimeout(id);
   }
+}
+
+    // ---------- JSONP helper (bypasses CORS) ----------
+function fetchJsonp(url, timeoutMs = 20000) {
+  return new Promise((resolve, reject) => {
+    const cbName = "__fbz_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error("Load failed"));
+    }, timeoutMs);
+
+    function cleanup() {
+      clearTimeout(timer);
+      try { delete window[cbName]; } catch (_) { window[cbName] = undefined; }
+      if (script && script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cbName] = (data) => {
+      cleanup();
+      resolve(data);
+    };
+
+    const sep = url.includes("?") ? "&" : "?";
+    const fullUrl = url + sep + "callback=" + encodeURIComponent(cbName) + "&t=" + Date.now();
+
+    const script = document.createElement("script");
+    script.src = fullUrl;
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("Load failed"));
+    };
+
+    document.head.appendChild(script);
+  });
 }
     
   async function loadProducts() {
@@ -2974,10 +2999,6 @@ function playAddToCartSound() {
         el.themeLabel.textContent = "Light";
         if (el.themeToggle?.firstElementChild) {
           el.themeToggle.firstElementChild.textContent = "☀️";
-
-          document.addEventListener("DOMContentLoaded", () => {
-  loadProducts();
-});
           
         }
       }
