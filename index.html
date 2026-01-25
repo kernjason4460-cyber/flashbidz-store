@@ -2836,7 +2836,13 @@ async function handleCheckout() {
       encodeURIComponent(JSON.stringify(payload)) +
       "&t=" + Date.now();
 
-    const data = await fetchJson(url, { method: "GET" }, 20000);
+    const payloadStr = encodeURIComponent(JSON.stringify(payload));
+const url =
+  window.APPS_SCRIPT_URL +
+  "?action=create_checkout" +
+  "&payload=" + payloadStr;
+
+const data = await fetchJsonp(url, 20000);
 
     if (!data.success || !data.checkout_url) {
   const stripeMsg =
