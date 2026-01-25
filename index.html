@@ -2816,8 +2816,14 @@ async function handleCheckout() {
     const data = await fetchJson(url, { method: "GET" }, 20000);
 
     if (!data.success || !data.checkout_url) {
-      throw new Error(data.error || "Could not create Stripe Checkout session.");
-    }
+  const stripeMsg =
+    data?.stripe?.error?.message ||
+    data?.stripe?.error?.type ||
+    data?.stripe_message ||
+    "";
+
+  throw new Error((data.error || "Checkout failed") + (stripeMsg ? (": " + stripeMsg) : ""));
+}
 
     window.location.href = data.checkout_url;
 
