@@ -2829,6 +2829,39 @@ async function handleCheckout() {
   };
 
   try {
+  const base = "https://script.google.com/macros/s/AKfycbw2PCr8A2ODkE-nPqKAGqKKn7ZNLTxcTDk1AQygGozHro4zYQuZCbxZ_BnTPuVS-mNF/exec";
+
+  const url =
+    base +
+    "?action=create_checkout" +
+    "&payload=" + encodeURIComponent(JSON.stringify(payload));
+
+  // optional UI lock
+  if (el.checkoutBtn) el.checkoutBtn.disabled = true;
+  if (el.checkoutMessage) el.checkoutMessage.textContent = "Redirecting to secure checkout…";
+
+  const res = await fetchJsonp(url);
+
+  if (!res || !res.success) {
+    throw new Error((res && res.error) ? res.error : "Checkout failed");
+  }
+  if (!res.checkout_url) {
+    throw new Error("No checkout_url returned");
+  }
+
+  window.location.href = res.checkout_url;
+  return;
+
+} catch (err) {
+  console.error(err);
+  alert("Checkout error: " + (err && err.message ? err.message : err));
+
+  checkoutSubmitted = false;
+  if (el.checkoutBtn) el.checkoutBtn.disabled = false;
+  if (el.checkoutMessage) el.checkoutMessage.textContent = "";
+}
+  
+  try {
     if (el.checkoutBtn) {
       el.checkoutBtn.disabled = true;
       el.checkoutBtn.style.opacity = "0.7";
