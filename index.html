@@ -1891,13 +1891,6 @@
       Built by local sellers • Fueled by local shoppers
     </p>
   </footer>
-
-<!--
-<audio id="add-to-cart-sound" preload="auto">
-  <source src="sounds/add-to-cart.mp3" type="audio/mpeg" />
-</audio>
-
-<div id="toast" class="toast hidden"></div>
   
 <audio id="remove-from-cart-sound" preload="auto">
   <source src="sounds/remove-from-cart.mp3" type="audio/mpeg" />
@@ -1932,40 +1925,6 @@
 
   <!-- MAIN SCRIPT -->
   <script>
-
- // ---------- JSONP helper (bypasses CORS) ----------
-function fetchJsonp(url, timeoutMs = 20000) {
-  return new Promise((resolve, reject) => {
-    const cbName = "__fbz_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
-    const sep = url.includes("?") ? "&" : "?";
-
-    const script = document.createElement("script");
-
-    const timer = setTimeout(() => {
-      cleanup();
-      reject(new Error("Load failed"));
-    }, timeoutMs);
-
-    function cleanup() {
-      clearTimeout(timer);
-      try { delete window[cbName]; } catch (_) { window[cbName] = undefined; }
-      if (script && script.parentNode) script.parentNode.removeChild(script);
-    }
-
-    window[cbName] = (data) => {
-      cleanup();
-      resolve(data);
-    };
-
-    script.onerror = () => {
-      cleanup();
-      reject(new Error("Load failed"));
-    };
-
-    script.src = url + sep + "callback=" + encodeURIComponent(cbName) + "&t=" + Date.now();
-    document.head.appendChild(script);
-  });
-}
 
     const CART_STORAGE_KEY = "flashbidz_cart_v3";
     const THEME_STORAGE_KEY = "flashbidz_theme";
@@ -2156,7 +2115,6 @@ function fetchJsonp(url, timeoutMs = 20000) {
   return new Promise((resolve, reject) => {
     const cbName = "__fbz_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
     const sep = url.includes("?") ? "&" : "?";
-
     const script = document.createElement("script");
 
     const timer = setTimeout(() => {
@@ -2185,18 +2143,28 @@ function fetchJsonp(url, timeoutMs = 20000) {
   });
 }
     
-  async function loadProducts() {
+async function loadProducts() {
   try {
     const data = await fetchJsonp(
       window.APPS_SCRIPT_URL + "?action=products&t=" + Date.now(),
       20000
     );
 
-    if (!data || !data.products) {
+    if (!data || !Array.isArray(data.products)) {
       throw new Error("No products returned");
     }
 
-    renderProducts(data.products);
+    // ✅ store products for search/filter/sort
+    allProducts = data.products
+      .map((p, idx) => ({ ...p, __index: idx }))
+      .filter((p) => p && p.sku);
+
+    // ✅ build category dropdown + pills
+    buildCategoryOptions(allProducts);
+    buildCategoryPills(allProducts);
+
+    // ✅ show products
+    applyFilters();
 
   } catch (err) {
     console.error("Product load failed", err);
@@ -2838,27 +2806,6 @@ async function handleCheckout() {
       price: item.price,
     })),
   };
-
-  try {
-  const base = "https://script.google.com/macros/s/AKfycbw2PCr8A2ODkE-nPqKAGqKKn7ZNLTxcTDk1AQygGozHro4zYQuZCbxZ_BnTPuVS-mNF/exec";
-
-  const url =
-    base +
-    "?action=create_checkout" +
-    "&payload=" + encodeURIComponent(JSON.stringify(payload));
-
-  // optional UI lock
-  if (el.checkoutBtn) el.checkoutBtn.disabled = true;
-  if (el.checkoutMessage) el.checkoutMessage.textContent = "Redirecting to secure checkout…";
-
-} catch (err) {
-  console.error(err);
-  alert("Checkout error: " + (err && err.message ? err.message : err));
-
-  checkoutSubmitted = false;
-  if (el.checkoutBtn) el.checkoutBtn.disabled = false;
-  if (el.checkoutMessage) el.checkoutMessage.textContent = "";
-}
   
   try {
     if (el.checkoutBtn) {
