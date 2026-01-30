@@ -2842,19 +2842,21 @@ async function handleCheckout() {
       renderCart();
     }
 
-    async function finalizeIfReturnedFromStripe() {
+  async function finalizeIfReturnedFromStripe() {
   const params = new URLSearchParams(window.location.search);
 
-  // We’ll support a few possible query styles:
-  const success = params.get("success") || params.get("checkout") || params.get("paid");
-  const orderId = params.get("orderId") || params.get("order_id") || params.get("oid");
-  const sessionId = params.get("session_id") || "";
+  const success =
+    params.get("success") || params.get("checkout") || params.get("paid");
 
-  // If we didn’t come back from Stripe with an orderId, do nothing.
-  if (!success || !orderId) return;
+  const sessionId = params.get("session_id") || "";
+  const orderId = params.get("orderId") || params.get("order_id") || params.get("oid") || "";
+
+  // ✅ Now we only REQUIRE session_id (orderId is optional)
+  if (!success || !sessionId) return;
 
   try {
-    const payload = { action: "finalize_checkout", orderId, session_id: sessionId };
+    const payload = { action: "finalize_checkout", session_id: sessionId };
+    if (orderId) payload.orderId = orderId; // optional fallback
 
     const url =
       window.APPS_SCRIPT_URL +
