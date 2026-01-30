@@ -1961,6 +1961,7 @@ function getOrderId_() {
       loadCartFromStorage();
       setCurrentYear();
       handleFulfillmentChange();
+      finalizeIfReturnedFromStripe();
     });
     
     function cacheDom() {
@@ -2841,6 +2842,46 @@ async function handleCheckout() {
       renderCart();
     }
 
+    async function finalizeIfReturnedFromStripe() {
+  const params = new URLSearchParams(window.location.search);
+
+  // We’ll support a few possible query styles:
+  const success = params.get("success") || params.get("checkout") || params.get("paid");
+  const orderId = params.get("orderId") || params.get("order_id") || params.get("oid");
+  const sessionId = params.get("session_id") || "";
+
+  // If we didn’t come back from Stripe with an orderId, do nothing.
+  if (!success || !orderId) return;
+
+  try {
+    const payload = { action: "finalize_checkout", orderId, session_id: sessionId };
+
+    const url =
+      window.APPS_SCRIPT_URL +
+      "?action=finalize_checkout" +
+      "&payload=" + encodeURIComponent(JSON.stringify(payload)) +
+      "&t=" + Date.now();
+
+    const data = await fetchJsonp(url, 20000);
+
+    if (!data || !data.success) {
+      throw new Error((data && data.error) ? data.error : "Finalize failed");
+    }
+
+    // ✅ clear cart + refresh inventory from sheet
+    if (typeof clearCartAfterCheckout === "function") clearCartAfterCheckout();
+    await loadProducts();
+
+    // ✅ prevent double-finalize on refresh
+    history.replaceState({}, document.title, window.location.pathname);
+
+    alert("Payment confirmed! Inventory updated.");
+  } catch (err) {
+    console.error("Finalize error:", err);
+    alert("Payment went through, but inventory didn’t update. (Finalize step failed.)");
+  }
+}
+    
     function setCurrentYear() {
       const yearEl = document.getElementById("year");
       if (yearEl) yearEl.textContent = new Date().getFullYear();
