@@ -2145,25 +2145,13 @@ function fetchJsonp(url, timeoutMs = 20000) {
     
 async function loadProducts() {
   try {
-    const data = await fetchJsonp(
-      window.APPS_SCRIPT_URL + "?action=products&t=" + Date.now(),
-      20000
-    );
+    const data = await fetchJsonp(window.APPS_SCRIPT_URL + "?action=products&t=" + Date.now(), 20000);
 
-    if (!data || !Array.isArray(data.products)) {
-      throw new Error("No products returned");
-    }
+    if (!data || !Array.isArray(data.products)) throw new Error("No products returned");
 
-    // ✅ store products for search/filter/sort
-    allProducts = data.products
-      .map((p, idx) => ({ ...p, __index: idx }))
-      .filter((p) => p && p.sku);
-
-    // ✅ build category dropdown + pills
+    allProducts = data.products.map((p, idx) => ({ ...p, __index: idx }));
     buildCategoryOptions(allProducts);
     buildCategoryPills(allProducts);
-
-    // ✅ show products
     applyFilters();
 
   } catch (err) {
