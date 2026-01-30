@@ -1958,7 +1958,7 @@
     const CART_STORAGE_KEY = "flashbidz_cart_v3";
     const THEME_STORAGE_KEY = "flashbidz_theme";
     const TAX_RATE = 0.06;
-    window.APPS_SCRIPT_URL = window.APPS_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbx0EwPE0_qa5M4NZyO-9862xLusrMFTtPiGwigbYxesITBuCpbuoS7yfKIDoVFCVBos/exec";
+    window.APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2PCr8A2ODkE-nPqKAGqKKn7ZNLTxcTDk1AQygGozHro4zYQuZCbxZ_BnTPuVS-mNF/exec";
     window.setPayButtonsEnabled = window.setPayButtonsEnabled || function(){};
     let allProducts = [];
     let filteredProducts = [];
@@ -2139,10 +2139,13 @@ async function fetchJson(url, options = {}, timeoutMs = 20000) {
   }
 }
 
-    // ---------- JSONP helper (bypasses CORS) ----------
+ // ---------- JSONP helper (bypasses CORS) ----------
 function fetchJsonp(url, timeoutMs = 20000) {
   return new Promise((resolve, reject) => {
     const cbName = "__fbz_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+    const sep = url.includes("?") ? "&" : "?";
+
+    const script = document.createElement("script");
 
     const timer = setTimeout(() => {
       cleanup();
@@ -2160,16 +2163,12 @@ function fetchJsonp(url, timeoutMs = 20000) {
       resolve(data);
     };
 
-    const sep = url.includes("?") ? "&" : "?";
-    const fullUrl = url + sep + "callback=" + encodeURIComponent(cbName) + "&t=" + Date.now();
-
-    const script = document.createElement("script");
-    script.src = fullUrl;
     script.onerror = () => {
       cleanup();
       reject(new Error("Load failed"));
     };
 
+    script.src = url + sep + "callback=" + encodeURIComponent(cbName) + "&t=" + Date.now();
     document.head.appendChild(script);
   });
 }
@@ -2839,18 +2838,6 @@ async function handleCheckout() {
   // optional UI lock
   if (el.checkoutBtn) el.checkoutBtn.disabled = true;
   if (el.checkoutMessage) el.checkoutMessage.textContent = "Redirecting to secure checkout…";
-
-  const res = await fetchJsonp(url);
-
-  if (!res || !res.success) {
-    throw new Error((res && res.error) ? res.error : "Checkout failed");
-  }
-  if (!res.checkout_url) {
-    throw new Error("No checkout_url returned");
-  }
-
-  window.location.href = res.checkout_url;
-  return;
 
 } catch (err) {
   console.error(err);
