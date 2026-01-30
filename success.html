@@ -23,12 +23,8 @@
     <a class="ok" href="/">Back to Store</a>
   </div>
 
-  <script>
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx0EwPE0_qa5M4NZyO-9862xLusrMFTtPiGwigbYxesITBuCpbuoS7yfKIDoVFCVBos/exec";
-
-  function qs(name) {
-    return new URLSearchParams(window.location.search).get(name);
-  }
+<script>
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2PCr8A2ODkE-nPqKAGqKKn7ZNLTxcTDk1AQygGozHro4zYQuZCbxZ_BnTPuVS-mNF/exec";
 
   function fetchJsonp(url, timeoutMs = 20000) {
     return new Promise((resolve, reject) => {
@@ -47,31 +43,34 @@
         if (script && script.parentNode) script.parentNode.removeChild(script);
       }
 
-      window[cbName] = (data) => { cleanup(); resolve(data); };
-      script.onerror = () => { cleanup(); reject(new Error("Load failed")); };
+      window[cbName] = (data) => {
+        cleanup();
+        resolve(data);
+      };
 
-      script.src = url + sep + "callback=" + encodeURIComponent(cbName) + "&t=" + Date.now();
+      script.onerror = () => {
+        cleanup();
+        reject(new Error("Load failed"));
+      };
+
+      script.src = url + sep + "action=finalize_checkout"
+        + "&session_id=" + encodeURIComponent(new URLSearchParams(location.search).get("session_id") || "")
+        + "&callback=" + encodeURIComponent(cbName)
+        + "&t=" + Date.now();
+
       document.head.appendChild(script);
     });
   }
 
   async function run() {
-    const sessionId = qs("session_id");
+    const sessionId = new URLSearchParams(location.search).get("session_id");
     if (!sessionId) {
-      document.getElementById("status").textContent =
-        "Missing session_id. Please contact FlashBidz.";
+      document.getElementById("status").textContent = "Missing session_id. Please contact FlashBidz.";
       return;
     }
 
     try {
-      const payload = { session_id: sessionId };
-
-      const url =
-        APPS_SCRIPT_URL +
-        "?action=finalize_checkout" +
-        "&payload=" + encodeURIComponent(JSON.stringify(payload));
-
-      const data = await fetchJsonp(url, 20000);
+      const data = await fetchJsonp(APPS_SCRIPT_URL, 20000);
 
       if (!data || !data.success) {
         throw new Error((data && data.error) ? data.error : "Could not finalize order.");
