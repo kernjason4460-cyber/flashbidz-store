@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FlashBidz POS</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:0; background:#0b1220; color:#fff; }
+    header { padding:16px; border-bottom:1px solid rgba(255,255,255,.12); background:#0e1730; position:sticky; top:0; z-index:10; }
+    h1 { margin:0; font-size:18px; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+    .grid { display:grid; grid-template-columns: 1.3fr .9fr; gap:16px; }
+    @media (max-width: 900px){ .grid{ grid-template-columns:1fr; } }
+    .card { background:#111b33; border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:14px; }
+    label { display:block; font-size:12px; opacity:.8; margin: 0 0 6px; }
+    input, select, button, textarea {
+      width:100%; box-sizing:border-box;
+      border-radius:12px; border:1px solid rgba(255,255,255,.16);
+      background:#0b1220; color:#fff;
+      padding:10px 12px; font-size:14px;
+    }
+    textarea { min-height: 64px; resize: vertical; }
+    button { cursor:pointer; font-weight:700; }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .row3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
+    .btn { background:linear-gradient(90deg,#ef4444,#f97316); border:0; }
+    .btn2 { background:#1b2a55; }
+    .btnDanger { background:#3b0b14; border:1px solid rgba(239,68,68,.35); }
+    table { width:100%; border-collapse: collapse; }
+    th, td { padding:10px 8px; border-bottom:1px solid rgba(255,255,255,.10); text-align:left; font-size:14px; }
+    th { font-size:12px; opacity:.8; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.08); font-size:12px; }
+    .totals { display:grid; gap:8px; }
+    .totals div { display:flex; justify-content:space-between; align-items:center; }
+    .big { font-size:20px; font-weight:800; }
+    .muted { opacity:.8; font-size:12px; }
+    .err { color:#fecaca; background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.35); padding:10px 12px; border-radius:12px; display:none; }
+    .ok { color:#bbf7d0; background:rgba(34,197,94,.10); border:1px solid rgba(34,197,94,.25); padding:10px 12px; border-radius:12px; display:none; }
+    .qtyBox { display:flex; gap:8px; align-items:center; }
+    .qtyBox button { width:auto; padding:8px 10px; }
+    .qtyBox input { width:70px; text-align:center; }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap" style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+    <div>
+      <h1>FlashBidz POS</h1>
+      <div class="muted">Scan SKU → add to cart → charge with Stripe</div>
+    </div>
+    <div class="pill mono" id="statusPill">Loading products…</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+
+    <!-- LEFT: Scan + Cart -->
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>Scan or type SKU</label>
+          <input id="skuInput" class="mono" placeholder="FBZ-..." autocomplete="off" />
+          <div class="muted" style="margin-top:6px;">Tip: barcode scanners type then press Enter.</div>
+        </div>
+        <div>
+          <label>Find by title (optional)</label>
+          <input id="searchInput" placeholder="Start typing…" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <button class="btn2" id="addBtn" type="button">Add to cart</button>
+        <button class="btnDanger" id="clearBtn" type="button">Clear cart</button>
+      </div>
+
+      <div id="msgErr" class="err" style="margin-top:10px;"></div>
+      <div id="msgOk" class="ok" style="margin-top:10px;"></div>
+
+      <div style="margin-top:14px;">
+        <table>
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Title</th>
+              <th style="width:130px;">Qty</th>
+              <th style="width:110px;">Price</th>
+              <th style="width:120px;">Line</th>
+              <th style="width:60px;"></th>
+            </tr>
+          </thead>
+          <tbody id="cartBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT: Customer + Totals + Pay -->
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>Buyer name</label>
+          <input id="buyerName" value="Walk-in" />
+        </div>
+        <div>
+          <label>Contact (optional)</label>
+          <input id="buyerContact" placeholder="phone/email" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label>Fulfillment</label>
+          <select id="fulfillment">
+            <option value="in_store" selected>In-store</option>
+            <option value="pickup">Pickup</option>
+            <option value="shipping">Shipping</option>
+          </select>
+        </div>
+        <div>
+          <label>Shipping $ (only if needed)</label>
+          <input id="shipping" type="number" step="0.01" value="0" />
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <label>Notes (optional)</label>
+        <textarea id="notes" placeholder="Receipt notes…"></textarea>
+      </div>
+
+      <div class="totals" style="margin-top:14px;">
+        <div><span class="muted">Subtotal</span><strong id="sub">$0.00</strong></div>
+        <div><span class="muted">Tax (6%)</span><strong id="tax">$0.00</strong></div>
+        <div><span class="muted">Shipping</span><strong id="ship">$0.00</strong></div>
+        <div style="border-top:1px solid rgba(255,255,255,.12); padding-top:10px;">
+          <span class="muted">Total</span><span class="big" id="total">$0.00</span>
+        </div>
+      </div>
+
+      <button class="btn" id="payBtn" type="button" style="margin-top:14px;">Pay with Stripe</button>
+      <div class="muted" style="margin-top:8px;">
+        This will create an <span class="mono">Orders</span> row as <b>PENDING</b>, then <span class="mono">success.html</span> finalizes inventory and writes <span class="mono">Order_Items</span>.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // 🔧 PUT YOUR APPS SCRIPT URL HERE
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2PCr8A2ODkE-nPqKAGqKKn7ZNLTxcTDk1AQygGozHro4zYQuZCbxZ_BnTPuVS-mNF/exec";
+  const TAX_RATE = 0.06;
+
+  // JSONP helper (same style you used in success.html)
+  function fetchJsonp(url, timeoutMs = 20000) {
+    return new Promise((resolve, reject) => {
+      const cbName = "__fbz_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+      const sep = url.includes("?") ? "&" : "?";
+      const script = document.createElement("script");
+      let timer;
+
+      function cleanup() {
+        if (timer) clearTimeout(timer);
+        try { delete window[cbName]; } catch(e){}
+        if (script && script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      window[cbName] = (data) => { cleanup(); resolve(data); };
+
+      timer = setTimeout(() => { cleanup(); reject(new Error("Load failed")); }, timeoutMs);
+
+      script.src = url + sep + "callback=" + encodeURIComponent(cbName);
+      script.onerror = () => { cleanup(); reject(new Error("Load failed")); };
+
+      document.head.appendChild(script);
+    });
+  }
+
+  function money(n){ return "$" + (Number(n||0)).toFixed(2); }
+  function showErr(msg){ const el=document.getElementById("msgErr"); el.style.display="block"; el.textContent=msg; document.getElementById("msgOk").style.display="none"; }
+  function showOk(msg){ const el=document.getElementById("msgOk"); el.style.display="block"; el.textContent=msg; document.getElementById("msgErr").style.display="none"; }
+
+  // State
+  let productsBySku = {};
+  let cart = []; // {sku,title,price,qty}
+
+  function loadCart(){
+    try { cart = JSON.parse(localStorage.getItem("fbz_pos_cart")||"[]"); } catch(e){ cart=[]; }
+  }
+  function saveCart(){ localStorage.setItem("fbz_pos_cart", JSON.stringify(cart)); }
+
+  function recalc(){
+    const subtotal = cart.reduce((s,it)=> s + (Number(it.price||0)*Number(it.qty||0)), 0);
+    const tax = +(subtotal * TAX_RATE).toFixed(2);
+    const shipping = +Number(document.getElementById("shipping").value || 0).toFixed(2);
+    const total = +(subtotal + tax + shipping).toFixed(2);
+    document.getElementById("sub").textContent = money(subtotal);
+    document.getElementById("tax").textContent = money(tax);
+    document.getElementById("ship").textContent = money(shipping);
+    document.getElementById("total").textContent = money(total);
+    return { subtotal, tax, shipping, grand_total: total };
+  }
+
+  function renderCart(){
+    const tb = document.getElementById("cartBody");
+    tb.innerHTML = "";
+    cart.forEach((it, idx) => {
+      const tr = document.createElement("tr");
+      const line = Number(it.price||0)*Number(it.qty||0);
+      tr.innerHTML = `
+        <td class="mono">${it.sku}</td>
+        <td>${it.title || ""}</td>
+        <td>
+          <div class="qtyBox">
+            <button type="button" data-act="dec" data-idx="${idx}">-</button>
+            <input type="number" min="1" step="1" value="${it.qty}" data-act="qty" data-idx="${idx}">
+            <button type="button" data-act="inc" data-idx="${idx}">+</button>
+          </div>
+        </td>
+        <td>${money(it.price)}</td>
+        <td>${money(line)}</td>
+        <td><button type="button" class="btnDanger" data-act="rm" data-idx="${idx}">X</button></td>
+      `;
+      tb.appendChild(tr);
+    });
+    recalc();
+  }
+
+  function addSkuToCart(sku){
+    sku = String(sku||"").trim();
+    if(!sku){ showErr("Enter a SKU."); return; }
+    const p = productsBySku[sku];
+    if(!p){ showErr("SKU not found: " + sku); return; }
+
+    const existing = cart.find(x => x.sku === sku);
+    if(existing){
+      existing.qty = Number(existing.qty||1) + 1;
+    } else {
+      cart.push({
+        sku,
+        title: p.title || "",
+        price: Number(p.price||0),
+        qty: 1
+      });
+    }
+    saveCart();
+    renderCart();
+    showOk("Added: " + sku);
+  }
+
+  async function loadProducts(){
+    const pill = document.getElementById("statusPill");
+    pill.textContent = "Loading products…";
+    const url = APPS_SCRIPT_URL + "?action=products&t=" + Date.now();
+    const data = await fetchJsonp(url, 20000);
+    const list = (data && data.products) ? data.products : [];
+    productsBySku = {};
+    list.forEach(p => {
+      const sku = String(p.sku||"").trim();
+      if(!sku) return;
+      // only include active + in stock if provided
+      const active = String(p.Active||p.active||"").toLowerCase();
+      const stock = Number(p.stock ?? p.Stock ?? 0);
+      if(active && active !== "true" && active !== "1" && active !== "yes") { /* allow blanks */ }
+      productsBySku[sku] = {
+        sku,
+        title: p.title || p.Title || "",
+        price: Number(p.price || p.Price || 0),
+        stock: stock
+      };
+    });
+    pill.textContent = "Products loaded: " + Object.keys(productsBySku).length;
+  }
+
+  function makeOrderId(){
+    // FBZPOS-YYYYMMDD-HHMMSS-rand
+    const d = new Date();
+    const pad = n => String(n).padStart(2,"0");
+    const y = d.getFullYear();
+    const m = pad(d.getMonth()+1);
+    const day = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mm = pad(d.getMinutes());
+    const ss = pad(d.getSeconds());
+    const rand = Math.floor(Math.random()*9000)+1000;
+    return `FBZPOS-${y}${m}${day}-${hh}${mm}${ss}-${rand}`;
+  }
+
+  async function pay(){
+    if(!cart.length){ showErr("Cart is empty."); return; }
+
+    const buyer = {
+      name: document.getElementById("buyerName").value || "Walk-in",
+      contact: document.getElementById("buyerContact").value || ""
+    };
+    const fulfillment = document.getElementById("fulfillment").value || "in_store";
+    const totals = recalc();
+
+    const payload = {
+      orderId: makeOrderId(),
+      channel: "pos",
+      fulfillment,
+      buyer,
+      notes: document.getElementById("notes").value || "",
+      items: cart.map(it => ({
+        sku: it.sku,
+        title: it.title,
+        qty: Number(it.qty||1),
+        price: Number(it.price||0)
+      })),
+      totals
+    };
+
+    // Send to Apps Script create_checkout (your existing endpoint)
+    const url = APPS_SCRIPT_URL
+      + "?action=create_checkout"
+      + "&payload=" + encodeURIComponent(JSON.stringify(payload))
+      + "&t=" + Date.now();
+
+    try {
+      const res = await fetchJsonp(url, 25000);
+      if(!res || !res.success || !res.checkout_url){
+        throw new Error((res && res.error) ? res.error : "Checkout failed");
+      }
+      // redirect to Stripe
+      window.location.href = res.checkout_url;
+    } catch(e){
+      showErr("Could not create Stripe checkout: " + (e && e.message ? e.message : e));
+    }
+  }
+
+  // Events
+  document.getElementById("addBtn").addEventListener("click", () => addSkuToCart(document.getElementById("skuInput").value));
+  document.getElementById("clearBtn").addEventListener("click", () => { cart=[]; saveCart(); renderCart(); showOk("Cart cleared."); });
+  document.getElementById("payBtn").addEventListener("click", pay);
+  document.getElementById("shipping").addEventListener("input", recalc);
+
+  // Enter-to-add for scanners
+  document.getElementById("skuInput").addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      e.preventDefault();
+      addSkuToCart(e.target.value);
+      e.target.value = "";
+    }
+  });
+
+  // Cart table controls
+  document.getElementById("cartBody").addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if(!btn) return;
+    const act = btn.getAttribute("data-act");
+    const idx = Number(btn.getAttribute("data-idx"));
+    if(!Number.isFinite(idx) || !cart[idx]) return;
+
+    if(act === "rm"){ cart.splice(idx,1); }
+    if(act === "inc"){ cart[idx].qty = Number(cart[idx].qty||1) + 1; }
+    if(act === "dec"){ cart[idx].qty = Math.max(1, Number(cart[idx].qty||1) - 1); }
+    saveCart(); renderCart();
+  });
+
+  document.getElementById("cartBody").addEventListener("change", (e) => {
+    const inp = e.target;
+    if(inp.getAttribute("data-act") !== "qty") return;
+    const idx = Number(inp.getAttribute("data-idx"));
+    if(!Number.isFinite(idx) || !cart[idx]) return;
+    cart[idx].qty = Math.max(1, Number(inp.value||1));
+    saveCart(); renderCart();
+  });
+
+  // Simple title search -> auto-fill sku box with best match
+  document.getElementById("searchInput").addEventListener("input", (e) => {
+    const q = String(e.target.value||"").trim().toLowerCase();
+    if(q.length < 2) return;
+    const keys = Object.keys(productsBySku);
+    let best = "";
+    for(const sku of keys){
+      const t = String(productsBySku[sku].title||"").toLowerCase();
+      if(t.includes(q)){ best = sku; break; }
+    }
+    if(best){ document.getElementById("skuInput").value = best; }
+  });
+
+  // Init
+  (async function init(){
+    loadCart();
+    renderCart();
+    document.getElementById("skuInput").focus();
+    try {
+      await loadProducts();
+    } catch (e) {
+      document.getElementById("statusPill").textContent = "Product load failed";
+      showErr("Could not load products from Apps Script. Check deployment access + ?action=products works. " + (e && e.message ? e.message : e));
+    }
+  })();
+</script>
+</body>
+</html>
