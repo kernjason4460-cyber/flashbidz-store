@@ -29,7 +29,7 @@ function qs(name) {
   return new URLSearchParams(window.location.search).get(name);
 }
 
-// JSONP helper (THIS is why it works without CORS)
+// JSONP helper
 function fetchJsonp(url, timeoutMs = 20000) {
   return new Promise((resolve, reject) => {
     const cbName = "__fbz_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
@@ -43,19 +43,13 @@ function fetchJsonp(url, timeoutMs = 20000) {
       if (script && script.parentNode) script.parentNode.removeChild(script);
     }
 
-    window[cbName] = (data) => {
-      cleanup();
-      resolve(data);
-    };
+    window[cbName] = (data) => { cleanup(); resolve(data); };
+    timer = setTimeout(() => { cleanup(); reject(new Error("Load failed")); }, timeoutMs);
 
-    timer = setTimeout(() => {
-      cleanup();
-      reject(new Error("Load failed"));
-    }, timeoutMs);
-
-    // IMPORTANT: parameter name MUST be "callback"
+    // MUST be "callback" (and Code.gs must return JAVASCRIPT when callback exists)
     script.src = url + sep + "callback=" + encodeURIComponent(cbName);
     script.onerror = () => { cleanup(); reject(new Error("Load failed")); };
+
     document.head.appendChild(script);
   });
 }
@@ -78,8 +72,6 @@ function clearCartStorage() {
   }
 
   try {
-    statusEl.textContent = "Finalizing your order…";
-
     const url =
       APPS_SCRIPT_URL +
       "?action=finalize_checkout" +
@@ -93,11 +85,11 @@ function clearCartStorage() {
     }
 
     clearCartStorage();
-
     statusEl.textContent = "Order confirmed! Inventory updated.";
     if (data.orderId) orderEl.textContent = "Order ID: " + data.orderId;
 
     setTimeout(() => {
+      // keep this if you always want to return to POS after payment
       window.location.href = "/pos.html?paid=1";
     }, 1200);
 
