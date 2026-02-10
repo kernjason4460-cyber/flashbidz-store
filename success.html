@@ -106,10 +106,15 @@
       statusEl.textContent = "Order confirmed! Cart cleared. Sending you back to the store…";
       if (data.orderId) orderEl.textContent = "Order ID: " + data.orderId;
 
-      // ✅ redirect back to store home
-      setTimeout(() => {
+      const channel = (data && data.channel) || (data && data.meta && data.meta.channel);
+
+    setTimeout(() => {
+      if (channel === "pos") {
+        window.location.href = "/pos.html?paid=1";
+      } else {
         window.location.href = "/?cleared=1";
-      }, 1200);
+      }
+    }, 1200);
 
     } catch (err) {
       statusEl.textContent = "Payment received, but we could not finalize inventory automatically.";
