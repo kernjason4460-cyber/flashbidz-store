@@ -51,12 +51,13 @@ function clearCartStorage() {
   try {
     statusEl.textContent = "Finalizing your order…";
 
-    const res = await fetch(
-      `${APPS_SCRIPT_URL}?action=finalize_checkout&session_id=${encodeURIComponent(sessionId)}`,
-      { cache: "no-store" }
-    );
+  const url =
+  APPS_SCRIPT_URL +
+  "?action=finalize_checkout" +
+  "&session_id=" + encodeURIComponent(sessionId) +
+  "&t=" + Date.now();
 
-    const data = await res.json();
+  const data = await fetchJsonp(url);
 
     if (!data.success) {
       throw new Error(data.error || "Finalize failed");
