@@ -28,7 +28,7 @@
     .btn2 { background:#1b2a55; }
     .btnDanger { background:#3b0b14; border:1px solid rgba(239,68,68,.35); }
     table { width:100%; border-collapse: collapse; }
-    th, td { padding:10px 8px; border-bottom:1px solid rgba(255,255,255,.10); text-align:left; font-size:14px; }
+    th, td { padding:10px 8px; border-bottom:1px solid rgba(255,255,255,.10); text-align:left; font-size:14px; vertical-align: top; }
     th { font-size:12px; opacity:.8; }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
     .pill { display:inline-block; padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.08); font-size:12px; }
@@ -41,6 +41,9 @@
     .qtyBox { display:flex; gap:8px; align-items:center; }
     .qtyBox button { width:auto; padding:8px 10px; }
     .qtyBox input { width:70px; text-align:center; }
+    .small { font-size: 12px; opacity: .9; }
+    .titleCell { max-width: 280px; }
+    .searchHint { margin-top: 6px; font-size: 12px; opacity: .75; }
   </style>
 </head>
 <body>
@@ -48,26 +51,26 @@
   <div class="wrap" style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
     <div>
       <h1>FlashBidz POS</h1>
-      <div class="muted">Scan SKU → add to cart → charge with Stripe</div>
+      <div class="muted">Scan item barcode → add to cart → charge with Stripe</div>
     </div>
-    <div class="pill mono" id="statusPill">Loading products…</div>
+    <div class="pill mono" id="statusPill">Loading items…</div>
   </div>
 </header>
 
 <div class="wrap">
   <div class="grid">
 
-    <!-- LEFT: Scan + Cart -->
     <div class="card">
       <div class="row">
         <div>
-          <label>Scan or type SKU</label>
-          <input id="skuInput" class="mono" placeholder="FBZ-..." autocomplete="off" />
-          <div class="muted" style="margin-top:6px;">Tip: barcode scanners type then press Enter.</div>
+          <label>Scan or type item barcode / SKU / item ID</label>
+          <input id="skuInput" class="mono" placeholder="Scan item…" autocomplete="off" />
+          <div class="muted" style="margin-top:6px;">Tip: most barcode scanners type the code and press Enter automatically.</div>
         </div>
         <div>
           <label>Find by title (optional)</label>
-          <input id="searchInput" placeholder="Start typing…" autocomplete="off" />
+          <input id="searchInput" placeholder="Start typing title…" autocomplete="off" />
+          <div class="searchHint" id="searchHint"></div>
         </div>
       </div>
 
@@ -83,8 +86,8 @@
         <table>
           <thead>
             <tr>
-              <th>SKU</th>
-              <th>Title</th>
+              <th>Code</th>
+              <th>Item</th>
               <th style="width:130px;">Qty</th>
               <th style="width:110px;">Price</th>
               <th style="width:120px;">Line</th>
@@ -96,7 +99,6 @@
       </div>
     </div>
 
-    <!-- RIGHT: Customer + Totals + Pay -->
     <div class="card">
       <div class="row">
         <div>
@@ -140,7 +142,7 @@
 
       <button class="btn" id="payBtn" type="button" style="margin-top:14px;">Pay with Stripe</button>
       <div class="muted" style="margin-top:8px;">
-        This will create an <span class="mono">Orders</span> row as <b>PENDING</b>, then <span class="mono">success.html</span> finalizes inventory and writes <span class="mono">Order_Items</span>.
+        This creates an <span class="mono">Orders</span> row as <b>PENDING</b>, then <span class="mono">success.html</span> finalizes the sale and writes <span class="mono">Order_Items</span>.
       </div>
     </div>
 
@@ -148,11 +150,10 @@
 </div>
 
 <script>
-  // 🔧 PUT YOUR APPS SCRIPT URL HERE
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5RknrrWZbRoPBXLzaIUh4V4hk8eGMTcBEulCeA5xBdmUaBLZpF_L7r6-fMAS9j5j7/exec";
   const TAX_RATE = 0.06;
+  const POS_CART_KEY = "fbz_pos_cart";
 
-  // JSONP helper (same style you used in success.html)
   function fetchJsonp(url, timeoutMs = 20000) {
     return new Promise((resolve, reject) => {
       const cbName = "__fbz_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
@@ -167,7 +168,6 @@
       }
 
       window[cbName] = (data) => { cleanup(); resolve(data); };
-
       timer = setTimeout(() => { cleanup(); reject(new Error("Load failed")); }, timeoutMs);
 
       script.src = url + sep + "callback=" + encodeURIComponent(cbName);
@@ -178,39 +178,110 @@
   }
 
   function money(n){ return "$" + (Number(n||0)).toFixed(2); }
-  function showErr(msg){ const el=document.getElementById("msgErr"); el.style.display="block"; el.textContent=msg; document.getElementById("msgOk").style.display="none"; }
-  function showOk(msg){ const el=document.getElementById("msgOk"); el.style.display="block"; el.textContent=msg; document.getElementById("msgErr").style.display="none"; }
 
-  // State
-  let productsBySku = {};
-  let cart = []; // {sku,title,price,qty}
+  function showErr(msg){
+    const el = document.getElementById("msgErr");
+    const ok = document.getElementById("msgOk");
+    ok.style.display = "none";
+    el.style.display = "block";
+    el.textContent = msg;
+  }
+
+  function showOk(msg){
+    const el = document.getElementById("msgOk");
+    const err = document.getElementById("msgErr");
+    err.style.display = "none";
+    el.style.display = "block";
+    el.textContent = msg;
+  }
+
+  function clearMessages(){
+    document.getElementById("msgErr").style.display = "none";
+    document.getElementById("msgOk").style.display = "none";
+  }
+
+  let productsByKey = {};
+  let productsList = [];
+  let cart = [];
+
+  function getNormalizedKeysForItem(p) {
+    const keys = [];
+    const sku = String(p.sku || "").trim();
+    const itemId = String(p.item_id || p.itemId || "").trim();
+    const barcode = String(p.barcode || "").trim();
+
+    if (sku) keys.push(sku);
+    if (itemId) keys.push(itemId);
+    if (barcode) keys.push(barcode);
+
+    return [...new Set(keys)];
+  }
+
+  function normalizeProduct(raw) {
+    return {
+      sku: String(raw.sku || raw.SKU || "").trim(),
+      item_id: String(raw.item_id || raw.itemId || "").trim(),
+      barcode: String(raw.barcode || "").trim(),
+      title: String(raw.title || raw.Title || "").trim(),
+      price: Number(raw.price || raw.Price || 0),
+      stock: Number(raw.stock ?? raw.qty_on_hand ?? raw.Qty ?? raw.Stock ?? 0),
+      status: String(raw.status || raw.Status || "").trim().toLowerCase(),
+      active: String(raw.active || raw.Active || "").trim().toLowerCase(),
+      sale_channel: String(raw.sale_channel || "").trim().toLowerCase(),
+      fee_tier: String(raw.fee_tier || "").trim(),
+      consignor_name: String(raw.consignor_name || "").trim(),
+      location_bin: String(raw.location_bin || "").trim()
+    };
+  }
+
+  function isAvailableItem(p) {
+    if (p.status === "sold") return false;
+    if (p.active && !["true", "1", "yes"].includes(p.active)) return false;
+    if (Number(p.stock || 0) < 1) return false;
+    return true;
+  }
 
   function loadCart(){
-    try { cart = JSON.parse(localStorage.getItem("fbz_pos_cart")||"[]"); } catch(e){ cart=[]; }
+    try {
+      cart = JSON.parse(localStorage.getItem(POS_CART_KEY) || "[]");
+      if (!Array.isArray(cart)) cart = [];
+    } catch(e){
+      cart = [];
+    }
   }
-  function saveCart(){ localStorage.setItem("fbz_pos_cart", JSON.stringify(cart)); }
+
+  function saveCart(){
+    localStorage.setItem(POS_CART_KEY, JSON.stringify(cart));
+  }
 
   function recalc(){
-    const subtotal = cart.reduce((s,it)=> s + (Number(it.price||0)*Number(it.qty||0)), 0);
+    const subtotal = cart.reduce((s,it)=> s + (Number(it.price||0) * Number(it.qty||0)), 0);
     const tax = +(subtotal * TAX_RATE).toFixed(2);
     const shipping = +Number(document.getElementById("shipping").value || 0).toFixed(2);
     const total = +(subtotal + tax + shipping).toFixed(2);
+
     document.getElementById("sub").textContent = money(subtotal);
     document.getElementById("tax").textContent = money(tax);
     document.getElementById("ship").textContent = money(shipping);
     document.getElementById("total").textContent = money(total);
+
     return { subtotal, tax, shipping, grand_total: total };
   }
 
   function renderCart(){
     const tb = document.getElementById("cartBody");
     tb.innerHTML = "";
+
     cart.forEach((it, idx) => {
       const tr = document.createElement("tr");
-      const line = Number(it.price||0)*Number(it.qty||0);
+      const line = Number(it.price||0) * Number(it.qty||0);
+
       tr.innerHTML = `
-        <td class="mono">${it.sku}</td>
-        <td>${it.title || ""}</td>
+        <td class="mono">${escapeHtml(it.scanKey || it.sku || it.item_id || "")}</td>
+        <td class="titleCell">
+          <div>${escapeHtml(it.title || "")}</div>
+          <div class="small muted">${escapeHtml(it.sku || "")}${it.location_bin ? " • " + escapeHtml(it.location_bin) : ""}</div>
+        </td>
         <td>
           <div class="qtyBox">
             <button type="button" data-act="dec" data-idx="${idx}">-</button>
@@ -224,79 +295,133 @@
       `;
       tb.appendChild(tr);
     });
+
     recalc();
   }
 
-  function addSkuToCart(sku){
-    sku = String(sku||"").trim();
-    if(!sku){ showErr("Enter a SKU."); return; }
-    const p = productsBySku[sku];
-    if(!p){ showErr("SKU not found: " + sku); return; }
+  function focusSkuInput() {
+    const el = document.getElementById("skuInput");
+    el.focus();
+    el.select();
+  }
 
-    const existing = cart.find(x => x.sku === sku);
-    if(existing){
-      existing.qty = Number(existing.qty||1) + 1;
+  function findItemByScanValue(scanValue) {
+    const key = String(scanValue || "").trim();
+    if (!key) return null;
+    return productsByKey[key] || null;
+  }
+
+  function addSkuToCart(scanValue){
+    const key = String(scanValue || "").trim();
+    if (!key) {
+      showErr("Enter or scan an item code.");
+      focusSkuInput();
+      return;
+    }
+
+    const p = findItemByScanValue(key);
+    if (!p) {
+      showErr("Item not found: " + key);
+      document.getElementById("skuInput").value = "";
+      focusSkuInput();
+      return;
+    }
+
+    if (!isAvailableItem(p)) {
+      showErr("This item is not available: " + (p.title || p.sku || key));
+      document.getElementById("skuInput").value = "";
+      focusSkuInput();
+      return;
+    }
+
+    const existing = cart.find(x => x.sku === p.sku && x.item_id === p.item_id);
+    const maxQty = Number(p.stock || 0);
+
+    if (existing) {
+      if (Number(existing.qty || 0) >= maxQty) {
+        showErr("Only " + maxQty + " available for " + (p.title || p.sku));
+        document.getElementById("skuInput").value = "";
+        focusSkuInput();
+        return;
+      }
+      existing.qty = Number(existing.qty || 1) + 1;
     } else {
       cart.push({
-        sku,
+        item_id: p.item_id || "",
+        sku: p.sku || "",
+        scanKey: key,
         title: p.title || "",
-        price: Number(p.price||0),
-        qty: 1
+        price: Number(p.price || 0),
+        qty: 1,
+        location_bin: p.location_bin || "",
+        consignor_name: p.consignor_name || "",
+        fee_tier: p.fee_tier || ""
       });
     }
+
     saveCart();
     renderCart();
-    showOk("Added: " + sku);
+    showOk("Added: " + (p.title || p.sku || key));
+
+    document.getElementById("skuInput").value = "";
+    focusSkuInput();
   }
 
   async function loadProducts(){
     const pill = document.getElementById("statusPill");
-    pill.textContent = "Loading products…";
+    pill.textContent = "Loading items…";
+
     const url = APPS_SCRIPT_URL + "?action=products&t=" + Date.now();
     const data = await fetchJsonp(url, 20000);
-    const list = (data && data.products) ? data.products : [];
-    productsBySku = {};
-    list.forEach(p => {
-      const sku = String(p.sku||"").trim();
-      if(!sku) return;
-      // only include active + in stock if provided
-      const active = String(p.Active||p.active||"").toLowerCase();
-      const stock = Number(p.stock ?? p.Stock ?? 0);
-      if(active && active !== "true" && active !== "1" && active !== "yes") { /* allow blanks */ }
-      productsBySku[sku] = {
-        sku,
-        title: p.title || p.Title || "",
-        price: Number(p.price || p.Price || 0),
-        stock: stock
-      };
+    const list = (data && Array.isArray(data.products)) ? data.products : [];
+
+    productsByKey = {};
+    productsList = [];
+
+    list.forEach(raw => {
+      const p = normalizeProduct(raw);
+      if (!p.sku && !p.item_id) return;
+      if (!isAvailableItem(p)) return;
+
+      productsList.push(p);
+
+      getNormalizedKeysForItem(p).forEach(k => {
+        productsByKey[k] = p;
+      });
     });
-    pill.textContent = "Products loaded: " + Object.keys(productsBySku).length;
+
+    pill.textContent = "Items loaded: " + productsList.length;
   }
 
-  // 🔁 Handle return from Stripe POS checkout
-(function handleStripeReturn() {
-  const params = new URLSearchParams(window.location.search);
+  async function handleStripeReturn() {
+    const params = new URLSearchParams(window.location.search);
 
-  if (params.get("paid") === "1") {
-    console.log("POS payment completed — clearing cart");
+    if (params.get("paid") === "1") {
+      const keysToTry = ["cart", "fbz_cart", "flashbidz_cart", "fbzCart", "store_cart", POS_CART_KEY];
+      keysToTry.forEach(k => localStorage.removeItem(k));
 
-    // Clear cart storage
-    const keysToTry = ["cart", "fbz_cart", "flashbidz_cart", "fbzCart", "store_cart"];
-    keysToTry.forEach(k => localStorage.removeItem(k));
+      Object.keys(localStorage).forEach(k => {
+        if (k.toLowerCase().includes("cart")) {
+          localStorage.removeItem(k);
+        }
+      });
 
-    Object.keys(localStorage).forEach(k => {
-      if (k.toLowerCase().includes("cart")) {
-        localStorage.removeItem(k);
+      cart = [];
+      renderCart();
+
+      try {
+        await loadProducts();
+        showOk("Payment complete. POS refreshed.");
+      } catch (e) {
+        showErr("Payment completed, but items could not be refreshed.");
       }
-    });
 
-    // Clean URL so refresh doesn’t re-trigger
-    window.history.replaceState({}, document.title, "/pos.html");
+      window.history.replaceState({}, document.title, "/pos.html");
+      focusSkuInput();
+    }
   }
-})();
-  
+
   function makeOrderId(){
-    // FBZPOS-YYYYMMDD-HHMMSS-rand
     const d = new Date();
     const pad = n => String(n).padStart(2,"0");
     const y = d.getFullYear();
@@ -310,12 +435,19 @@
   }
 
   async function pay(){
-    if(!cart.length){ showErr("Cart is empty."); return; }
+    clearMessages();
+
+    if (!cart.length) {
+      showErr("Cart is empty.");
+      focusSkuInput();
+      return;
+    }
 
     const buyer = {
       name: document.getElementById("buyerName").value || "Walk-in",
       contact: document.getElementById("buyerContact").value || ""
     };
+
     const fulfillment = document.getElementById("fulfillment").value || "in_store";
     const totals = recalc();
 
@@ -326,15 +458,15 @@
       buyer,
       notes: document.getElementById("notes").value || "",
       items: cart.map(it => ({
+        item_id: it.item_id || "",
         sku: it.sku,
         title: it.title,
-        qty: Number(it.qty||1),
-        price: Number(it.price||0)
+        qty: Number(it.qty || 1),
+        price: Number(it.price || 0)
       })),
       totals
     };
 
-    // Send to Apps Script create_checkout (your existing endpoint)
     const url = APPS_SCRIPT_URL
       + "?action=create_checkout"
       + "&payload=" + encodeURIComponent(JSON.stringify(payload))
@@ -342,77 +474,133 @@
 
     try {
       const res = await fetchJsonp(url, 25000);
-      if(!res || !res.success || !res.checkout_url){
+
+      if (!res || !res.success || !res.checkout_url) {
         throw new Error((res && res.error) ? res.error : "Checkout failed");
       }
-      // redirect to Stripe
+
       window.location.href = res.checkout_url;
-    } catch(e){
+    } catch(e) {
       showErr("Could not create Stripe checkout: " + (e && e.message ? e.message : e));
     }
   }
 
-  // Events
-  document.getElementById("addBtn").addEventListener("click", () => addSkuToCart(document.getElementById("skuInput").value));
-  document.getElementById("clearBtn").addEventListener("click", () => { cart=[]; saveCart(); renderCart(); showOk("Cart cleared."); });
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  document.getElementById("addBtn").addEventListener("click", () => {
+    addSkuToCart(document.getElementById("skuInput").value);
+  });
+
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    cart = [];
+    saveCart();
+    renderCart();
+    showOk("Cart cleared.");
+    focusSkuInput();
+  });
+
   document.getElementById("payBtn").addEventListener("click", pay);
   document.getElementById("shipping").addEventListener("input", recalc);
 
-  // Enter-to-add for scanners
   document.getElementById("skuInput").addEventListener("keydown", (e) => {
-    if(e.key === "Enter"){
+    if (e.key === "Enter") {
       e.preventDefault();
       addSkuToCart(e.target.value);
-      e.target.value = "";
     }
   });
 
-  // Cart table controls
   document.getElementById("cartBody").addEventListener("click", (e) => {
     const btn = e.target.closest("button");
-    if(!btn) return;
+    if (!btn) return;
+
     const act = btn.getAttribute("data-act");
     const idx = Number(btn.getAttribute("data-idx"));
-    if(!Number.isFinite(idx) || !cart[idx]) return;
+    if (!Number.isFinite(idx) || !cart[idx]) return;
 
-    if(act === "rm"){ cart.splice(idx,1); }
-    if(act === "inc"){ cart[idx].qty = Number(cart[idx].qty||1) + 1; }
-    if(act === "dec"){ cart[idx].qty = Math.max(1, Number(cart[idx].qty||1) - 1); }
-    saveCart(); renderCart();
+    const item = cart[idx];
+    const source = findItemByScanValue(item.sku) || {};
+    const maxQty = Number(source.stock || item.qty || 1);
+
+    if (act === "rm") {
+      cart.splice(idx, 1);
+    }
+
+    if (act === "inc") {
+      if (item.qty >= maxQty) {
+        showErr("Only " + maxQty + " available for " + item.sku);
+        return;
+      }
+      cart[idx].qty = Number(cart[idx].qty || 1) + 1;
+    }
+
+    if (act === "dec") {
+      cart[idx].qty = Math.max(1, Number(cart[idx].qty || 1) - 1);
+    }
+
+    saveCart();
+    renderCart();
+    focusSkuInput();
   });
 
   document.getElementById("cartBody").addEventListener("change", (e) => {
     const inp = e.target;
-    if(inp.getAttribute("data-act") !== "qty") return;
+    if (inp.getAttribute("data-act") !== "qty") return;
+
     const idx = Number(inp.getAttribute("data-idx"));
-    if(!Number.isFinite(idx) || !cart[idx]) return;
-    cart[idx].qty = Math.max(1, Number(inp.value||1));
-    saveCart(); renderCart();
+    if (!Number.isFinite(idx) || !cart[idx]) return;
+
+    const item = cart[idx];
+    const source = findItemByScanValue(item.sku) || {};
+    const maxQty = Number(source.stock || item.qty || 1);
+
+    let nextQty = Math.max(1, Number(inp.value || 1));
+    nextQty = Math.min(nextQty, maxQty);
+
+    cart[idx].qty = nextQty;
+    saveCart();
+    renderCart();
+    focusSkuInput();
   });
 
-  // Simple title search -> auto-fill sku box with best match
   document.getElementById("searchInput").addEventListener("input", (e) => {
-    const q = String(e.target.value||"").trim().toLowerCase();
-    if(q.length < 2) return;
-    const keys = Object.keys(productsBySku);
-    let best = "";
-    for(const sku of keys){
-      const t = String(productsBySku[sku].title||"").toLowerCase();
-      if(t.includes(q)){ best = sku; break; }
+    const q = String(e.target.value || "").trim().toLowerCase();
+    const hint = document.getElementById("searchHint");
+
+    if (q.length < 2) {
+      hint.textContent = "";
+      return;
     }
-    if(best){ document.getElementById("skuInput").value = best; }
+
+    const match = productsList.find(p =>
+      String(p.title || "").toLowerCase().includes(q)
+    );
+
+    if (match) {
+      document.getElementById("skuInput").value = match.sku || match.item_id || "";
+      hint.textContent = "Best match: " + (match.title || "") + (match.location_bin ? " • " + match.location_bin : "");
+    } else {
+      hint.textContent = "No matching item found";
+    }
   });
 
-  // Init
   (async function init(){
     loadCart();
     renderCart();
-    document.getElementById("skuInput").focus();
+    focusSkuInput();
+
     try {
+      await handleStripeReturn();
       await loadProducts();
     } catch (e) {
-      document.getElementById("statusPill").textContent = "Product load failed";
-      showErr("Could not load products from Apps Script. Check deployment access + ?action=products works. " + (e && e.message ? e.message : e));
+      document.getElementById("statusPill").textContent = "Item load failed";
+      showErr("Could not load items from Apps Script. Check deployment access and test ?action=products. " + (e && e.message ? e.message : e));
     }
   })();
 </script>
