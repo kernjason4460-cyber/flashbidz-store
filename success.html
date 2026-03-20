@@ -107,9 +107,9 @@ function clearCartStorage() {
     }, 1200);
 
   } catch (err) {
-    statusEl.textContent = "Payment received, but inventory may already be finalized.";
+    statusEl.textContent = "Payment confirmed. Your order may already be finalized.";
     errEl.style.display = "block";
-    errEl.textContent = "Error: " + (err && err.message ? err.message : err);
+    errEl.textContent = "You can return to the store safely.";
   }
 })();
 </script>
