@@ -2116,14 +2116,10 @@ function fetchJsonp(url, timeoutMs = 20000) {
     const cbName = "__fbz_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
     const sep = url.includes("?") ? "&" : "?";
     const script = document.createElement("script");
-
-    const timer = setTimeout(() => {
-      cleanup();
-      reject(new Error("Load failed"));
-    }, timeoutMs);
+    let timer;
 
     function cleanup() {
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       try { delete window[cbName]; } catch (_) { window[cbName] = undefined; }
       if (script && script.parentNode) script.parentNode.removeChild(script);
     }
@@ -2133,26 +2129,36 @@ function fetchJsonp(url, timeoutMs = 20000) {
       resolve(data);
     };
 
+    timer = setTimeout(() => {
+      cleanup();
+      reject(new Error("Load failed"));
+    }, timeoutMs);
+
+    script.src = url + sep + "callback=" + encodeURIComponent(cbName) + "&t=" + Date.now();
     script.onerror = () => {
       cleanup();
       reject(new Error("Load failed"));
     };
 
-    script.src = url + sep + "callback=" + encodeURIComponent(cbName) + "&t=" + Date.now();
     document.head.appendChild(script);
   });
 }
     
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby28t15OjYfnLF3GqvKkvl5Z1uT71CBE4NvIOjpjur7vAnwltmHDh8LRWtKlVOqMDCm/exec";
+
 async function loadProducts() {
   try {
-    const data = await fetchJsonp(window.APPS_SCRIPT_URL + "?action=products&t=" + Date.now(), 20000);
+    const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=products&t=" + Date.now(), 20000);
 
-    if (!data || !Array.isArray(data.products)) throw new Error("No products returned");
+    if (!data || !Array.isArray(data.products)) {
+      throw new Error("No products returned");
+    }
 
     allProducts = data.products.map((p, idx) => ({ ...p, __index: idx }));
-    buildCategoryOptions(allProducts);
-    buildCategoryPills(allProducts);
-    applyFilters();
+
+    if (typeof buildCategoryOptions === "function") buildCategoryOptions(allProducts);
+    if (typeof buildCategoryPills === "function") buildCategoryPills(allProducts);
+    if (typeof applyFilters === "function") applyFilters();
 
   } catch (err) {
     console.error("Product load failed", err);
