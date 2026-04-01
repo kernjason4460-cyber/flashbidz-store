@@ -141,6 +141,14 @@
       </div>
 
       <button class="btn" id="payBtn" type="button" style="margin-top:14px;">Pay with Stripe</button>
+     <div class="row" style="margin-top:10px;">
+     <button class="btn2" id="cashBtn" type="button">Cash</button>
+     <button class="btn2" id="terminalBtn" type="button">Card Terminal</button>
+     </div>
+     <div class="row" style="margin-top:10px;">
+     <button class="btn2" id="otherPaidBtn" type="button">Other Paid</button>
+     <button class="btnDanger" id="suspendBtn" type="button">Suspend Sale</button>
+     </div>
       <div class="muted" style="margin-top:8px;">
         This creates an <span class="mono">Orders</span> row as <b>PENDING</b>, then <span class="mono">success.html</span> finalizes the sale and writes <span class="mono">Order_Items</span>.
       </div>
@@ -177,6 +185,68 @@
     });
   }
 
+  async function completeManualPaidSale(paymentMethod){
+  clearMessages();
+
+  if (!cart.length) {
+    showErr("Cart is empty.");
+    focusSkuInput();
+    return;
+  }
+
+  const buyer = {
+    name: document.getElementById("buyerName").value || "Walk-in",
+    contact: document.getElementById("buyerContact").value || ""
+  };
+
+  const fulfillment = document.getElementById("fulfillment").value || "in_store";
+  const totals = recalc();
+
+  const payload = {
+    orderId: makeOrderId(),
+    channel: "pos",
+    payment_method: paymentMethod,
+    fulfillment,
+    buyer,
+    notes: document.getElementById("notes").value || "",
+    items: cart.map(it => ({
+      item_id: it.item_id || "",
+      sku: it.sku,
+      title: it.title,
+      qty: Number(it.qty || 1),
+      price: Number(it.price || 0)
+    })),
+    totals
+  };
+
+  const url = APPS_SCRIPT_URL
+    + "?action=record_pos_sale"
+    + "&payload=" + encodeURIComponent(JSON.stringify(payload))
+    + "&t=" + Date.now();
+
+  try {
+    const res = await fetchJsonp(url, 25000);
+
+    if (!res || !res.success) {
+      throw new Error((res && res.error) ? res.error : "Sale failed");
+    }
+
+    cart = [];
+    saveCart();
+    renderCart();
+    document.getElementById("buyerName").value = "Walk-in";
+    document.getElementById("buyerContact").value = "";
+    document.getElementById("notes").value = "";
+    document.getElementById("shipping").value = "0";
+
+    await loadProducts();
+    showOk("Sale completed: " + paymentMethod + " • Order " + res.orderId);
+    focusSkuInput();
+  } catch(e) {
+    showErr("Could not complete sale: " + (e && e.message ? e.message : e));
+  }
+}
+  
   function money(n){ return "$" + (Number(n||0)).toFixed(2); }
 
   function showErr(msg){
@@ -508,7 +578,14 @@
 
   document.getElementById("payBtn").addEventListener("click", pay);
   document.getElementById("shipping").addEventListener("input", recalc);
-
+  document.getElementById("cashBtn").addEventListener("click", () => completeManualPaidSale("cash"));
+  document.getElementById("terminalBtn").addEventListener("click", () => completeManualPaidSale("card_terminal"));
+  document.getElementById("otherPaidBtn").addEventListener("click", () => completeManualPaidSale("other_paid"));
+  document.getElementById("suspendBtn").addEventListener("click", () => {
+    saveCart();
+    showOk("Sale suspended. Cart saved on this device.");
+    focusSkuInput();
+});
   document.getElementById("skuInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
