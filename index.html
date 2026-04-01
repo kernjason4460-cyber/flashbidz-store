@@ -2678,41 +2678,25 @@ function updateCartSummary() {
       updateCartSummary();
     }
 
-    async function fetchJson(url, options = {}, timeoutMs = 15000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-
+async function loadProducts() {
   try {
-    const res = await fetch(url, {
-      mode: "cors",
-      cache: "no-store",
-      ...options,
-      signal: controller.signal,
-    });
+    const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=products&t=" + Date.now(), 20000);
 
-    // Some failures come back as HTML instead of JSON (Apps Script errors)
-    const text = await res.text();
-    let data = null;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch (_) {}
-
-    if (!res.ok) {
-      const msg = (data && (data.error || data.message)) || text || `HTTP ${res.status}`;
-      throw new Error(msg);
+    if (!data || !Array.isArray(data.products)) {
+      throw new Error("No products returned");
     }
 
-    if (!data) throw new Error("Server returned non-JSON response.");
-    return data;
+    allProducts = data.products.map((p, idx) => ({ ...p, __index: idx }));
+
+    if (typeof buildCategoryOptions === "function") buildCategoryOptions(allProducts);
+    if (typeof buildCategoryPills === "function") buildCategoryPills(allProducts);
+    if (typeof applyFilters === "function") applyFilters();
 
   } catch (err) {
-    if (err.name === "AbortError") throw new Error("Request timed out. Try again.");
-    throw err;
-  } finally {
-    clearTimeout(timer);
+    console.error("Product load failed", err);
+    alert("Failed to load products");
   }
 }
-    
 async function handleCheckout() {
   if (!cart.length) {
     alert("Your cart is empty.");
