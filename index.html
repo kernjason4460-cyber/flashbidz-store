@@ -1927,7 +1927,7 @@
   const CART_STORAGE_KEY = "flashbidz_cart_v3";
   const THEME_STORAGE_KEY = "flashbidz_theme";
   const TAX_RATE = 0.06;
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwTYih9kFDhZBsKl68VX1eoWy4nes9jK0hKHGHZ9ZaVxizxgTZVYYFX3sX370IU1gN/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhNTOWXWvmC0ECjb3t5yKDExTQoJ1GPbe0Yxz1cOxj47jYpzaF1726mU1jUZbtE6uj/exec";
   window.APPS_SCRIPT_URL = APPS_SCRIPT_URL;
   window.setPayButtonsEnabled = window.setPayButtonsEnabled || function(){};
 
@@ -1999,22 +1999,13 @@
 
 async function loadProducts() {
   try {
-   
     const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=products&t=" + Date.now(), 20000);
 
-    console.log("Raw store feed:", data);
-
-    const rawProducts =
-      Array.isArray(data?.products) ? data.products :
-      Array.isArray(data?.items) ? data.items :
-      [];
-
-    if (!rawProducts.length) {
-      const keys = data && typeof data === "object" ? Object.keys(data).join(", ") : "(no object)";
-      throw new Error("No products returned. Response keys: " + keys);
+    if (!data || !Array.isArray(data.products)) {
+      throw new Error("No products returned");
     }
 
-    allProducts = rawProducts.map((p, idx) => ({
+    allProducts = data.products.map((p, idx) => ({
       ...p,
       __index: idx,
       title: String(p.title || ""),
@@ -2029,10 +2020,9 @@ async function loadProducts() {
     buildCategoryOptions(allProducts);
     buildCategoryPills(allProducts);
     applyFilters();
-
   } catch (err) {
     console.error("Product load failed:", err);
-    alert("Failed to load products: " + (err && err.message ? err.message : err));
+    alert("Failed to load products: " + (err?.message || err));
   }
 }
 
