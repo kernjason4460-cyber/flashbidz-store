@@ -1928,7 +1928,7 @@
   const THEME_STORAGE_KEY = "flashbidz_theme";
   const TAX_RATE = 0.06;
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby28t15OjYfnLF3GqvKkvl5Z1uT71CBE4NvIOjpjur7vAnwltmHDh8LRWtKlVOqMDCm/exec";
-
+  window.APPS_SCRIPT_URL = APPS_SCRIPT_URL;
   window.setPayButtonsEnabled = window.setPayButtonsEnabled || function(){};
 
   let allProducts = [];
@@ -1997,25 +1997,35 @@
     });
   }
 
-  async function loadProducts() {
-    try {
-      const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=products&t=" + Date.now(), 20000);
+ async function loadProducts() {
+  try {
+    const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=products&t=" + Date.now(), 20000);
 
-      if (!data || !Array.isArray(data.products)) {
-        throw new Error("No products returned");
-      }
-
-      allProducts = data.products.map((p, idx) => ({ ...p, __index: idx }));
-
-      if (typeof buildCategoryOptions === "function") buildCategoryOptions(allProducts);
-      if (typeof buildCategoryPills === "function") buildCategoryPills(allProducts);
-      if (typeof applyFilters === "function") applyFilters();
-
-    } catch (err) {
-      console.error("Product load failed", err);
-      alert("Failed to load products");
+    if (!data || !Array.isArray(data.products)) {
+      throw new Error("No products returned");
     }
+
+    allProducts = data.products.map((p, idx) => ({
+      ...p,
+      __index: idx,
+      title: String(p.title || ""),
+      description: String(p.description || ""),
+      sku: String(p.sku || ""),
+      price: Number(p.price || 0),
+      stock: Number(p.stock ?? 0),
+      categories: Array.isArray(p.categories) ? p.categories : [],
+      images: Array.isArray(p.images) ? p.images : (p.image ? [p.image] : [])
+    }));
+
+    buildCategoryOptions(allProducts);
+    buildCategoryPills(allProducts);
+    applyFilters();
+
+  } catch (err) {
+    console.error("Product load failed:", err);
+    alert("Failed to load products: " + (err && err.message ? err.message : err));
   }
+}
 
     function cacheDom() {
       el.productGrid = document.getElementById("product-grid");
