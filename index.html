@@ -2017,27 +2017,12 @@ async function loadProducts() {
       images: Array.isArray(p.images) ? p.images : (p.image ? [p.image] : [])
     }));
 
-    try {
-      buildCategoryOptions(allProducts);
-    } catch (err) {
-      throw new Error("buildCategoryOptions failed: " + (err?.message || err));
-    }
-
-    try {
-      buildCategoryPills(allProducts);
-    } catch (err) {
-      throw new Error("buildCategoryPills failed: " + (err?.message || err));
-    }
-
-    try {
-      applyFilters();
-    } catch (err) {
-      throw new Error("applyFilters failed: " + (err?.message || err));
-    }
-
+    buildCategoryOptions(allProducts);
+    buildCategoryPills(allProducts);
+    applyFilters();
   } catch (err) {
     console.error("Product load failed:", err);
-    alert("Failed after load: " + (err?.message || err));
+    alert("Failed to load products: " + (err?.message || err));
   }
 }
 
