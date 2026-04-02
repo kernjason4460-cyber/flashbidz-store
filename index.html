@@ -1997,15 +1997,23 @@
     });
   }
 
- async function loadProducts() {
+async function loadProducts() {
   try {
     const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=products&t=" + Date.now(), 20000);
 
-    if (!data || !Array.isArray(data.products)) {
-      throw new Error("No products returned");
+    console.log("Raw store feed:", data);
+
+    const rawProducts =
+      Array.isArray(data?.products) ? data.products :
+      Array.isArray(data?.items) ? data.items :
+      [];
+
+    if (!rawProducts.length) {
+      const keys = data && typeof data === "object" ? Object.keys(data).join(", ") : "(no object)";
+      throw new Error("No products returned. Response keys: " + keys);
     }
 
-    allProducts = data.products.map((p, idx) => ({
+    allProducts = rawProducts.map((p, idx) => ({
       ...p,
       __index: idx,
       title: String(p.title || ""),
