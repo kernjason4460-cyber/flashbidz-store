@@ -1999,6 +1999,7 @@
 
 async function loadProducts() {
   try {
+    alert("Loading from: " + APPS_SCRIPT_URL + "?action=products");
     const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=products&t=" + Date.now(), 20000);
 
     console.log("Raw store feed:", data);
