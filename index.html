@@ -2001,8 +2001,6 @@ async function loadProducts() {
   try {
     const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=products&t=" + Date.now(), 20000);
 
-    alert("keys: " + Object.keys(data || {}).join(", "));
-
     if (!data || !Array.isArray(data.products)) {
       throw new Error("No products returned");
     }
@@ -2019,16 +2017,23 @@ async function loadProducts() {
       images: Array.isArray(p.images) ? p.images : (p.image ? [p.image] : [])
     }));
 
-    alert("mapped: " + allProducts.length);
+    try {
+      buildCategoryOptions(allProducts);
+    } catch (err) {
+      throw new Error("buildCategoryOptions failed: " + (err?.message || err));
+    }
 
-    buildCategoryOptions(allProducts);
-    alert("category options ok");
+    try {
+      buildCategoryPills(allProducts);
+    } catch (err) {
+      throw new Error("buildCategoryPills failed: " + (err?.message || err));
+    }
 
-    buildCategoryPills(allProducts);
-    alert("category pills ok");
-
-    applyFilters();
-    alert("applyFilters ok");
+    try {
+      applyFilters();
+    } catch (err) {
+      throw new Error("applyFilters failed: " + (err?.message || err));
+    }
 
   } catch (err) {
     console.error("Product load failed:", err);
