@@ -20,6 +20,48 @@
       background:#0b1220; color:#fff;
       padding:10px 12px; font-size:14px;
     }
+    @media print {
+    body * {
+      visibility: hidden !important;
+    }
+
+    #receiptOverlay,
+    #receiptOverlay * {
+      visibility: visible !important;
+    }
+
+    #receiptOverlay {
+      position: absolute !important;
+      inset: 0 !important;
+      background: #fff !important;
+      display: block !important;
+    }
+
+    #receiptOverlay .receipt-card {
+      width: 300px !important;
+      max-width: 300px !important;
+      margin: 0 auto !important;
+      background: #fff !important;
+      color: #000 !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+      font-size: 12px !important;
+      line-height: 1.35 !important;
+    }
+
+    #receiptOverlay .receipt-actions {
+      display: none !important;
+    }
+
+    #receiptOverlay hr {
+      border: 0;
+      border-top: 1px dashed #000;
+      margin: 8px 0;
+    }
+  }
     textarea { min-height: 64px; resize: vertical; }
     button { cursor:pointer; font-weight:700; }
     .row { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
@@ -125,7 +167,16 @@
           <input id="shipping" type="number" step="0.01" value="0" />
         </div>
       </div>
-
+     <div class="row" style="margin-top:10px;">
+       <div>
+         <label>Cash received $</label>
+         <input id="cashReceived" type="number" step="0.01" min="0" value="0" />
+       </div>
+       <div>
+         <label>Change due</label>
+         <input id="changeDue" type="text" value="$0.00" readonly />
+       </div>
+     </div>
       <div style="margin-top:10px;">
         <label>Notes (optional)</label>
         <textarea id="notes" placeholder="Receipt notes…"></textarea>
@@ -185,6 +236,13 @@
     });
   }
 
+  function updateChangeDue() {
+  const received = Number(document.getElementById("cashReceived").value || 0);
+  const totals = recalc();
+  const change = Math.max(0, received - Number(totals.grand_total || 0));
+  document.getElementById("changeDue").value = money(change);
+}
+  
   async function completeManualPaidSale(paymentMethod){
   clearMessages();
 
@@ -235,7 +293,7 @@
   if (!res.success) {
     throw new Error(res.error || "Sale failed");
   }
-
+const soldItems = [...cart];
   cart = [];
 
     cart = [];
@@ -251,7 +309,7 @@
     orderId: res.orderId,
     payment: paymentMethod,
     totals: totals,
-    items: cart
+    items: soldItems
   });
     showOk("Sale completed: " + paymentMethod + " • Order " + res.orderId);
     focusSkuInput();
@@ -573,6 +631,107 @@
     }
   }
 
+  function showReceipt(data){
+  const old = document.getElementById("receiptOverlay");
+  if (old) old.remove();
+
+  const itemsHtml = (data.items || []).map(it => `
+    <div style="display:flex; justify-content:space-between; gap:12px; margin:4px 0;">
+      <span>${Number(it.qty || 0)} x ${escapeHtml(it.title || "")}</span>
+      <span>${money(Number(it.price || 0) * Number(it.qty || 0))}</span>
+    </div>
+  `).join("");
+
+  const received = Number(data.cashReceived || 0);
+  const total = Number(data.totals?.grand_total || 0);
+  const change = Math.max(0, received - total);
+  const now = new Date();
+
+  const overlay = document.createElement("div");
+  overlay.id = "receiptOverlay";
+  overlay.style.cssText = `
+    position:fixed; inset:0; background:rgba(0,0,0,.72);
+    display:flex; align-items:center; justify-content:center; z-index:9999;
+  `;
+
+  overlay.innerHTML = `
+    <div class="receipt-card" style="
+      width:min(420px,92vw); background:#111b33; color:#fff;
+      border:1px solid rgba(255,255,255,.12); border-radius:18px;
+      padding:18px; box-shadow:0 20px 50px rgba(0,0,0,.5);
+    ">
+      <div style="text-align:center;">
+        <div style="font-size:20px; font-weight:800;">FlashBidz POS</div>
+        <div style="font-size:12px; opacity:.8;">51797 County Road 652</div>
+        <div style="font-size:12px; opacity:.8;">Mattawan, MI 49071</div>
+      </div>
+
+      <hr style="opacity:.2; margin:10px 0;">
+
+      <div style="font-size:12px;">Order: ${escapeHtml(data.orderId || "")}</div>
+      <div style="font-size:12px;">Date: ${now.toLocaleString()}</div>
+      <div style="font-size:12px;">Payment: ${escapeHtml(data.payment || "")}</div>
+
+      <hr style="opacity:.2; margin:10px 0;">
+
+      ${itemsHtml || '<div>No items</div>'}
+
+      <hr style="opacity:.2; margin:10px 0;">
+
+      <div style="display:flex; justify-content:space-between; margin:4px 0;">
+        <span>Subtotal</span><strong>${money(data.totals?.subtotal || 0)}</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin:4px 0;">
+        <span>Tax</span><strong>${money(data.totals?.tax || 0)}</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin:4px 0;">
+        <span>Shipping</span><strong>${money(data.totals?.shipping || 0)}</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin:10px 0 4px;">
+        <span style="font-size:18px; font-weight:800;">Total</span>
+        <span style="font-size:18px; font-weight:800;">${money(total)}</span>
+      </div>
+
+      <div style="margin-top:10px; font-size:14px;">
+        <div style="display:flex; justify-content:space-between; margin:4px 0;">
+          <span>Cash received</span><strong>${money(received)}</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin:4px 0;">
+          <span>Change due</span><strong>${money(change)}</strong>
+        </div>
+      </div>
+
+      <hr style="opacity:.2; margin:10px 0;">
+
+      <div style="text-align:center; font-size:12px;">
+        Thank you for shopping FlashBidz
+      </div>
+
+      <div class="receipt-actions" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px;">
+        <button id="receiptDoneBtn" style="
+          border-radius:12px; border:0; padding:10px 12px; font-weight:700;
+          background:linear-gradient(90deg,#ef4444,#f97316); color:#fff; cursor:pointer;
+        ">Done</button>
+        <button id="receiptPrintBtn" style="
+          border-radius:12px; border:1px solid rgba(255,255,255,.16);
+          padding:10px 12px; font-weight:700; background:#0b1220; color:#fff; cursor:pointer;
+        ">Print</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById("receiptDoneBtn").addEventListener("click", () => {
+    overlay.remove();
+    focusSkuInput();
+  });
+
+  document.getElementById("receiptPrintBtn").addEventListener("click", () => {
+    window.print();
+  });
+}
+ 
   function escapeHtml(str) {
     return String(str)
       .replace(/&/g, "&amp;")
@@ -612,6 +771,10 @@
   });
 
   document.getElementById("cartBody").addEventListener("click", (e) => {
+  window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("cashReceived").addEventListener("input", updateChangeDue);
+});
+   document.getElementById("cashReceived").addEventListener("input", updateChangeDue);
     const btn = e.target.closest("button");
     if (!btn) return;
 
