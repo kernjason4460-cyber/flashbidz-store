@@ -500,7 +500,7 @@
       renderCart();
 
       try {
-        await loadProducts();
+        loadProducts().catch(err => console.error("Background reload failed:", err));
         showOk("Payment complete. POS refreshed.");
       } catch (e) {
         showErr("Payment completed, but items could not be refreshed.");
@@ -524,104 +524,186 @@
     return `FBZPOS-${y}${m}${day}-${hh}${mm}${ss}-${rand}`;
   }
 
-  async function completeManualPaidSale(paymentMethod, cashReceivedOverride = 0) {
-    clearMessages();
+function applyLocalSaleToInventory(soldItems) {
+  soldItems.forEach(sold => {
+    const qtySold = Number(sold.qty || 0);
 
-    if (!cart.length) {
-      showErr("Cart is empty.");
-      focusSkuInput();
-      return;
-    }
+    Object.keys(productsByKey).forEach(key => {
+      const p = productsByKey[key];
+      if (!p) return;
 
-    const buyer = {
-      name: document.getElementById("buyerName").value || "Walk-in",
-      contact: document.getElementById("buyerContact").value || ""
-    };
+      const sameItem =
+        (sold.item_id && p.item_id === sold.item_id) ||
+        (sold.sku && p.sku === sold.sku);
 
-    const fulfillment = document.getElementById("fulfillment").value || "in_store";
-    const totals = recalc();
+      if (!sameItem) return;
 
-    const soldItems = [...cart];
-    const cashReceived = paymentMethod === "cash"
-      ? Number(cashReceivedOverride || 0)
-      : 0;
+      p.stock = Math.max(0, Number(p.stock || 0) - qtySold);
+    });
 
-    if (paymentMethod === "cash" && cashReceived < Number(totals.grand_total || 0)) {
-      showErr("Cash received is less than the total.");
-      focusSkuInput();
-      return;
-    }
+    productsList = productsList
+      .map(p => {
+        const sameItem =
+          (sold.item_id && p.item_id === sold.item_id) ||
+          (sold.sku && p.sku === sold.sku);
 
-    const payload = {
-      orderId: makeOrderId(),
-      channel: "pos",
-      payment_method: paymentMethod,
-      fulfillment,
-      buyer,
-      notes: document.getElementById("notes").value || "",
-      items: soldItems.map(it => ({
-        item_id: it.item_id || "",
-        sku: it.sku,
-        title: it.title,
-        qty: Number(it.qty || 1),
-        price: Number(it.price || 0)
-      })),
-      totals
-    };
+        if (!sameItem) return p;
 
-    const url = APPS_SCRIPT_URL
-      + "?action=record_pos_sale"
-      + "&payload=" + encodeURIComponent(JSON.stringify(payload))
-      + "&t=" + Date.now();
+        return {
+          ...p,
+          stock: Math.max(0, Number(p.stock || 0) - qtySold)
+        };
+      })
+      .filter(p => Number(p.stock || 0) > 0);
+  });
+}
+  
+  function showProcessingOverlay(message = "Processing sale...") {
+  let overlay = document.getElementById("processingOverlay");
 
-    try {
-      showOk("Processing " + paymentMethod + " sale...");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "processingOverlay";
+    overlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9998;
+    `;
 
-      document.getElementById("cashBtn").disabled = true;
-      document.getElementById("terminalBtn").disabled = true;
-      document.getElementById("otherPaidBtn").disabled = true;
-      document.getElementById("payBtn").disabled = true;
+    overlay.innerHTML = `
+      <div style="
+        background:#111b33;
+        color:#fff;
+        border:1px solid rgba(255,255,255,.12);
+        border-radius:18px;
+        padding:24px;
+        width:min(340px,90vw);
+        text-align:center;
+        box-shadow:0 20px 50px rgba(0,0,0,.5);
+      ">
+        <div style="font-size:20px; font-weight:800; margin-bottom:8px;">FlashBidz POS</div>
+        <div id="processingOverlayText" style="font-size:15px; opacity:.92;">${message}</div>
+      </div>
+    `;
 
-      const res = await fetchJsonp(url, 60000);
-
-      if (!res) {
-        throw new Error("No response from Apps Script");
-      }
-
-      if (!res.success) {
-        throw new Error(res.error || "Sale failed");
-      }
-
-      cart = [];
-      saveCart();
-      renderCart();
-
-      document.getElementById("buyerName").value = "Walk-in";
-      document.getElementById("buyerContact").value = "";
-      document.getElementById("notes").value = "";
-      document.getElementById("shipping").value = "0";
-
-      await loadProducts();
-
-      showReceipt({
-        orderId: res.orderId,
-        payment: paymentMethod,
-        totals: totals,
-        items: soldItems,
-        cashReceived: cashReceived
-      });
-
-      showOk("Sale completed: " + paymentMethod + " • Order " + res.orderId);
-      focusSkuInput();
-    } catch (e) {
-      showErr("Could not complete sale: " + (e && e.message ? e.message : e));
-    } finally {
-      document.getElementById("cashBtn").disabled = false;
-      document.getElementById("terminalBtn").disabled = false;
-      document.getElementById("otherPaidBtn").disabled = false;
-      document.getElementById("payBtn").disabled = false;
-    }
+    document.body.appendChild(overlay);
+  } else {
+    overlay.style.display = "flex";
+    const text = document.getElementById("processingOverlayText");
+    if (text) text.textContent = message;
   }
+}
+
+function hideProcessingOverlay() {
+  const overlay = document.getElementById("processingOverlay");
+  if (overlay) overlay.style.display = "none";
+}
+  
+  async function completeManualPaidSale(paymentMethod, cashReceivedOverride = 0) {
+  clearMessages();
+
+  if (!cart.length) {
+    showErr("Cart is empty.");
+    focusSkuInput();
+    return;
+  }
+
+  const buyer = {
+    name: document.getElementById("buyerName").value || "Walk-in",
+    contact: document.getElementById("buyerContact").value || ""
+  };
+
+  const fulfillment = document.getElementById("fulfillment").value || "in_store";
+  const totals = recalc();
+
+  const soldItems = [...cart];
+  const cashReceived = paymentMethod === "cash"
+    ? Number(cashReceivedOverride || 0)
+    : 0;
+
+  if (paymentMethod === "cash" && cashReceived < Number(totals.grand_total || 0)) {
+    showErr("Cash received is less than the total.");
+    focusSkuInput();
+    return;
+  }
+
+  const payload = {
+    orderId: makeOrderId(),
+    channel: "pos",
+    payment_method: paymentMethod,
+    fulfillment,
+    buyer,
+    notes: document.getElementById("notes").value || "",
+    items: soldItems.map(it => ({
+      item_id: it.item_id || "",
+      sku: it.sku,
+      title: it.title,
+      qty: Number(it.qty || 1),
+      price: Number(it.price || 0)
+    })),
+    totals
+  };
+
+  const url = APPS_SCRIPT_URL
+    + "?action=record_pos_sale"
+    + "&payload=" + encodeURIComponent(JSON.stringify(payload))
+    + "&t=" + Date.now();
+
+  try {
+    showProcessingOverlay("Processing " + paymentMethod + " sale...");
+
+    document.getElementById("cashBtn").disabled = true;
+    document.getElementById("terminalBtn").disabled = true;
+    document.getElementById("otherPaidBtn").disabled = true;
+    document.getElementById("payBtn").disabled = true;
+
+    const res = await fetchJsonp(url, 60000);
+
+    if (!res) {
+      throw new Error("No response from Apps Script");
+    }
+
+    if (!res.success) {
+      throw new Error(res.error || "Sale failed");
+    }
+
+    applyLocalSaleToInventory(soldItems);
+
+    cart = [];
+    saveCart();
+    renderCart();
+
+    document.getElementById("buyerName").value = "Walk-in";
+    document.getElementById("buyerContact").value = "";
+    document.getElementById("notes").value = "";
+    document.getElementById("shipping").value = "0";
+
+    loadProducts().catch(err => console.error("Background reload failed:", err));
+
+    showReceipt({
+      orderId: res.orderId,
+      payment: paymentMethod,
+      totals: totals,
+      items: soldItems,
+      cashReceived: cashReceived
+    });
+
+    showOk("Sale completed: " + paymentMethod + " • Order " + res.orderId);
+    focusSkuInput();
+  } catch (e) {
+    showErr("Could not complete sale: " + (e && e.message ? e.message : e));
+  } finally {
+    hideProcessingOverlay();
+    document.getElementById("cashBtn").disabled = false;
+    document.getElementById("terminalBtn").disabled = false;
+    document.getElementById("otherPaidBtn").disabled = false;
+    document.getElementById("payBtn").disabled = false;
+  }
+}
 
   async function pay() {
     clearMessages();
