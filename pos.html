@@ -221,6 +221,10 @@
   const TAX_RATE = 0.06;
   const POS_CART_KEY = "fbz_pos_cart";
 
+  let productsByKey = {};
+  let productsList = [];
+  let cart = [];
+
   function fetchJsonp(url, timeoutMs = 20000) {
     return new Promise((resolve, reject) => {
       const cbName = "__fbz_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
@@ -230,163 +234,63 @@
 
       function cleanup() {
         if (timer) clearTimeout(timer);
-        try { delete window[cbName]; } catch(e){}
+        try { delete window[cbName]; } catch (e) {}
         if (script && script.parentNode) script.parentNode.removeChild(script);
       }
 
-      window[cbName] = (data) => { cleanup(); resolve(data); };
-      timer = setTimeout(() => { cleanup(); reject(new Error("Request timed out")); }, timeoutMs);
+      window[cbName] = (data) => {
+        cleanup();
+        resolve(data);
+      };
+
+      timer = setTimeout(() => {
+        cleanup();
+        reject(new Error("Request timed out"));
+      }, timeoutMs);
 
       script.src = url + sep + "callback=" + encodeURIComponent(cbName);
-      script.onerror = () => { cleanup(); reject(new Error("Script load failed")); };
+      script.onerror = () => {
+        cleanup();
+        reject(new Error("Script load failed"));
+      };
 
       document.head.appendChild(script);
     });
   }
 
-  function updateChangeDue() {
-  const received = Number(document.getElementById("cashReceived").value || 0);
-  const totals = recalc();
-  const change = Math.max(0, received - Number(totals.grand_total || 0));
-  document.getElementById("changeDue").value = money(change);
-}
-  
-async function completeManualPaidSale(paymentMethod){
-  clearMessages();
-
-  if (!cart.length) {
-    showErr("Cart is empty.");
-    focusSkuInput();
-    return;
+  function money(n) {
+    return "$" + (Number(n || 0)).toFixed(2);
   }
 
-  const buyer = {
-    name: document.getElementById("buyerName").value || "Walk-in",
-    contact: document.getElementById("buyerContact").value || ""
-  };
-
-  const fulfillment = document.getElementById("fulfillment").value || "in_store";
-  const totals = recalc();
-
-  const soldItems = [...cart];
-  const cashReceived = paymentMethod === "cash"
-    ? Number(document.getElementById("cashReceived")?.value || 0)
-    : 0;
-  
-  if (paymentMethod === "cash" && cashReceived < Number(totals.grand_total || 0)) {
-    showErr("Cash received is less than the total.");
-    return;
-  }
-  
-  const payload = {
-    orderId: makeOrderId(),
-    channel: "pos",
-    payment_method: paymentMethod,
-    fulfillment,
-    buyer,
-    notes: document.getElementById("notes").value || "",
-    items: soldItems.map(it => ({
-      item_id: it.item_id || "",
-      sku: it.sku,
-      title: it.title,
-      qty: Number(it.qty || 1),
-      price: Number(it.price || 0)
-    })),
-    totals
-  };
-
-  const url = APPS_SCRIPT_URL
-    + "?action=record_pos_sale"
-    + "&payload=" + encodeURIComponent(JSON.stringify(payload))
-    + "&t=" + Date.now();
-
-  try {
-    showOk("Processing " + paymentMethod + " sale...");
-
-    document.getElementById("cashBtn").disabled = true;
-    document.getElementById("terminalBtn").disabled = true;
-    document.getElementById("otherPaidBtn").disabled = true;
-    document.getElementById("payBtn").disabled = true;
-    document.getElementById("completeCashBtn").addEventListener("click", () => {
-      completeManualPaidSale("cash");
-    });
-    const res = await fetchJsonp(url, 60000);
-
-    if (!res) {
-      throw new Error("No response from Apps Script");
-    }
-
-    if (!res.success) {
-      throw new Error(res.error || "Sale failed");
-    }
-
-    cart = [];
-    saveCart();
-    renderCart();
-
-    document.getElementById("buyerName").value = "Walk-in";
-    document.getElementById("buyerContact").value = "";
-    document.getElementById("notes").value = "";
-    document.getElementById("shipping").value = "0";
-
-    const cashReceivedEl = document.getElementById("cashReceived");
-    const changeDueEl = document.getElementById("changeDue");
-    if (cashReceivedEl) cashReceivedEl.value = "0";
-    if (changeDueEl) changeDueEl.value = "$0.00";
-
-    await loadProducts();
-
-    showReceipt({
-      orderId: res.orderId,
-      payment: paymentMethod,
-      totals: totals,
-      items: soldItems,
-      cashReceived: cashReceived
-    });
-
-    showOk("Sale completed: " + paymentMethod + " • Order " + res.orderId);
-    focusSkuInput();
-  } catch(e) {
-    showErr("Could not complete sale: " + (e && e.message ? e.message : e));
-  } finally {
-    document.getElementById("cashBtn").disabled = false;
-    document.getElementById("terminalBtn").disabled = false;
-    document.getElementById("otherPaidBtn").disabled = false;
-    document.getElementById("payBtn").disabled = false;
-  }
-}
-  
-  function money(n){ return "$" + (Number(n||0)).toFixed(2); }
-
-  function showErr(msg){
+  function showErr(msg) {
     const el = document.getElementById("msgErr");
     const ok = document.getElementById("msgOk");
-    ok.style.display = "none";
-    el.style.display = "block";
-    el.textContent = msg;
+    if (ok) ok.style.display = "none";
+    if (el) {
+      el.style.display = "block";
+      el.textContent = msg;
+    }
   }
 
- function showOk(msg){
-  const ok = document.getElementById("msgOk");
-  const err = document.getElementById("msgErr");
-  if (err) err.style.display = "none";
-  if (!ok) {
-    alert(msg);
-    return;
-  }
-  ok.style.display = "block";
-  ok.textContent = msg;
-  ok.scrollIntoView({ behavior: "smooth", block: "nearest" });
-}
-
-  function clearMessages(){
-    document.getElementById("msgErr").style.display = "none";
-    document.getElementById("msgOk").style.display = "none";
+  function showOk(msg) {
+    const ok = document.getElementById("msgOk");
+    const err = document.getElementById("msgErr");
+    if (err) err.style.display = "none";
+    if (!ok) {
+      alert(msg);
+      return;
+    }
+    ok.style.display = "block";
+    ok.textContent = msg;
+    ok.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
-  let productsByKey = {};
-  let productsList = [];
-  let cart = [];
+  function clearMessages() {
+    const err = document.getElementById("msgErr");
+    const ok = document.getElementById("msgOk");
+    if (err) err.style.display = "none";
+    if (ok) ok.style.display = "none";
+  }
 
   function getNormalizedKeysForItem(p) {
     const keys = [];
@@ -425,21 +329,21 @@ async function completeManualPaidSale(paymentMethod){
     return true;
   }
 
-  function loadCart(){
+  function loadCart() {
     try {
       cart = JSON.parse(localStorage.getItem(POS_CART_KEY) || "[]");
       if (!Array.isArray(cart)) cart = [];
-    } catch(e){
+    } catch (e) {
       cart = [];
     }
   }
 
-  function saveCart(){
+  function saveCart() {
     localStorage.setItem(POS_CART_KEY, JSON.stringify(cart));
   }
 
-  function recalc(){
-    const subtotal = cart.reduce((s,it)=> s + (Number(it.price||0) * Number(it.qty||0)), 0);
+  function recalc() {
+    const subtotal = cart.reduce((s, it) => s + (Number(it.price || 0) * Number(it.qty || 0)), 0);
     const tax = +(subtotal * TAX_RATE).toFixed(2);
     const shipping = +Number(document.getElementById("shipping").value || 0).toFixed(2);
     const total = +(subtotal + tax + shipping).toFixed(2);
@@ -452,13 +356,13 @@ async function completeManualPaidSale(paymentMethod){
     return { subtotal, tax, shipping, grand_total: total };
   }
 
-  function renderCart(){
+  function renderCart() {
     const tb = document.getElementById("cartBody");
     tb.innerHTML = "";
 
     cart.forEach((it, idx) => {
       const tr = document.createElement("tr");
-      const line = Number(it.price||0) * Number(it.qty||0);
+      const line = Number(it.price || 0) * Number(it.qty || 0);
 
       tr.innerHTML = `
         <td class="mono">${escapeHtml(it.scanKey || it.sku || it.item_id || "")}</td>
@@ -485,8 +389,10 @@ async function completeManualPaidSale(paymentMethod){
 
   function focusSkuInput() {
     const el = document.getElementById("skuInput");
-    el.focus();
-    el.select();
+    if (el) {
+      el.focus();
+      el.select();
+    }
   }
 
   function findItemByScanValue(scanValue) {
@@ -495,7 +401,7 @@ async function completeManualPaidSale(paymentMethod){
     return productsByKey[key] || null;
   }
 
-  function addSkuToCart(scanValue){
+  function addSkuToCart(scanValue) {
     const key = String(scanValue || "").trim();
     if (!key) {
       showErr("Enter or scan an item code.");
@@ -551,7 +457,7 @@ async function completeManualPaidSale(paymentMethod){
     focusSkuInput();
   }
 
-  async function loadProducts(){
+  async function loadProducts() {
     const pill = document.getElementById("statusPill");
     pill.textContent = "Loading items…";
 
@@ -605,20 +511,119 @@ async function completeManualPaidSale(paymentMethod){
     }
   }
 
-  function makeOrderId(){
+  function makeOrderId() {
     const d = new Date();
-    const pad = n => String(n).padStart(2,"0");
+    const pad = n => String(n).padStart(2, "0");
     const y = d.getFullYear();
-    const m = pad(d.getMonth()+1);
+    const m = pad(d.getMonth() + 1);
     const day = pad(d.getDate());
     const hh = pad(d.getHours());
     const mm = pad(d.getMinutes());
     const ss = pad(d.getSeconds());
-    const rand = Math.floor(Math.random()*9000)+1000;
+    const rand = Math.floor(Math.random() * 9000) + 1000;
     return `FBZPOS-${y}${m}${day}-${hh}${mm}${ss}-${rand}`;
   }
 
-  async function pay(){
+  async function completeManualPaidSale(paymentMethod, cashReceivedOverride = 0) {
+    clearMessages();
+
+    if (!cart.length) {
+      showErr("Cart is empty.");
+      focusSkuInput();
+      return;
+    }
+
+    const buyer = {
+      name: document.getElementById("buyerName").value || "Walk-in",
+      contact: document.getElementById("buyerContact").value || ""
+    };
+
+    const fulfillment = document.getElementById("fulfillment").value || "in_store";
+    const totals = recalc();
+
+    const soldItems = [...cart];
+    const cashReceived = paymentMethod === "cash"
+      ? Number(cashReceivedOverride || 0)
+      : 0;
+
+    if (paymentMethod === "cash" && cashReceived < Number(totals.grand_total || 0)) {
+      showErr("Cash received is less than the total.");
+      focusSkuInput();
+      return;
+    }
+
+    const payload = {
+      orderId: makeOrderId(),
+      channel: "pos",
+      payment_method: paymentMethod,
+      fulfillment,
+      buyer,
+      notes: document.getElementById("notes").value || "",
+      items: soldItems.map(it => ({
+        item_id: it.item_id || "",
+        sku: it.sku,
+        title: it.title,
+        qty: Number(it.qty || 1),
+        price: Number(it.price || 0)
+      })),
+      totals
+    };
+
+    const url = APPS_SCRIPT_URL
+      + "?action=record_pos_sale"
+      + "&payload=" + encodeURIComponent(JSON.stringify(payload))
+      + "&t=" + Date.now();
+
+    try {
+      showOk("Processing " + paymentMethod + " sale...");
+
+      document.getElementById("cashBtn").disabled = true;
+      document.getElementById("terminalBtn").disabled = true;
+      document.getElementById("otherPaidBtn").disabled = true;
+      document.getElementById("payBtn").disabled = true;
+
+      const res = await fetchJsonp(url, 60000);
+
+      if (!res) {
+        throw new Error("No response from Apps Script");
+      }
+
+      if (!res.success) {
+        throw new Error(res.error || "Sale failed");
+      }
+
+      cart = [];
+      saveCart();
+      renderCart();
+
+      document.getElementById("buyerName").value = "Walk-in";
+      document.getElementById("buyerContact").value = "";
+      document.getElementById("notes").value = "";
+      document.getElementById("shipping").value = "0";
+
+      await loadProducts();
+
+      showReceipt({
+        orderId: res.orderId,
+        payment: paymentMethod,
+        totals: totals,
+        items: soldItems,
+        cashReceived: cashReceived
+      });
+
+      showOk("Sale completed: " + paymentMethod + " • Order " + res.orderId);
+      focusSkuInput();
+    } catch (e) {
+      showErr("Could not complete sale: " + (e && e.message ? e.message : e));
+    } finally {
+      document.getElementById("cashBtn").disabled = false;
+      document.getElementById("terminalBtn").disabled = false;
+      document.getElementById("otherPaidBtn").disabled = false;
+      document.getElementById("payBtn").disabled = false;
+    }
+  }
+
+  async function pay() {
     clearMessages();
 
     if (!cart.length) {
@@ -664,116 +669,114 @@ async function completeManualPaidSale(paymentMethod){
       }
 
       window.location.href = res.checkout_url;
-    } catch(e) {
+    } catch (e) {
       showErr("Could not create Stripe checkout: " + (e && e.message ? e.message : e));
     }
   }
 
-function showReceipt(data){
-  const old = document.getElementById("receiptOverlay");
-  if (old) old.remove();
+  function showReceipt(data) {
+    const old = document.getElementById("receiptOverlay");
+    if (old) old.remove();
 
-  const itemsHtml = (data.items || []).map(it => `
-    <div style="display:flex; justify-content:space-between; gap:12px; margin:4px 0;">
-      <span>${Number(it.qty || 0)} x ${escapeHtml(it.title || "")}</span>
-      <span>${money(Number(it.price || 0) * Number(it.qty || 0))}</span>
-    </div>
-  `).join("");
-
-  const received = Number(data.cashReceived || 0);
-  const total = Number(data.totals?.grand_total || 0);
-  const change = Math.max(0, received - total);
-  const now = new Date();
-
-  const overlay = document.createElement("div");
-  overlay.id = "receiptOverlay";
-  overlay.style.cssText = `
-    position:fixed; inset:0; background:rgba(0,0,0,.72);
-    display:flex; align-items:center; justify-content:center; z-index:9999;
-  `;
-
-  overlay.innerHTML = `
-    <div class="receipt-card" style="
-      width:min(340px,92vw); background:#111b33; color:#fff;
-      border:1px solid rgba(255,255,255,.12); border-radius:18px;
-      padding:18px; box-shadow:0 20px 50px rgba(0,0,0,.5);
-    ">
-      <div style="text-align:center;">
-        <div style="font-size:20px; font-weight:800;">FlashBidz POS</div>
-        <div style="font-size:12px; opacity:.8;">51797 County Road 652</div>
-        <div style="font-size:12px; opacity:.8;">Mattawan, MI 49071</div>
+    const itemsHtml = (data.items || []).map(it => `
+      <div style="display:flex; justify-content:space-between; gap:12px; margin:4px 0;">
+        <span>${Number(it.qty || 0)} x ${escapeHtml(it.title || "")}</span>
+        <span>${money(Number(it.price || 0) * Number(it.qty || 0))}</span>
       </div>
+    `).join("");
 
-      <hr style="opacity:.2; margin:10px 0;">
+    const received = Number(data.cashReceived || 0);
+    const total = Number(data.totals?.grand_total || 0);
+    const change = Math.max(0, received - total);
+    const now = new Date();
 
-      <div style="font-size:12px;">Order: ${escapeHtml(data.orderId || "")}</div>
-      <div style="font-size:12px;">Date: ${now.toLocaleString()}</div>
-      <div style="font-size:12px;">Payment: ${escapeHtml(data.payment || "")}</div>
+    const overlay = document.createElement("div");
+    overlay.id = "receiptOverlay";
+    overlay.style.cssText = `
+      position:fixed; inset:0; background:rgba(0,0,0,.72);
+      display:flex; align-items:center; justify-content:center; z-index:9999;
+    `;
 
-      <hr style="opacity:.2; margin:10px 0;">
+    overlay.innerHTML = `
+      <div class="receipt-card" style="
+        width:min(340px,92vw); background:#111b33; color:#fff;
+        border:1px solid rgba(255,255,255,.12); border-radius:18px;
+        padding:18px; box-shadow:0 20px 50px rgba(0,0,0,.5);
+      ">
+        <div style="text-align:center;">
+          <div style="font-size:20px; font-weight:800;">FlashBidz POS</div>
+          <div style="font-size:12px; opacity:.8;">51797 County Road 652</div>
+          <div style="font-size:12px; opacity:.8;">Mattawan, MI 49071</div>
+        </div>
 
-      ${itemsHtml || '<div>No items</div>'}
+        <hr style="opacity:.2; margin:10px 0;">
 
-      <hr style="opacity:.2; margin:10px 0;">
+        <div style="font-size:12px;">Order: ${escapeHtml(data.orderId || "")}</div>
+        <div style="font-size:12px;">Date: ${now.toLocaleString()}</div>
+        <div style="font-size:12px;">Payment: ${escapeHtml(data.payment || "")}</div>
 
-      <div style="display:flex; justify-content:space-between; margin:4px 0;">
-        <span>Subtotal</span><strong>${money(data.totals?.subtotal || 0)}</strong>
-      </div>
-      <div style="display:flex; justify-content:space-between; margin:4px 0;">
-        <span>Tax</span><strong>${money(data.totals?.tax || 0)}</strong>
-      </div>
-      <div style="display:flex; justify-content:space-between; margin:4px 0;">
-        <span>Shipping</span><strong>${money(data.totals?.shipping || 0)}</strong>
-      </div>
-      <div style="display:flex; justify-content:space-between; margin:10px 0 4px;">
-        <span style="font-size:18px; font-weight:800;">Total</span>
-        <span style="font-size:18px; font-weight:800;">${money(total)}</span>
-      </div>
+        <hr style="opacity:.2; margin:10px 0;">
 
-      ${data.payment === "cash" ? `
-      <div style="margin-top:10px; font-size:14px;">
+        ${itemsHtml || '<div>No items</div>'}
+
+        <hr style="opacity:.2; margin:10px 0;">
+
         <div style="display:flex; justify-content:space-between; margin:4px 0;">
-          <span>Cash received</span><strong>${money(received)}</strong>
+          <span>Subtotal</span><strong>${money(data.totals?.subtotal || 0)}</strong>
         </div>
         <div style="display:flex; justify-content:space-between; margin:4px 0;">
-          <span>Change due</span><strong>${money(change)}</strong>
+          <span>Tax</span><strong>${money(data.totals?.tax || 0)}</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin:4px 0;">
+          <span>Shipping</span><strong>${money(data.totals?.shipping || 0)}</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin:10px 0 4px;">
+          <span style="font-size:18px; font-weight:800;">Total</span>
+          <span style="font-size:18px; font-weight:800;">${money(total)}</span>
+        </div>
+
+        ${data.payment === "cash" ? `
+        <div style="margin-top:10px; font-size:14px;">
+          <div style="display:flex; justify-content:space-between; margin:4px 0;">
+            <span>Cash received</span><strong>${money(received)}</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin:4px 0;">
+            <span>Change due</span><strong>${money(change)}</strong>
+          </div>
+        </div>
+        ` : ""}
+
+        <hr style="opacity:.2; margin:10px 0;">
+
+        <div style="text-align:center; font-size:12px;">
+          Thank you for shopping FlashBidz
+        </div>
+
+        <div class="receipt-actions" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px;">
+          <button id="receiptDoneBtn" style="
+            border-radius:12px; border:0; padding:10px 12px; font-weight:700;
+            background:linear-gradient(90deg,#ef4444,#f97316); color:#fff; cursor:pointer;
+          ">Done</button>
+          <button id="receiptPrintBtn" style="
+            border-radius:12px; border:1px solid rgba(255,255,255,.16);
+            padding:10px 12px; font-weight:700; background:#0b1220; color:#fff; cursor:pointer;
+          ">Print</button>
         </div>
       </div>
-      ` : ""}
+    `;
 
-      <hr style="opacity:.2; margin:10px 0;">
+    document.body.appendChild(overlay);
 
-      <div style="text-align:center; font-size:12px;">
-        Thank you for shopping FlashBidz
-      </div>
+    document.getElementById("receiptDoneBtn").addEventListener("click", () => {
+      overlay.remove();
+      focusSkuInput();
+    });
 
-      <div class="receipt-actions" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px;">
-        <button id="receiptDoneBtn" style="
-          border-radius:12px; border:0; padding:10px 12px; font-weight:700;
-          background:linear-gradient(90deg,#ef4444,#f97316); color:#fff; cursor:pointer;
-        ">Done</button>
-        <button id="receiptPrintBtn" style="
-          border-radius:12px; border:1px solid rgba(255,255,255,.16);
-          padding:10px 12px; font-weight:700; background:#0b1220; color:#fff; cursor:pointer;
-        ">Print</button>
-      </div>
-    </div>
-  `;
+    document.getElementById("receiptPrintBtn").addEventListener("click", () => {
+      window.print();
+    });
+  }
 
-  document.body.appendChild(overlay);
-
-  document.getElementById("receiptDoneBtn").addEventListener("click", () => {
-    overlay.remove();
-    focusSkuInput();
-  });
-
-  document.getElementById("receiptPrintBtn").addEventListener("click", () => {
-    window.print();
-  });
-}
-
-  
-  
   function escapeHtml(str) {
     return String(str)
       .replace(/&/g, "&amp;")
@@ -797,14 +800,48 @@ function showReceipt(data){
 
   document.getElementById("payBtn").addEventListener("click", pay);
   document.getElementById("shipping").addEventListener("input", recalc);
-  document.getElementById("cashBtn").addEventListener("click", () => completeManualPaidSale("cash"));
-  document.getElementById("terminalBtn").addEventListener("click", () => completeManualPaidSale("card_terminal"));
-  document.getElementById("otherPaidBtn").addEventListener("click", () => completeManualPaidSale("other_paid"));
+
+  document.getElementById("cashBtn").addEventListener("click", () => {
+    if (!cart.length) {
+      showErr("Cart is empty.");
+      focusSkuInput();
+      return;
+    }
+
+    const totals = recalc();
+    const totalDue = Number(totals.grand_total || 0);
+    const input = prompt("Total is " + money(totalDue) + "\nEnter cash received:");
+
+    if (input === null) {
+      focusSkuInput();
+      return;
+    }
+
+    const cashReceived = Number(input || 0);
+
+    if (!Number.isFinite(cashReceived) || cashReceived < totalDue) {
+      showErr("Cash received is less than the total.");
+      focusSkuInput();
+      return;
+    }
+
+    completeManualPaidSale("cash", cashReceived);
+  });
+
+  document.getElementById("terminalBtn").addEventListener("click", () => {
+    completeManualPaidSale("card_terminal");
+  });
+
+  document.getElementById("otherPaidBtn").addEventListener("click", () => {
+    completeManualPaidSale("other_paid");
+  });
+
   document.getElementById("suspendBtn").addEventListener("click", () => {
     saveCart();
     showOk("Sale suspended. Cart saved on this device.");
     focusSkuInput();
-});
+  });
+
   document.getElementById("skuInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -813,10 +850,6 @@ function showReceipt(data){
   });
 
   document.getElementById("cartBody").addEventListener("click", (e) => {
-  window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("cashReceived").addEventListener("input", updateChangeDue);
-});
-   document.getElementById("cashReceived").addEventListener("input", updateChangeDue);
     const btn = e.target.closest("button");
     if (!btn) return;
 
@@ -890,7 +923,7 @@ function showReceipt(data){
     }
   });
 
-  (async function init(){
+  (async function init() {
     loadCart();
     renderCart();
     focusSkuInput();
