@@ -247,7 +247,12 @@
     document.getElementById("shipping").value = "0";
 
     await loadProducts();
-    alert("Sale completed: " + paymentMethod + " • Order " + res.orderId);
+    showReceipt({
+    orderId: res.orderId,
+    payment: paymentMethod,
+    totals: totals,
+    items: cart
+  });
     showOk("Sale completed: " + paymentMethod + " • Order " + res.orderId);
     focusSkuInput();
   } catch(e) {
