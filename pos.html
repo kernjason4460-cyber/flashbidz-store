@@ -240,6 +240,7 @@
     document.getElementById("shipping").value = "0";
 
     await loadProducts();
+    alert("Sale completed: " + paymentMethod + " • Order " + res.orderId);
     showOk("Sale completed: " + paymentMethod + " • Order " + res.orderId);
     focusSkuInput();
   } catch(e) {
@@ -257,13 +258,18 @@
     el.textContent = msg;
   }
 
-  function showOk(msg){
-    const el = document.getElementById("msgOk");
-    const err = document.getElementById("msgErr");
-    err.style.display = "none";
-    el.style.display = "block";
-    el.textContent = msg;
+ function showOk(msg){
+  const ok = document.getElementById("msgOk");
+  const err = document.getElementById("msgErr");
+  if (err) err.style.display = "none";
+  if (!ok) {
+    alert(msg);
+    return;
   }
+  ok.style.display = "block";
+  ok.textContent = msg;
+  ok.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
 
   function clearMessages(){
     document.getElementById("msgErr").style.display = "none";
