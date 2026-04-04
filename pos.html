@@ -401,130 +401,128 @@
     return productsByKey[key] || null;
   }
 
-  function addSkuToCart(scanValue) {
-    console.log("Trying to add:", scanValue, productsByKey);
-    alert("Trying to add: " + scanValue);
-    const key = String(scanValue || "").trim();
-    if (!key) {
-      showErr("Enter or scan an item code.");
-      focusSkuInput();
-      return;
-    }
+ function addSkuToCart(scanValue) {
+  const key = String(scanValue || "").trim();
+  if (!key) {
+    showErr("Enter or scan an item code.");
+    focusSkuInput();
+    return;
+  }
 
-    const p = findItemByScanValue(key);
-    if (!p) {
-      showErr("Item not found: " + key);
-      document.getElementById("skuInput").value = "";
-      focusSkuInput();
-      return;
-    }
-
-    if (!isAvailableItem(p)) {
-      showErr("This item is not available: " + (p.title || p.sku || key));
-      document.getElementById("skuInput").value = "";
-      focusSkuInput();
-      return;
-    }
-
-    const existing = cart.find(x => x.sku === p.sku && x.item_id === p.item_id);
-    const maxQty = Number(p.stock || 0);
-
-    if (existing) {
-      if (Number(existing.qty || 0) >= maxQty) {
-        showErr("Only " + maxQty + " available for " + (p.title || p.sku));
-        document.getElementById("skuInput").value = "";
-        focusSkuInput();
-        return;
-      }
-      existing.qty = Number(existing.qty || 1) + 1;
-    } else {
-      cart.push({
-        item_id: p.item_id || "",
-        sku: p.sku || "",
-        scanKey: key,
-        title: p.title || "",
-        price: Number(p.price || 0),
-        qty: 1,
-        location_bin: p.location_bin || "",
-        consignor_name: p.consignor_name || "",
-        fee_tier: p.fee_tier || ""
-      });
-    }
-
-    saveCart();
-    renderCart();
-    showOk("Added: " + (p.title || p.sku || key));
-
+  const p = findItemByScanValue(key);
+  if (!p) {
+    showErr("Item not found: " + key);
     document.getElementById("skuInput").value = "";
     focusSkuInput();
+    return;
   }
 
-  async function loadProducts() {
-    const pill = document.getElementById("statusPill");
-    pill.textContent = "Loading items…";
+  if (!isAvailableItem(p)) {
+    showErr("This item is not available: " + (p.title || p.sku || key));
+    document.getElementById("skuInput").value = "";
+    focusSkuInput();
+    return;
+  }
 
-    const url = APPS_SCRIPT_URL + "?action=products&t=" + Date.now();
-    const data = await fetchJsonp(url, 20000);
-    const list = (data && Array.isArray(data.products)) ? data.products : [];
+  const existing = cart.find(x => x.sku === p.sku && x.item_id === p.item_id);
+  const maxQty = Number(p.stock || 0);
 
-    productsByKey = {};
-    productsList = [];
+  if (existing) {
+    if (Number(existing.qty || 0) >= maxQty) {
+      showErr("Only " + maxQty + " available for " + (p.title || p.sku));
+      document.getElementById("skuInput").value = "";
+      focusSkuInput();
+      return;
+    }
+    existing.qty = Number(existing.qty || 1) + 1;
+  } else {
+    cart.push({
+      item_id: p.item_id || "",
+      sku: p.sku || "",
+      scanKey: key,
+      title: p.title || "",
+      price: Number(p.price || 0),
+      qty: 1,
+      location_bin: p.location_bin || "",
+      consignor_name: p.consignor_name || "",
+      fee_tier: p.fee_tier || ""
+    });
+  }
 
-    list.forEach(raw => {
-      const p = normalizeProduct(raw);
-      if (!p.sku && !p.item_id) return;
-      if (!isAvailableItem(p)) return;
+  saveCart();
+  renderCart();
+  showOk("Added: " + (p.title || p.sku || key));
 
-      productsList.push(p);
+  document.getElementById("skuInput").value = "";
+  focusSkuInput();
+}
 
-      getNormalizedKeysForItem(p).forEach(k => {
-        productsByKey[k] = p;
-      });
+async function loadProducts() {
+  const pill = document.getElementById("statusPill");
+  pill.textContent = "Loading items…";
+
+  const url = APPS_SCRIPT_URL + "?action=products&t=" + Date.now();
+  const data = await fetchJsonp(url, 20000);
+  const list = (data && Array.isArray(data.products)) ? data.products : [];
+
+  productsByKey = {};
+  productsList = [];
+
+  list.forEach(raw => {
+    const p = normalizeProduct(raw);
+    if (!p.sku && !p.item_id) return;
+    if (!isAvailableItem(p)) return;
+
+    productsList.push(p);
+
+    getNormalizedKeysForItem(p).forEach(k => {
+      productsByKey[k] = p;
+    });
+  });
+
+  pill.textContent = "Items loaded: " + productsList.length;
+}
+
+async function handleStripeReturn() {
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.get("paid") === "1") {
+    const keysToTry = ["cart", "fbz_cart", "flashbidz_cart", "fbzCart", "store_cart", POS_CART_KEY];
+    keysToTry.forEach(k => localStorage.removeItem(k));
+
+    Object.keys(localStorage).forEach(k => {
+      if (k.toLowerCase().includes("cart")) {
+        localStorage.removeItem(k);
+      }
     });
 
-    pill.textContent = "Items loaded: " + productsList.length;
-  }
+    cart = [];
+    renderCart();
 
-  async function handleStripeReturn() {
-    const params = new URLSearchParams(window.location.search);
-
-    if (params.get("paid") === "1") {
-      const keysToTry = ["cart", "fbz_cart", "flashbidz_cart", "fbzCart", "store_cart", POS_CART_KEY];
-      keysToTry.forEach(k => localStorage.removeItem(k));
-
-      Object.keys(localStorage).forEach(k => {
-        if (k.toLowerCase().includes("cart")) {
-          localStorage.removeItem(k);
-        }
-      });
-
-      cart = [];
-      renderCart();
-
-      try {
-        loadProducts().catch(err => console.error("Background reload failed:", err));
-        showOk("Payment complete. POS refreshed.");
-      } catch (e) {
-        showErr("Payment completed, but items could not be refreshed.");
-      }
-
-      window.history.replaceState({}, document.title, "/pos.html");
-      focusSkuInput();
+    try {
+      loadProducts().catch(err => console.error("Background reload failed:", err));
+      showOk("Payment complete. POS refreshed.");
+    } catch (e) {
+      showErr("Payment completed, but items could not be refreshed.");
     }
-  }
 
-  function makeOrderId() {
-    const d = new Date();
-    const pad = n => String(n).padStart(2, "0");
-    const y = d.getFullYear();
-    const m = pad(d.getMonth() + 1);
-    const day = pad(d.getDate());
-    const hh = pad(d.getHours());
-    const mm = pad(d.getMinutes());
-    const ss = pad(d.getSeconds());
-    const rand = Math.floor(Math.random() * 9000) + 1000;
-    return `FBZPOS-${y}${m}${day}-${hh}${mm}${ss}-${rand}`;
+    window.history.replaceState({}, document.title, "/pos.html");
+    focusSkuInput();
   }
+}
+
+function makeOrderId() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const y = d.getFullYear();
+  const m = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hh = pad(d.getHours());
+  const mm = pad(d.getMinutes());
+  const ss = pad(d.getSeconds());
+  const rand = Math.floor(Math.random() * 9000) + 1000;
+  return `FBZPOS-${y}${m}${day}-${hh}${mm}${ss}-${rand}`;
+}
 
 function applyLocalSaleToInventory(soldItems) {
   soldItems.forEach(sold => {
@@ -559,8 +557,8 @@ function applyLocalSaleToInventory(soldItems) {
       .filter(p => Number(p.stock || 0) > 0);
   });
 }
-  
-  function showProcessingOverlay(message = "Processing sale...") {
+
+function showProcessingOverlay(message = "Processing sale...") {
   let overlay = document.getElementById("processingOverlay");
 
   if (!overlay) {
@@ -605,7 +603,403 @@ function hideProcessingOverlay() {
   if (overlay) overlay.style.display = "none";
 }
 
-  (async function init() {
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function showReceipt(data) {
+  const old = document.getElementById("receiptOverlay");
+  if (old) old.remove();
+
+  const itemsHtml = (data.items || []).map(it => `
+    <div style="display:flex; justify-content:space-between; gap:12px; margin:4px 0;">
+      <span>${Number(it.qty || 0)} x ${escapeHtml(it.title || "")}</span>
+      <span>${money(Number(it.price || 0) * Number(it.qty || 0))}</span>
+    </div>
+  `).join("");
+
+  const received = Number(data.cashReceived || 0);
+  const total = Number(data.totals?.grand_total || 0);
+  const change = Math.max(0, received - total);
+  const now = new Date();
+
+  const overlay = document.createElement("div");
+  overlay.id = "receiptOverlay";
+  overlay.style.cssText = `
+    position:fixed; inset:0; background:rgba(0,0,0,.72);
+    display:flex; align-items:center; justify-content:center; z-index:9999;
+  `;
+
+  overlay.innerHTML = `
+    <div class="receipt-card" style="
+      width:min(340px,92vw); background:#111b33; color:#fff;
+      border:1px solid rgba(255,255,255,.12); border-radius:18px;
+      padding:18px; box-shadow:0 20px 50px rgba(0,0,0,.5);
+    ">
+      <div style="text-align:center;">
+        <div style="font-size:20px; font-weight:800;">FlashBidz POS</div>
+        <div style="font-size:12px; opacity:.8;">51797 County Road 652</div>
+        <div style="font-size:12px; opacity:.8;">Mattawan, MI 49071</div>
+      </div>
+
+      <hr style="opacity:.2; margin:10px 0;">
+
+      <div style="font-size:12px;">Order: ${escapeHtml(data.orderId || "")}</div>
+      <div style="font-size:12px;">Date: ${now.toLocaleString()}</div>
+      <div style="font-size:12px;">Payment: ${escapeHtml(data.payment || "")}</div>
+
+      <hr style="opacity:.2; margin:10px 0;">
+
+      ${itemsHtml || '<div>No items</div>'}
+
+      <hr style="opacity:.2; margin:10px 0;">
+
+      <div style="display:flex; justify-content:space-between; margin:4px 0;">
+        <span>Subtotal</span><strong>${money(data.totals?.subtotal || 0)}</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin:4px 0;">
+        <span>Tax</span><strong>${money(data.totals?.tax || 0)}</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin:4px 0;">
+        <span>Shipping</span><strong>${money(data.totals?.shipping || 0)}</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin:10px 0 4px;">
+        <span style="font-size:18px; font-weight:800;">Total</span>
+        <span style="font-size:18px; font-weight:800;">${money(total)}</span>
+      </div>
+
+      ${data.payment === "cash" ? `
+      <div style="margin-top:10px; font-size:14px;">
+        <div style="display:flex; justify-content:space-between; margin:4px 0;">
+          <span>Cash received</span><strong>${money(received)}</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin:4px 0;">
+          <span>Change due</span><strong>${money(change)}</strong>
+        </div>
+      </div>
+      ` : ""}
+
+      <hr style="opacity:.2; margin:10px 0;">
+
+      <div style="text-align:center; font-size:12px;">
+        Thank you for shopping FlashBidz
+      </div>
+
+      <div class="receipt-actions" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px;">
+        <button id="receiptDoneBtn" style="
+          border-radius:12px; border:0; padding:10px 12px; font-weight:700;
+          background:linear-gradient(90deg,#ef4444,#f97316); color:#fff; cursor:pointer;
+        ">Done</button>
+        <button id="receiptPrintBtn" style="
+          border-radius:12px; border:1px solid rgba(255,255,255,.16);
+          padding:10px 12px; font-weight:700; background:#0b1220; color:#fff; cursor:pointer;
+        ">Print</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById("receiptDoneBtn").addEventListener("click", () => {
+    overlay.remove();
+    focusSkuInput();
+  });
+
+  document.getElementById("receiptPrintBtn").addEventListener("click", () => {
+    window.print();
+  });
+}
+
+async function completeManualPaidSale(paymentMethod, cashReceivedOverride = 0) {
+  clearMessages();
+
+  if (!cart.length) {
+    showErr("Cart is empty.");
+    focusSkuInput();
+    return;
+  }
+
+  const buyer = {
+    name: document.getElementById("buyerName").value || "Walk-in",
+    contact: document.getElementById("buyerContact").value || ""
+  };
+
+  const fulfillment = document.getElementById("fulfillment").value || "in_store";
+  const totals = recalc();
+
+  const soldItems = [...cart];
+  const cashReceived = paymentMethod === "cash"
+    ? Number(cashReceivedOverride || 0)
+    : 0;
+
+  if (paymentMethod === "cash" && cashReceived < Number(totals.grand_total || 0)) {
+    showErr("Cash received is less than the total.");
+    focusSkuInput();
+    return;
+  }
+
+  const payload = {
+    orderId: makeOrderId(),
+    channel: "pos",
+    payment_method: paymentMethod,
+    fulfillment,
+    buyer,
+    notes: document.getElementById("notes").value || "",
+    items: soldItems.map(it => ({
+      item_id: it.item_id || "",
+      sku: it.sku,
+      title: it.title,
+      qty: Number(it.qty || 1),
+      price: Number(it.price || 0)
+    })),
+    totals
+  };
+
+  const url = APPS_SCRIPT_URL
+    + "?action=record_pos_sale"
+    + "&payload=" + encodeURIComponent(JSON.stringify(payload))
+    + "&t=" + Date.now();
+
+  try {
+    showProcessingOverlay("Processing " + paymentMethod + " sale...");
+
+    document.getElementById("cashBtn").disabled = true;
+    document.getElementById("terminalBtn").disabled = true;
+    document.getElementById("otherPaidBtn").disabled = true;
+    document.getElementById("payBtn").disabled = true;
+
+    fetchJsonp(url, 60000).catch(err => {
+      console.error("Background sale error", err);
+    });
+
+    applyLocalSaleToInventory(soldItems);
+
+    cart = [];
+    saveCart();
+    renderCart();
+
+    document.getElementById("buyerName").value = "Walk-in";
+    document.getElementById("buyerContact").value = "";
+    document.getElementById("notes").value = "";
+    document.getElementById("shipping").value = "0";
+
+    loadProducts().catch(err => console.error("Background reload failed:", err));
+
+    showReceipt({
+      orderId: payload.orderId,
+      payment: paymentMethod,
+      totals: totals,
+      items: soldItems,
+      cashReceived: cashReceived
+    });
+
+    showOk("Sale completed: " + paymentMethod + " • Order " + payload.orderId);
+    focusSkuInput();
+  } catch (e) {
+    showErr("Could not complete sale: " + (e && e.message ? e.message : e));
+  } finally {
+    hideProcessingOverlay();
+    document.getElementById("cashBtn").disabled = false;
+    document.getElementById("terminalBtn").disabled = false;
+    document.getElementById("otherPaidBtn").disabled = false;
+    document.getElementById("payBtn").disabled = false;
+  }
+}
+
+async function pay() {
+  clearMessages();
+
+  if (!cart.length) {
+    showErr("Cart is empty.");
+    focusSkuInput();
+    return;
+  }
+
+  const buyer = {
+    name: document.getElementById("buyerName").value || "Walk-in",
+    contact: document.getElementById("buyerContact").value || ""
+  };
+
+  const fulfillment = document.getElementById("fulfillment").value || "in_store";
+  const totals = recalc();
+
+  const payload = {
+    orderId: makeOrderId(),
+    channel: "pos",
+    fulfillment,
+    buyer,
+    notes: document.getElementById("notes").value || "",
+    items: cart.map(it => ({
+      item_id: it.item_id || "",
+      sku: it.sku,
+      title: it.title,
+      qty: Number(it.qty || 1),
+      price: Number(it.price || 0)
+    })),
+    totals
+  };
+
+  const url = APPS_SCRIPT_URL
+    + "?action=create_checkout"
+    + "&payload=" + encodeURIComponent(JSON.stringify(payload))
+    + "&t=" + Date.now();
+
+  try {
+    const res = await fetchJsonp(url, 60000);
+
+    if (!res || !res.success || !res.checkout_url) {
+      throw new Error((res && res.error) ? res.error : "Checkout failed");
+    }
+
+    window.location.href = res.checkout_url;
+  } catch (e) {
+    showErr("Could not create Stripe checkout: " + (e && e.message ? e.message : e));
+  }
+}
+
+document.getElementById("addBtn").addEventListener("click", () => {
+  addSkuToCart(document.getElementById("skuInput").value);
+});
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  cart = [];
+  saveCart();
+  renderCart();
+  showOk("Cart cleared.");
+  focusSkuInput();
+});
+
+document.getElementById("payBtn").addEventListener("click", pay);
+document.getElementById("shipping").addEventListener("input", recalc);
+
+document.getElementById("cashBtn").addEventListener("click", () => {
+  if (!cart.length) {
+    showErr("Cart is empty.");
+    focusSkuInput();
+    return;
+  }
+
+  const totals = recalc();
+  const totalDue = Number(totals.grand_total || 0);
+  const input = prompt("Total is " + money(totalDue) + "\nEnter cash received:");
+
+  if (input === null) {
+    focusSkuInput();
+    return;
+  }
+
+  const cashReceived = Number(input || 0);
+
+  if (!Number.isFinite(cashReceived) || cashReceived < totalDue) {
+    showErr("Cash received is less than the total.");
+    focusSkuInput();
+    return;
+  }
+
+  completeManualPaidSale("cash", cashReceived);
+});
+
+document.getElementById("terminalBtn").addEventListener("click", () => {
+  completeManualPaidSale("card_terminal");
+});
+
+document.getElementById("otherPaidBtn").addEventListener("click", () => {
+  completeManualPaidSale("other_paid");
+});
+
+document.getElementById("suspendBtn").addEventListener("click", () => {
+  saveCart();
+  showOk("Sale suspended. Cart saved on this device.");
+  focusSkuInput();
+});
+
+document.getElementById("skuInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    addSkuToCart(e.target.value);
+  }
+});
+
+document.getElementById("cartBody").addEventListener("click", (e) => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+
+  const act = btn.getAttribute("data-act");
+  const idx = Number(btn.getAttribute("data-idx"));
+  if (!Number.isFinite(idx) || !cart[idx]) return;
+
+  const item = cart[idx];
+  const source = findItemByScanValue(item.sku) || {};
+  const maxQty = Number(source.stock || item.qty || 1);
+
+  if (act === "rm") {
+    cart.splice(idx, 1);
+  }
+
+  if (act === "inc") {
+    if (item.qty >= maxQty) {
+      showErr("Only " + maxQty + " available for " + item.sku);
+      return;
+    }
+    cart[idx].qty = Number(cart[idx].qty || 1) + 1;
+  }
+
+  if (act === "dec") {
+    cart[idx].qty = Math.max(1, Number(cart[idx].qty || 1) - 1);
+  }
+
+  saveCart();
+  renderCart();
+  focusSkuInput();
+});
+
+document.getElementById("cartBody").addEventListener("change", (e) => {
+  const inp = e.target;
+  if (inp.getAttribute("data-act") !== "qty") return;
+
+  const idx = Number(inp.getAttribute("data-idx"));
+  if (!Number.isFinite(idx) || !cart[idx]) return;
+
+  const item = cart[idx];
+  const source = findItemByScanValue(item.sku) || {};
+  const maxQty = Number(source.stock || item.qty || 1);
+
+  let nextQty = Math.max(1, Number(inp.value || 1));
+  nextQty = Math.min(nextQty, maxQty);
+
+  cart[idx].qty = nextQty;
+  saveCart();
+  renderCart();
+  focusSkuInput();
+});
+
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  const q = String(e.target.value || "").trim().toLowerCase();
+  const hint = document.getElementById("searchHint");
+
+  if (q.length < 2) {
+    hint.textContent = "";
+    return;
+  }
+
+  const match = productsList.find(p =>
+    String(p.title || "").toLowerCase().includes(q)
+  );
+
+  if (match) {
+    document.getElementById("skuInput").value = match.sku || match.item_id || "";
+    hint.textContent = "Best match: " + (match.title || "") + (match.location_bin ? " • " + match.location_bin : "");
+  } else {
+    hint.textContent = "No matching item found";
+  }
+});
+
+(async function init() {
   loadCart();
   renderCart();
   focusSkuInput();
@@ -615,11 +1009,8 @@ function hideProcessingOverlay() {
     await loadProducts();
   } catch (e) {
     document.getElementById("statusPill").textContent = "Item load failed";
-    showErr("Could not load items from Apps Script. Check deployment access and test ?action=products. " + (e && e.message ? e.message : e));
+    showErr("Could not load items from Apps Script. " + (e && e.message ? e.message : e));
   }
-
-  processQueue();
-  setInterval(processQueue, 30000);
 })();
 </script>
 </body>
