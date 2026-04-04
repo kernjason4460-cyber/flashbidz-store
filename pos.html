@@ -602,6 +602,36 @@ function hideProcessingOverlay() {
   const overlay = document.getElementById("processingOverlay");
   if (overlay) overlay.style.display = "none";
 }
+
+  const POS_QUEUE_KEY = "fbz_pos_unsynced_sales";
+
+function getQueue() {
+  try {
+    return JSON.parse(localStorage.getItem(POS_QUEUE_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveQueue(queue) {
+  localStorage.setItem(POS_QUEUE_KEY, JSON.stringify(queue));
+}
+
+function addToQueue(payload) {
+  const queue = getQueue();
+  queue.push({
+    payload,
+    createdAt: Date.now(),
+    attempts: 0
+  });
+  saveQueue(queue);
+}
+
+function removeFromQueue(index) {
+  const queue = getQueue();
+  queue.splice(index, 1);
+  saveQueue(queue);
+}
   
   async function completeManualPaidSale(paymentMethod, cashReceivedOverride = 0) {
   clearMessages();
@@ -653,56 +683,57 @@ function hideProcessingOverlay() {
     + "&payload=" + encodeURIComponent(JSON.stringify(payload))
     + "&t=" + Date.now();
 
-  try {
-    showProcessingOverlay("Processing " + paymentMethod + " sale...");
+ try {
+  showProcessingOverlay("Processing " + paymentMethod + " sale...");
 
-    document.getElementById("cashBtn").disabled = true;
-    document.getElementById("terminalBtn").disabled = true;
-    document.getElementById("otherPaidBtn").disabled = true;
-    document.getElementById("payBtn").disabled = true;
+  document.getElementById("cashBtn").disabled = true;
+  document.getElementById("terminalBtn").disabled = true;
+  document.getElementById("otherPaidBtn").disabled = true;
+  document.getElementById("payBtn").disabled = true;
 
-    const res = await fetchJsonp(url, 60000);
-
-    if (!res) {
-      throw new Error("No response from Apps Script");
-    }
-
-    if (!res.success) {
-      throw new Error(res.error || "Sale failed");
-    }
-
-    applyLocalSaleToInventory(soldItems);
-
-    cart = [];
-    saveCart();
-    renderCart();
-
-    document.getElementById("buyerName").value = "Walk-in";
-    document.getElementById("buyerContact").value = "";
-    document.getElementById("notes").value = "";
-    document.getElementById("shipping").value = "0";
-
-    loadProducts().catch(err => console.error("Background reload failed:", err));
-
-    showReceipt({
-      orderId: res.orderId,
-      payment: paymentMethod,
-      totals: totals,
-      items: soldItems,
-      cashReceived: cashReceived
+  // send to backend in the background
+  fetchJsonp(url, 60000)
+    .then(res => {
+      if (!res || !res.success) {
+        console.error("Background sale failed", res);
+      }
+    })
+    .catch(err => {
+      console.error("Background sale error", err);
     });
 
-    showOk("Sale completed: " + paymentMethod + " • Order " + res.orderId);
-    focusSkuInput();
-  } catch (e) {
-    showErr("Could not complete sale: " + (e && e.message ? e.message : e));
-  } finally {
-    hideProcessingOverlay();
-    document.getElementById("cashBtn").disabled = false;
-    document.getElementById("terminalBtn").disabled = false;
-    document.getElementById("otherPaidBtn").disabled = false;
-    document.getElementById("payBtn").disabled = false;
-  }
+  // update UI immediately
+  applyLocalSaleToInventory(soldItems);
+
+  cart = [];
+  saveCart();
+  renderCart();
+
+  document.getElementById("buyerName").value = "Walk-in";
+  document.getElementById("buyerContact").value = "";
+  document.getElementById("notes").value = "";
+  document.getElementById("shipping").value = "0";
+
+  loadProducts().catch(err => console.error("Background reload failed:", err));
+
+  showReceipt({
+    orderId: payload.orderId,
+    payment: paymentMethod,
+    totals: totals,
+    items: soldItems,
+    cashReceived: cashReceived
+  });
+
+  showOk("Sale completed: " + paymentMethod + " • Order " + payload.orderId);
+  focusSkuInput();
+} catch (e) {
+  showErr("Could not complete sale: " + (e && e.message ? e.message : e));
+} finally {
+  hideProcessingOverlay();
+  document.getElementById("cashBtn").disabled = false;
+  document.getElementById("terminalBtn").disabled = false;
+  document.getElementById("otherPaidBtn").disabled = false;
+  document.getElementById("payBtn").disabled = false;
 }
 
   async function pay() {
@@ -1017,6 +1048,8 @@ function hideProcessingOverlay() {
       document.getElementById("statusPill").textContent = "Item load failed";
       showErr("Could not load items from Apps Script. Check deployment access and test ?action=products. " + (e && e.message ? e.message : e));
     }
+    processQueue();
+    setInterval(processQueue, 30000); // retry every 30 seconds
   })();
 </script>
 </body>
