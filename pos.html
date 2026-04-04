@@ -402,6 +402,8 @@
   }
 
   function addSkuToCart(scanValue) {
+    console.log("Trying to add:", scanValue, productsByKey);
+    alert("Trying to add: " + scanValue);
     const key = String(scanValue || "").trim();
     if (!key) {
       showErr("Enter or scan an item code.");
