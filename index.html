@@ -1998,12 +1998,18 @@
   }
 
 async function loadProducts() {
-  try {
-    const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=products&t=" + Date.now(), 20000);
+  const CACHE_KEY = "flashbidz_products_cache_v1";
 
+  try {
+    const res = await fetch("/products.json?t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("Load failed");
+
+    const data = await res.json();
     if (!data || !Array.isArray(data.products)) {
       throw new Error("No products returned");
     }
+
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data.products));
 
     allProducts = data.products.map((p, idx) => ({
       ...p,
@@ -2020,10 +2026,65 @@ async function loadProducts() {
     buildCategoryOptions(allProducts);
     buildCategoryPills(allProducts);
     applyFilters();
+    hideStoreWarning();
   } catch (err) {
     console.error("Product load failed:", err);
-    alert("Failed to load products: " + (err?.message || err));
+
+    try {
+      const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "[]");
+
+      if (Array.isArray(cached) && cached.length) {
+        allProducts = cached.map((p, idx) => ({
+          ...p,
+          __index: idx,
+          title: String(p.title || ""),
+          description: String(p.description || ""),
+          sku: String(p.sku || ""),
+          price: Number(p.price || 0),
+          stock: Number(p.stock ?? 0),
+          categories: Array.isArray(p.categories) ? p.categories : [],
+          images: Array.isArray(p.images) ? p.images : (p.image ? [p.image] : [])
+        }));
+
+        buildCategoryOptions(allProducts);
+        buildCategoryPills(allProducts);
+        applyFilters();
+        showStoreWarning("Showing last saved inventory. Latest updates may take a moment.");
+        return;
+      }
+    } catch (_) {}
+
+    allProducts = [];
+    buildCategoryOptions(allProducts);
+    buildCategoryPills(allProducts);
+    applyFilters();
+    showStoreWarning("Store inventory is temporarily unavailable. Please refresh in a moment.");
   }
+}
+  function showStoreWarning(message) {
+  let bar = document.getElementById("store-warning");
+
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.id = "store-warning";
+    bar.style.cssText = "max-width:1100px;margin:0 auto 12px;padding:12px 14px;border-radius:14px;background:#fff3cd;color:#664d03;border:1px solid #ffecb5;font-size:14px;";
+
+    const shopSection = document.getElementById("shop");
+    const sectionHeader = shopSection?.querySelector(".section-header");
+    if (shopSection && sectionHeader) {
+      shopSection.insertBefore(bar, sectionHeader.nextSibling);
+    } else if (shopSection) {
+      shopSection.prepend(bar);
+    }
+  }
+
+  bar.textContent = message;
+  bar.classList.remove("hidden");
+}
+
+function hideStoreWarning() {
+  const bar = document.getElementById("store-warning");
+  if (bar) bar.classList.add("hidden");
 }
 
     function cacheDom() {
