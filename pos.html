@@ -507,12 +507,16 @@
   focusSkuInput();
 }
   
-  async function loadProducts() {
+ async function loadProducts() {
   const pill = document.getElementById("statusPill");
   pill.textContent = "Loading items…";
 
-  const url = APPS_SCRIPT_URL + "?action=products&t=" + Date.now();
-  const data = await fetchJsonp(url, 20000);
+  const res = await fetch("/products.json?t=" + Date.now(), { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error("Could not load products.json");
+  }
+
+  const data = await res.json();
   const list = (data && Array.isArray(data.products)) ? data.products : [];
 
   productsByKey = {};
