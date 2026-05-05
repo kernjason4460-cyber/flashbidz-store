@@ -1,32 +1,3 @@
 {
-  "products": [
-    {
-      "item_id": "FBZ-20260423-0001",
-      "sku": "FBZ-20260423-0001",
-      "title": "WIRELESS KEYBOARD (CK211)",
-      "description": "",
-      "price": 5,
-      "stock": 1,
-      "image": "img/placeholder.png",
-      "images": [],
-      "categories": [],
-      "badge": "",
-      "added_at": "2026-04-23",
-      "active": true
-    },
-    {
-      "item_id": "FBZ-20260423-0711",
-      "sku": "FBZ-20260423-0711",
-      "title": "BCP Table",
-      "description": "",
-      "price": 60,
-      "stock": 1,
-      "image": "img/placeholder.png",
-      "images": [],
-      "categories": [],
-      "badge": "",
-      "added_at": "2026-04-23",
-      "active": true
-    }
-  ]
+  "products": []
 }
