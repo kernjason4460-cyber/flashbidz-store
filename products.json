@@ -1,3 +1,17 @@
 {
-  "products": []
+  "products": [
+    {
+      "sku": "FBZ-20260506-0826",
+      "title": "VEVOR RV power converter",
+      "description": "Power Converter",
+      "price": 50,
+      "stock": 1,
+      "image": "",
+      "images": [],
+      "categories": [
+        "Recreation"
+      ],
+      "active": true
+    }
+  ]
 }
