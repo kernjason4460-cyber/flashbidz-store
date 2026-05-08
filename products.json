@@ -12,6 +12,19 @@
         "Recreation"
       ],
       "active": true
+    },
+    {
+      "sku": "FBZ-20260508-0836",
+      "title": "Shine Up Textured Pink Boutique Top ? XL",
+      "description": "Brand new with tags! Super cute lightweight textured blouse with an oversized comfy fit. Perfect spring and summer piece.",
+      "price": 10,
+      "stock": 1,
+      "image": "",
+      "images": [],
+      "categories": [
+        "Clothing"
+      ],
+      "active": true
     }
   ]
 }
