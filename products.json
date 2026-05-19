@@ -1,7 +1,7 @@
 {
   "products": [
     {
-      "sku": "FBZ-20260508-0826",
+      "sku": "FBZ-20260519-0826",
       "title": "10",
       "description": "Power Converter",
       "price": 50,
@@ -14,7 +14,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260508-0836",
+      "sku": "FBZ-20260519-0836",
       "title": "Shine Up Textured Pink Boutique Top ? XL",
       "description": "Brand new with tags! Super cute lightweight textured blouse with an oversized comfy fit. Perfect spring and summer piece.",
       "price": 10,
@@ -23,6 +23,45 @@
       "images": [],
       "categories": [
         "Clothing"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260519-0845",
+      "title": "VEVOR PROFESSIONAL HOME BREWING MACHINE",
+      "description": "Looks to be unused and comes with the manual! Stainless steel brewing system with digital controller, glass lid, and internal brewing basket included. Great setup for home brewing enthusiasts.",
+      "price": 175,
+      "stock": 1,
+      "image": "",
+      "images": [],
+      "categories": [
+        "Appliances"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260519-0863",
+      "title": "FUEL LINE WITH PRIMER BULB",
+      "description": "New without packaging",
+      "price": 25,
+      "stock": 1,
+      "image": "",
+      "images": [],
+      "categories": [
+        "recreation"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260519-0872",
+      "title": "MODERN RATTAN BAR STOOLS",
+      "description": "These are beautiful in person and would look great in a kitchen island setup, coffee bar, apartment, or modern farmhouse home.",
+      "price": 75,
+      "stock": 1,
+      "image": "",
+      "images": [],
+      "categories": [
+        "FURNITURE"
       ],
       "active": true
     }
