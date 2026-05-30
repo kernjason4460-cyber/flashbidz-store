@@ -14,6 +14,17 @@
         "Furniture"
       ],
       "active": true
+    },
+    {
+      "sku": "FBZ-20260530-1053",
+      "title": "HERA 25mm Ceramic Hair Curler",
+      "description": "",
+      "price": 13,
+      "stock": 1,
+      "image": "",
+      "images": [],
+      "categories": [],
+      "active": true
     }
   ]
 }
