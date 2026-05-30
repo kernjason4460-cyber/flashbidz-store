@@ -2318,7 +2318,17 @@ showToast("Added: " + (product.title || "item"));
       applyFilters();
     }
 
-    function sortProducts(list, sortValue) {
+  function normalizeImageUrl(src) {
+  src = String(src || "").trim();
+
+  if (!src) return "img/placeholder.png";
+  if (src.startsWith("http")) return src;
+  if (src.startsWith("img/")) return src;
+
+  return "img/" + src.replace(/^\/+/, "");
+}  
+  
+  function sortProducts(list, sortValue) {
       const arr = [...list];
       switch (sortValue) {
         case "newest":
@@ -2370,9 +2380,11 @@ showToast("Added: " + (product.title || "item"));
         const stock = product.stock ?? 1;
 
         const badgesHtml = buildBadges(product, stock);
-        const primaryImage = product.image ||
-          (product.images && product.images[0]) ||
-          "img/placeholder.png";
+        const primaryImage = normalizeImageUrl(
+        product.image ||
+        (product.images && product.images[0]) ||
+        "img/placeholder.png"
+      );
 
         card.innerHTML = `
           <div class="product-image-wrap">
