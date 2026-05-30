@@ -6,13 +6,13 @@
       "description": "This set includes four sturdy wooden chairs, perfect for any dining space. A great addition for comfort and style.",
       "price": 50,
       "stock": 1,
-      "image": "img/IMG_9652.jpeg",
+      "image": "img/IMG_9512.jpeg",
       "images": [
+        "img/IMG_9512.jpeg",
+        "img/IMG_9653.jpeg",
         "img/IMG_9652.jpeg",
-        "img/IMG_9654.jpeg",
-        "img/IMG_9511.jpg",
-        "img/IMG_9512.jpg",
-        "img/IMG_9665.jpg"
+        "img/IMG_9652.jpeg",
+        "img/IMG_9653.jpeg"
       ],
       "categories": [
         "Furniture"
@@ -32,7 +32,7 @@
     },
     {
       "sku": "FBZ-20260530-1060",
-      "title": "Sparkly Summer Slides ? Size 11",
+      "title": "Sparkly Summer Slides  Size 11",
       "description": "",
       "price": 8,
       "stock": 1,
@@ -54,7 +54,7 @@
     },
     {
       "sku": "FBZ-20260530-1081",
-      "title": "FUNKO POP! DISNEY WISH ? ASHA WITH STAR #1390",
+      "title": "FUNKO POP! DISNEY WISH ASHA WITH STAR #1390",
       "description": "",
       "price": 5,
       "stock": 1,
@@ -76,7 +76,7 @@
     },
     {
       "sku": "FBZ-20260530-1094",
-      "title": "Valentine Sanrio Squishmallow Set ? Hello Kitty & Chococat 8?",
+      "title": "Valentine Sanrio Squishmallow Set Hello Kitty & Chococat 8?",
       "description": "",
       "price": 13,
       "stock": 1,
@@ -109,7 +109,7 @@
     },
     {
       "sku": "FBZ-20260530-1120",
-      "title": "Girls Rainbow Tulle Dress ? Size 18M",
+      "title": "Girls Rainbow Tulle Dress Size 18M",
       "description": "",
       "price": 8,
       "stock": 1,
