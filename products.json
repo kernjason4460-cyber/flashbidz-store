@@ -141,6 +141,20 @@
       ],
       "categories": [],
       "active": true
+    },
+    {
+      "sku": "FBZ-20260610-1332",
+      "title": "Cat & Jack Glitter Jelly Sandals - Size 4",
+      "description": "",
+      "price": 5,
+      "stock": 1,
+      "image": "img/FBZ-20260610-112006-IMG_9859.jpg",
+      "images": [
+        "img/FBZ-20260610-112006-IMG_9859.jpg",
+        "img/FBZ-20260610-112004-IMG_9858.jpg"
+      ],
+      "categories": [],
+      "active": true
     }
   ]
 }
