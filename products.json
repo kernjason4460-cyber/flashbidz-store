@@ -143,10 +143,53 @@
       "active": true
     },
     {
+      "sku": "FBZ-20260610-1321",
+      "title": "12 Month Swim Shorts ? Brand New, No Tags",
+      "description": "",
+      "price": 7,
+      "stock": 1,
+      "image": "img/FBZ-20260610-135449-IMG_9865.jpg",
+      "images": [
+        "img/FBZ-20260610-135449-IMG_9865.jpg",
+        "img/FBZ-20260610-135447-IMG_9866.jpg"
+      ],
+      "categories": [],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260610-1322",
+      "title": "2T Swim Trunks ? Brand New with Tags",
+      "description": "",
+      "price": 7,
+      "stock": 1,
+      "image": "img/FBZ-20260610-135050-IMG_9863.jpg",
+      "images": [
+        "img/FBZ-20260610-135050-IMG_9863.jpg",
+        "img/FBZ-20260610-135047-IMG_9864.jpg"
+      ],
+      "categories": [],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260610-1327",
+      "title": "Framed Dog Wall Art Set",
+      "description": "",
+      "price": 9,
+      "stock": 1,
+      "image": "img/FBZ-20260610-135344-IMG_9860.jpg",
+      "images": [
+        "img/FBZ-20260610-135344-IMG_9860.jpg",
+        "img/FBZ-20260610-135342-IMG_9861.jpg",
+        "img/FBZ-20260610-135340-IMG_9862.jpg"
+      ],
+      "categories": [],
+      "active": true
+    },
+    {
       "sku": "FBZ-20260610-1332",
       "title": "Cat & Jack Glitter Jelly Sandals - Size 4",
       "description": "",
-      "price": 5,
+      "price": 7,
       "stock": 1,
       "image": "img/FBZ-20260610-112006-IMG_9859.jpg",
       "images": [
