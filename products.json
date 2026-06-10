@@ -143,6 +143,63 @@
       "active": true
     },
     {
+      "sku": "FBZ-20260610-1266",
+      "title": "Advantage II Small Cat Flea Treatment - 2 Month Supply",
+      "description": "",
+      "price": 20,
+      "stock": 1,
+      "image": "img/FBZ-20260610-174310-IMG_9882.jpg",
+      "images": [
+        "img/FBZ-20260610-174310-IMG_9882.jpg",
+        "img/FBZ-20260610-174308-IMG_9884.jpg",
+        "img/FBZ-20260610-174306-IMG_9883.jpg"
+      ],
+      "categories": [],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260610-1273",
+      "title": "Room Essentials Teddy Body Pillow Cover ? Brand New",
+      "description": "",
+      "price": 13,
+      "stock": 1,
+      "image": "img/FBZ-20260610-174241-IMG_9880.jpg",
+      "images": [
+        "img/FBZ-20260610-174241-IMG_9880.jpg",
+        "img/FBZ-20260610-174239-IMG_9881.jpg"
+      ],
+      "categories": [],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260610-1289",
+      "title": "Philips Air Fryer",
+      "description": "",
+      "price": 50,
+      "stock": 1,
+      "image": "img/FBZ-20260610-174200-IMG_9878.jpg",
+      "images": [
+        "img/FBZ-20260610-174200-IMG_9878.jpg",
+        "img/FBZ-20260610-174159-IMG_9879.jpg"
+      ],
+      "categories": [],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260610-1305",
+      "title": "Future Collective Women?s Button Front Shirt ? Size 1X",
+      "description": "",
+      "price": 7,
+      "stock": 1,
+      "image": "img/FBZ-20260610-140251-IMG_9876.jpg",
+      "images": [
+        "img/FBZ-20260610-140251-IMG_9876.jpg",
+        "img/FBZ-20260610-140248-IMG_9875.jpg"
+      ],
+      "categories": [],
+      "active": true
+    },
+    {
       "sku": "FBZ-20260610-1321",
       "title": "12 Month Swim Shorts ? Brand New, No Tags",
       "description": "",
