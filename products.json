@@ -19,35 +19,15 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260610-1053",
-      "title": "HERA 25mm Ceramic Hair Curler",
-      "description": "",
-      "price": 13,
-      "stock": 1,
-      "image": "",
-      "images": [],
-      "categories": [],
-      "active": true
-    },
-    {
-      "sku": "FBZ-20260610-1060",
-      "title": "Sparkly Summer Slides  Size 11",
-      "description": "",
-      "price": 8,
-      "stock": 1,
-      "image": "",
-      "images": [],
-      "categories": [],
-      "active": true
-    },
-    {
       "sku": "FBZ-20260610-1080",
       "title": "DON?T BREAK THE ICE GAME",
       "description": "",
-      "price": 5,
+      "price": 7,
       "stock": 1,
-      "image": "",
-      "images": [],
+      "image": "img/FBZ-20260610-175643-IMG_9910.jpg",
+      "images": [
+        "img/FBZ-20260610-175643-IMG_9910.jpg"
+      ],
       "categories": [],
       "active": true
     },
