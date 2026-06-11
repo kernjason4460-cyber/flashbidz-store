@@ -160,6 +160,23 @@
       "active": true
     },
     {
+      "sku": "FBZ-20260607-1267",
+      "title": "FACTION Spectre Gel Bead Blaster",
+      "description": "Get ready for fun with the FACTION Spectre Gel Bead Blaster! This set includes a blaster with a multicolor LED display and is compatible with a mobile app for interactive play.",
+      "price": 12,
+      "stock": 1,
+      "image": "img/FBZ-20260611-133746-IMG_9840.jpg",
+      "images": [
+        "img/FBZ-20260611-133746-IMG_9840.jpg",
+        "img/FBZ-20260611-133743-IMG_9846.jpg",
+        "img/FBZ-20260611-133741-IMG_9847.jpg"
+      ],
+      "categories": [
+        "Outdoor Toys"
+      ],
+      "active": true
+    },
+    {
       "sku": "FBZ-20260610-1339",
       "title": "Square Wooden Serving Tray",
       "description": "This unique square tray features four divided compartments, ideal for serving snacks or appetizers. Crafted from a warm, patterned wood with a vibrant finish, it adds a rustic touch to your gatherings.",
