@@ -2848,12 +2848,10 @@ async function handleCheckout() {
       shipping: fulfillment === "shipping" ? shippingCost : 0,
       grand_total: grandTotal,
     },
-    items: cartSnapshot.map((item) => ({
-      sku: item.sku,
-      title: item.title,
-      qty: item.quantity,
-      price: item.price,
-    })),
+   items: cartSnapshot.map((item) => ({
+  sku: item.sku,
+  qty: item.quantity,
+})),
   };
   
   try {
@@ -2870,19 +2868,11 @@ async function handleCheckout() {
       "&payload=" + payloadStr +
       "&t=" + Date.now();
 
-    const data = await fetchJsonp(url, 20000);
-
-    if (!data.success || !data.checkout_url) {
-      const stripeMsg =
-        data?.stripe?.error?.message ||
-        data?.stripe?.error?.type ||
-        data?.stripe_message ||
-        "";
-
-      throw new Error((data.error || "Checkout failed") + (stripeMsg ? (": " + stripeMsg) : ""));
-    }
-
-    window.location.href = data.checkout_url;
+    window.location.href = url.replace(
+  "action=create_checkout",
+  "action=create_checkout_redirect"
+);
+return;
 
   } catch (err) {
     console.error(err);
