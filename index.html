@@ -2768,7 +2768,6 @@ function updateCartSummary() {
       updateCartSummary();
     }
 
-<script>
 async function handleCheckout() {
   if (!cart.length) {
     alert("Your cart is empty.");
@@ -2875,7 +2874,6 @@ async function handleCheckout() {
   document.body.appendChild(form);
   form.submit();
 }
-</script>
 
     function clearCartAfterCheckout() {
       cart = [];
@@ -2883,7 +2881,6 @@ async function handleCheckout() {
       renderCart();
     }
 
-  <script>
 async function finalizeIfReturnedFromStripe() {
   const params = new URLSearchParams(window.location.search);
 
@@ -2918,7 +2915,6 @@ async function finalizeIfReturnedFromStripe() {
     alert("Payment went through, but inventory did not update automatically. Please contact FlashBidz with your payment confirmation.");
   }
 }
-</script>
     
     function setCurrentYear() {
       const yearEl = document.getElementById("year");
@@ -3049,7 +3045,6 @@ function playAddToCartSound() {
         }
       }
     }
-  </script>
         <!-- Toast (little popup confirmation) -->
         <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
 
