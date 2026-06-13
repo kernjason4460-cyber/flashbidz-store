@@ -2928,7 +2928,11 @@ async function finalizeIfReturnedFromStripe() {
 
     history.replaceState({}, document.title, window.location.pathname);
 
-    alert("Payment confirmed! Inventory updated.");
+     if (data.storePublish && data.storePublish.success === false) {
+      alert("Payment confirmed and inventory updated, but the public store feed did not republish automatically. Please run FlashBidz > Publish Store Feed.");
+    } else {
+      alert("Payment confirmed! Inventory updated.");
+    }
   } catch (err) {
     console.error("Finalize error:", err);
     alert("Payment went through, but inventory did not update automatically. Please contact FlashBidz with your payment confirmation.");
