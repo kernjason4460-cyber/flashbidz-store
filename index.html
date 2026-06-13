@@ -2768,6 +2768,7 @@ function updateCartSummary() {
       updateCartSummary();
     }
 
+<script>
 async function handleCheckout() {
   if (!cart.length) {
     alert("Your cart is empty.");
@@ -2815,6 +2816,12 @@ async function handleCheckout() {
 
   checkoutSubmitted = true;
 
+  if (el.checkoutBtn) {
+    el.checkoutBtn.disabled = true;
+    el.checkoutBtn.style.opacity = "0.7";
+    el.checkoutBtn.textContent = "Opening checkout...";
+  }
+
   const cartSnapshot = cart.map((item) => ({ ...item }));
 
   const subtotal = cartSnapshot.reduce(
@@ -2828,7 +2835,7 @@ async function handleCheckout() {
   lastOrderId = getOrderId_();
 
   const payload = {
-    action: "create_checkout",
+    action: "create_checkout_redirect",
     channel: "store",
     orderId: lastOrderId,
     buyer: { name, contact },
@@ -2847,42 +2854,28 @@ async function handleCheckout() {
     }))
   };
 
-  try {
-  if (el.checkoutBtn) {
-    el.checkoutBtn.disabled = true;
-    el.checkoutBtn.style.opacity = "0.7";
-    el.checkoutBtn.textContent = "Opening checkout...";
-  }
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = window.APPS_SCRIPT_URL;
+  form.target = "_top";
+  form.style.display = "none";
 
-  const payloadStr = encodeURIComponent(JSON.stringify(payload));
+  const actionInput = document.createElement("input");
+  actionInput.type = "hidden";
+  actionInput.name = "action";
+  actionInput.value = "create_checkout_redirect";
+  form.appendChild(actionInput);
 
-  const url =
-    window.APPS_SCRIPT_URL +
-    "?action=create_checkout" +
-    "&payload=" + payloadStr +
-    "&t=" + Date.now();
+  const payloadInput = document.createElement("input");
+  payloadInput.type = "hidden";
+  payloadInput.name = "payload";
+  payloadInput.value = JSON.stringify(payload);
+  form.appendChild(payloadInput);
 
-  const data = await fetchJsonp(url, 10000);
-
-if (!data || !data.success || !data.checkout_url) {
-  throw new Error(data?.error || "Checkout failed");
+  document.body.appendChild(form);
+  form.submit();
 }
-
-window.location.href = data.checkout_url;
-return;
-
-} catch (err) {
-  console.error(err);
-  alert("Checkout error: " + (err.message || err));
-  checkoutSubmitted = false;
-
-  if (el.checkoutBtn) {
-    el.checkoutBtn.disabled = false;
-    el.checkoutBtn.style.opacity = "1";
-    el.checkoutBtn.textContent = "Submit Cart";
-  }
-}
-}
+</script>
 
     function clearCartAfterCheckout() {
       cart = [];
@@ -2890,47 +2883,42 @@ return;
       renderCart();
     }
 
-  async function finalizeIfReturnedFromStripe() {
+  <script>
+async function finalizeIfReturnedFromStripe() {
   const params = new URLSearchParams(window.location.search);
 
   const success =
     params.get("success") || params.get("checkout") || params.get("paid");
 
   const sessionId = params.get("session_id") || "";
-  const orderId = params.get("orderId") || params.get("order_id") || params.get("oid") || "";
 
-  // ✅ Now we only REQUIRE session_id (orderId is optional)
   if (!success || !sessionId) return;
 
   try {
-    const payload = { action: "finalize_checkout", session_id: sessionId };
-    if (orderId) payload.orderId = orderId; // optional fallback
-
     const url =
       window.APPS_SCRIPT_URL +
       "?action=finalize_checkout" +
-      "&payload=" + encodeURIComponent(JSON.stringify(payload)) +
+      "&session_id=" + encodeURIComponent(sessionId) +
       "&t=" + Date.now();
 
-    const data = await fetchJsonp(url, 20000);
+    const data = await fetchJsonp(url, 30000);
 
     if (!data || !data.success) {
       throw new Error((data && data.error) ? data.error : "Finalize failed");
     }
 
-    // ✅ clear cart + refresh inventory from sheet
     if (typeof clearCartAfterCheckout === "function") clearCartAfterCheckout();
     await loadProducts();
 
-    // ✅ prevent double-finalize on refresh
     history.replaceState({}, document.title, window.location.pathname);
 
     alert("Payment confirmed! Inventory updated.");
   } catch (err) {
     console.error("Finalize error:", err);
-    alert("Payment went through, but inventory didn’t update. (Finalize step failed.)");
+    alert("Payment went through, but inventory did not update automatically. Please contact FlashBidz with your payment confirmation.");
   }
 }
+</script>
     
     function setCurrentYear() {
       const yearEl = document.getElementById("year");
