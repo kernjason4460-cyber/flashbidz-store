@@ -2853,27 +2853,45 @@ async function handleCheckout() {
     }))
   };
 
-  const form = document.createElement("form");
-  form.method = "POST";
-  form.action = window.APPS_SCRIPT_URL;
-  form.target = "_top";
-  form.style.display = "none";
+  try {
+    const url =
+      window.APPS_SCRIPT_URL +
+      "?action=create_checkout" +
+      "&payload=" + encodeURIComponent(JSON.stringify(payload)) +
+      "&t=" + Date.now();
 
-  const actionInput = document.createElement("input");
-  actionInput.type = "hidden";
-  actionInput.name = "action";
-  actionInput.value = "create_checkout_redirect";
-  form.appendChild(actionInput);
+    const data = await fetchJsonp(url, 30000);
 
-  const payloadInput = document.createElement("input");
-  payloadInput.type = "hidden";
-  payloadInput.name = "payload";
-  payloadInput.value = JSON.stringify(payload);
-  form.appendChild(payloadInput);
+    if (!data || !data.success || !data.checkout_url) {
+      throw new Error(data?.error || "Checkout failed");
+    }
 
-  document.body.appendChild(form);
-  form.submit();
-}
+    window.location.href = data.checkout_url;
+    return;
+  } catch (err) {
+    console.warn("Direct checkout failed, using fallback page:", err);
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = window.APPS_SCRIPT_URL;
+    form.target = "_top";
+    form.style.display = "none";
+
+    const actionInput = document.createElement("input");
+    actionInput.type = "hidden";
+    actionInput.name = "action";
+    actionInput.value = "create_checkout_redirect";
+    form.appendChild(actionInput);
+
+    const payloadInput = document.createElement("input");
+    payloadInput.type = "hidden";
+    payloadInput.name = "payload";
+    payloadInput.value = JSON.stringify(payload);
+    form.appendChild(payloadInput);
+
+    document.body.appendChild(form);
+    form.submit();
+  }
 
     function clearCartAfterCheckout() {
       cart = [];
