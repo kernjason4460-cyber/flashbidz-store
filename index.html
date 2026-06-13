@@ -2848,42 +2848,34 @@ async function handleCheckout() {
   };
 
   try {
-    if (el.checkoutBtn) {
-      el.checkoutBtn.disabled = true;
-      el.checkoutBtn.style.opacity = "0.7";
-      el.checkoutBtn.textContent = "Opening checkout...";
-    }
-
-    const payloadStr = encodeURIComponent(JSON.stringify(payload));
-
-    const url =
-      window.APPS_SCRIPT_URL +
-      "?action=create_checkout" +
-      "&payload=" + payloadStr +
-      "&t=" + Date.now();
-
-    const payloadStr = encodeURIComponent(JSON.stringify(payload));
-
-const url =
-  window.APPS_SCRIPT_URL +
-  "?action=create_checkout_redirect" +
-  "&payload=" + payloadStr +
-  "&t=" + Date.now();
-
-window.location.href = url;
-return;
-
-  } catch (err) {
-    console.error(err);
-    alert("Checkout error: " + (err.message || err));
-    checkoutSubmitted = false;
-
-    if (el.checkoutBtn) {
-      el.checkoutBtn.disabled = false;
-      el.checkoutBtn.style.opacity = "1";
-      el.checkoutBtn.textContent = "Submit Cart";
-    }
+  if (el.checkoutBtn) {
+    el.checkoutBtn.disabled = true;
+    el.checkoutBtn.style.opacity = "0.7";
+    el.checkoutBtn.textContent = "Opening checkout...";
   }
+
+  const payloadStr = encodeURIComponent(JSON.stringify(payload));
+
+  const url =
+    window.APPS_SCRIPT_URL +
+    "?action=create_checkout_redirect" +
+    "&payload=" + payloadStr +
+    "&t=" + Date.now();
+
+  window.location.href = url;
+  return;
+
+} catch (err) {
+  console.error(err);
+  alert("Checkout error: " + (err.message || err));
+  checkoutSubmitted = false;
+
+  if (el.checkoutBtn) {
+    el.checkoutBtn.disabled = false;
+    el.checkoutBtn.style.opacity = "1";
+    el.checkoutBtn.textContent = "Submit Cart";
+  }
+}
 }
 
     function clearCartAfterCheckout() {
