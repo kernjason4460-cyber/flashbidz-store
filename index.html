@@ -2858,12 +2858,18 @@ async function handleCheckout() {
 
   const url =
     window.APPS_SCRIPT_URL +
-    "?action=create_checkout_redirect" +
+    "?action=create_checkout" +
     "&payload=" + payloadStr +
     "&t=" + Date.now();
 
-  window.location.href = url;
-  return;
+  const data = await fetchJsonp(url, 10000);
+
+if (!data || !data.success || !data.checkout_url) {
+  throw new Error(data?.error || "Checkout failed");
+}
+
+window.location.href = data.checkout_url;
+return;
 
 } catch (err) {
   console.error(err);
