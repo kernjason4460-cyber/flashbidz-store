@@ -2788,7 +2788,6 @@ async function handleCheckout() {
   const fulfillment =
     el.fulfillmentShipping && el.fulfillmentShipping.checked ? "shipping" : "pickup";
 
-  // Build shipping object if needed
   let shipping = null;
   let shippingCost = 0;
 
@@ -2808,35 +2807,29 @@ async function handleCheckout() {
       address2: (el.shippingAddress2?.value || "").trim(),
       city,
       state,
-      zip,
+      zip
     };
 
     shippingCost = Number(shippingAmount || 0);
   }
 
-  // ✅ Lock submission ONLY after all validation passes
   checkoutSubmitted = true;
 
-  // Snapshot cart
   const cartSnapshot = cart.map((item) => ({ ...item }));
 
-  // Totals
-  const subtotal = cartSnapshot.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cartSnapshot.reduce(
+    (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
+    0
+  );
+
   const tax = +(subtotal * TAX_RATE).toFixed(2);
   const grandTotal = subtotal + tax + (fulfillment === "shipping" ? shippingCost : 0);
 
-  // Create order ID
   lastOrderId = getOrderId_();
 
-  // Save cart snapshot (optional)
-  try {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartSnapshot));
-  } catch (_) {}
-
-  // Payload
   const payload = {
     action: "create_checkout",
-    channel: "FBZ_STORE",
+    channel: "store",
     orderId: lastOrderId,
     buyer: { name, contact },
     fulfillment,
@@ -2846,42 +2839,47 @@ async function handleCheckout() {
       subtotal,
       tax,
       shipping: fulfillment === "shipping" ? shippingCost : 0,
-      grand_total: grandTotal,
+      grand_total: grandTotal
     },
-   items: cartSnapshot.map((item) => ({
-  sku: item.sku,
-  qty: item.quantity,
-})),
+    items: cartSnapshot.map((item) => ({
+      sku: item.sku,
+      qty: item.quantity
+    }))
   };
-  
+
   try {
     if (el.checkoutBtn) {
       el.checkoutBtn.disabled = true;
       el.checkoutBtn.style.opacity = "0.7";
+      el.checkoutBtn.textContent = "Opening checkout...";
     }
 
-    // ✅ Use JSONP GET -> matches your Code.gs doGet(action=create_checkout)
     const payloadStr = encodeURIComponent(JSON.stringify(payload));
+
     const url =
       window.APPS_SCRIPT_URL +
       "?action=create_checkout" +
       "&payload=" + payloadStr +
       "&t=" + Date.now();
 
-    window.location.href = url.replace(
-  "action=create_checkout",
-  "action=create_checkout_redirect"
-);
-return;
+    const data = await fetchJsonp(url, 60000);
+
+    if (!data || !data.success || !data.checkout_url) {
+      throw new Error(data?.error || "Checkout failed");
+    }
+
+    window.location.href = data.checkout_url;
+    return;
 
   } catch (err) {
     console.error(err);
     alert("Checkout error: " + (err.message || err));
-  } finally {
     checkoutSubmitted = false;
+
     if (el.checkoutBtn) {
       el.checkoutBtn.disabled = false;
       el.checkoutBtn.style.opacity = "1";
+      el.checkoutBtn.textContent = "Submit Cart";
     }
   }
 }
