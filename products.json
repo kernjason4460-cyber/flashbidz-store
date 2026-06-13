@@ -90,20 +90,6 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260613-1322",
-      "title": "2T Swim Trunks ? Brand New with Tags",
-      "description": "",
-      "price": 7,
-      "stock": 1,
-      "image": "img/FBZ-20260610-135050-IMG_9863.jpg",
-      "images": [
-        "img/FBZ-20260610-135050-IMG_9863.jpg",
-        "img/FBZ-20260610-135047-IMG_9864.jpg"
-      ],
-      "categories": [],
-      "active": true
-    },
-    {
       "sku": "FBZ-20260613-1327",
       "title": "Framed Dog Wall Art Set",
       "description": "",
@@ -228,24 +214,6 @@
       ],
       "categories": [
         "Footwear"
-      ],
-      "active": true
-    },
-    {
-      "sku": "FBZ-20260610-1360",
-      "title": "Art Class Swim Trunks",
-      "description": "Boys' swim trunks featuring a colorful palm leaf pattern in shades of blue, green, and orange. Size 4, includes a drawstring waist and back pocket.",
-      "price": 7,
-      "stock": 1,
-      "image": "img/FBZ-20260611-172957-IMG_9973.jpg",
-      "images": [
-        "img/FBZ-20260611-172957-IMG_9973.jpg",
-        "img/FBZ-20260611-172955-IMG_9974.jpg",
-        "img/FBZ-20260611-172954-IMG_9975.jpg",
-        "img/FBZ-20260611-172952-IMG_9972.jpg"
-      ],
-      "categories": [
-        "Clothing"
       ],
       "active": true
     },
