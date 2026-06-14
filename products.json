@@ -19,7 +19,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260613-1127",
+      "sku": "FBZ-20260614-1127",
       "title": "Hand-Carved Moon Face Puzzle Jewelry Box",
       "description": "",
       "price": 10,
@@ -33,7 +33,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260613-1266",
+      "sku": "FBZ-20260614-1266",
       "title": "Advantage II Small Cat Flea Treatment - 2 Month Supply",
       "description": "",
       "price": 20,
@@ -48,7 +48,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260613-1273",
+      "sku": "FBZ-20260614-1273",
       "title": "Room Essentials Teddy Body Pillow Cover ? Brand New",
       "description": "",
       "price": 13,
@@ -62,7 +62,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260613-1289",
+      "sku": "FBZ-20260614-1289",
       "title": "Philips Air Fryer",
       "description": "",
       "price": 50,
@@ -76,7 +76,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260613-1305",
+      "sku": "FBZ-20260614-1305",
       "title": "Future Collective Women?s Button Front Shirt ? Size 1X",
       "description": "",
       "price": 7,
@@ -90,7 +90,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260613-1327",
+      "sku": "FBZ-20260614-1327",
       "title": "Framed Dog Wall Art Set",
       "description": "",
       "price": 9,
@@ -105,7 +105,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260613-1332",
+      "sku": "FBZ-20260614-1332",
       "title": "Cat & Jack Glitter Jelly Sandals - Size 4",
       "description": "",
       "price": 7,
@@ -247,22 +247,6 @@
       ],
       "categories": [
         "Clothing"
-      ],
-      "active": true
-    },
-    {
-      "sku": "FBZ-20260610-1377",
-      "title": "Drawer Slides",
-      "description": "This set includes ball bearing drawer slides, perfect for smooth drawer operation. Packaged and ready to use.",
-      "price": 7,
-      "stock": 1,
-      "image": "img/FBZ-20260611-173339-IMG_9923.jpg",
-      "images": [
-        "img/FBZ-20260611-173339-IMG_9923.jpg",
-        "img/FBZ-20260611-173338-IMG_9922.jpg"
-      ],
-      "categories": [
-        "Home Improvement"
       ],
       "active": true
     }
