@@ -217,21 +217,6 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260611-1358",
-      "title": "Top Paw Nylon Dog Collars (2 Pack)",
-      "description": "Set of two small nylon dog collars in pink, adjustable from 10 to 16 inches. Features black plastic buckles and D-rings for leash attachment.",
-      "price": 8,
-      "stock": 1,
-      "image": "IMG_0094.jpg",
-      "images": [
-        "IMG_0094.jpg"
-      ],
-      "categories": [
-        "Pet Supplies"
-      ],
-      "active": true
-    },
-    {
       "sku": "FBZ-20260611-1371",
       "title": "Girls' Rainbow Tulle Dress",
       "description": "A cute aqua tank dress with a rainbow tulle skirt. Perfect for summer fun, featuring a ruffled waistband and adjustable straps.",
@@ -243,21 +228,6 @@
       ],
       "categories": [
         "Clothing"
-      ],
-      "active": true
-    },
-    {
-      "sku": "FBZ-20260612-1338",
-      "title": "Window Visors Set",
-      "description": "Set of four window visors in black with blue trim. Includes two larger and two smaller pieces, all wrapped in protective packaging.",
-      "price": 15,
-      "stock": 2,
-      "image": "IMG_0147.jpg",
-      "images": [
-        "IMG_0147.jpg"
-      ],
-      "categories": [
-        "Auto Parts"
       ],
       "active": true
     },
