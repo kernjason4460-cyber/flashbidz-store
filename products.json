@@ -235,14 +235,44 @@
       "active": true
     },
     {
+      "sku": "FBZ-20260611-1358",
+      "title": "Top Paw Nylon Dog Collars (2 Pack)",
+      "description": "Set of two small nylon dog collars in pink, adjustable from 10 to 16 inches. Features black plastic buckles and D-rings for leash attachment.",
+      "price": 8,
+      "stock": 1,
+      "image": "IMG_0094.jpg",
+      "images": [
+        "IMG_0094.jpg"
+      ],
+      "categories": [
+        "Pet Supplies"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260611-1371",
+      "title": "Girls' Rainbow Tulle Dress",
+      "description": "A cute aqua tank dress with a rainbow tulle skirt. Perfect for summer fun, featuring a ruffled waistband and adjustable straps.",
+      "price": 7,
+      "stock": 1,
+      "image": "IMG_0063.jpg",
+      "images": [
+        "IMG_0063.jpg"
+      ],
+      "categories": [
+        "Clothing"
+      ],
+      "active": true
+    },
+    {
       "sku": "FBZ-20260612-1338",
       "title": "Window Visors Set",
       "description": "Set of four window visors in black with blue trim. Includes two larger and two smaller pieces, all wrapped in protective packaging.",
       "price": 15,
       "stock": 2,
-      "image": "https://drive.google.com/file/d/1td2c6lKdsK3lLfqRqKEEfls5KGlcFuS6/view",
+      "image": "IMG_0147.jpg",
       "images": [
-        "https://drive.google.com/file/d/1td2c6lKdsK3lLfqRqKEEfls5KGlcFuS6/view"
+        "IMG_0147.jpg"
       ],
       "categories": [
         "Auto Parts"
@@ -255,10 +285,12 @@
       "description": "Black ultrasonic humidifier featuring a user manual, power adapter, and additional hoses. Includes a visible water level gauge and adjustable settings.",
       "price": 13,
       "stock": 1,
-      "image": "https://drive.google.com/file/d/11teY_h0uczLV3vcEibmBhzQdsqIab9C8/view",
+      "image": "img/FBZ-20260615-192255-IMG_0178.jpg",
       "images": [
-        "https://drive.google.com/file/d/11teY_h0uczLV3vcEibmBhzQdsqIab9C8/view",
-        "https://drive.google.com/file/d/1m-CCYtMAvskdlvDgZPIh3yTZfYaNp1y-/view"
+        "img/FBZ-20260615-192255-IMG_0178.jpg",
+        "img/FBZ-20260615-192253-IMG_0177.jpg",
+        "img/FBZ-20260615-192252-IMG_0179.jpg",
+        "img/FBZ-20260615-192250-IMG_0176.jpg"
       ],
       "categories": [
         "Home Appliances"
@@ -271,30 +303,12 @@
       "description": "This metal wire dryiung rack features a circular opening and includes several black clips.",
       "price": 8,
       "stock": 1,
-      "image": "https://drive.google.com/file/d/1l1fxUM0EbvJAIk8iiGTkBJU_ubu-zC8n/view",
+      "image": "img/FBZ-20260615-192040-IMG_0155.jpg",
       "images": [
-        "https://drive.google.com/file/d/1l1fxUM0EbvJAIk8iiGTkBJU_ubu-zC8n/view"
+        "img/FBZ-20260615-192040-IMG_0155.jpg"
       ],
       "categories": [
         "Kitchen Supplies"
-      ],
-      "active": true
-    },
-    {
-      "sku": "FBZ-20260612-1344",
-      "title": "27\" Sansui Gaming Monitor",
-      "description": "This is a 27-inch Sansui gaming monitor with a sleek black design. Comes with a quick start guide, power cable, and stand.",
-      "price": 75,
-      "stock": 1,
-      "image": "https://drive.google.com/file/d/19knJXb_PWbtvrhKaFhDyL4oJH6eb8WnK/view",
-      "images": [
-        "https://drive.google.com/file/d/19knJXb_PWbtvrhKaFhDyL4oJH6eb8WnK/view",
-        "https://drive.google.com/file/d/1O40kwCMaAFOeAoK-naqZ9gqZwFeoxr2H/view",
-        "https://drive.google.com/file/d/1Ct0-oFcx9jJ5ek_6B7e4HdK_qqlZcysQ/view",
-        "https://drive.google.com/file/d/1xK63iIyD7qvYKzX30kBmyZytSz1AjjaT/view"
-      ],
-      "categories": [
-        "Electronics"
       ],
       "active": true
     },
@@ -304,10 +318,10 @@
       "description": "ASUS dual bay disc duplicator with two drives. Features a digital display and a compact black design, suitable for various duplication tasks.",
       "price": 75,
       "stock": 1,
-      "image": "https://drive.google.com/file/d/1o0W2ll8V55_NJ1bu2FAdrjADHTqWj_sv/view",
+      "image": "img/FBZ-20260615-191915-IMG_0183.jpg",
       "images": [
-        "https://drive.google.com/file/d/1o0W2ll8V55_NJ1bu2FAdrjADHTqWj_sv/view",
-        "https://drive.google.com/file/d/1IufX1QOJjLYCTefAZWId7gb1aWrUyFJh/view"
+        "img/FBZ-20260615-191915-IMG_0183.jpg",
+        "img/FBZ-20260615-191913-IMG_0184.jpg"
       ],
       "categories": [
         "Electronics"
@@ -315,47 +329,15 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260614-1340",
-      "title": "Globe on Stand",
-      "description": "Decorative globe mounted on a gold-tone stand. It features detailed maps and is approximately 12 inches tall. Great for home or office display.",
-      "price": 13,
-      "stock": 1,
-      "image": "https://drive.google.com/file/d/1BsJOwAsOdShSQDHZ6ZGrvppCgSTH5M__/view",
-      "images": [
-        "https://drive.google.com/file/d/1BsJOwAsOdShSQDHZ6ZGrvppCgSTH5M__/view",
-        "https://drive.google.com/file/d/1JMrD659KxIOLs5QK9WiH1oGtgA-1B05z/view"
-      ],
-      "categories": [
-        "Home Decor"
-      ],
-      "active": true
-    },
-    {
-      "sku": "FBZ-20260614-1342",
-      "title": "Decorative Wooden Vase",
-      "description": "This decorative wooden vase features intricate black floral designs on a warm brown finish. It has a unique neck wrapped in twine with decorative accents included.",
-      "price": 8,
-      "stock": 1,
-      "image": "https://drive.google.com/file/d/1IlbxR0wa0AF7DPNJmzb0I8hoXomgCnaH/view",
-      "images": [
-        "https://drive.google.com/file/d/1IlbxR0wa0AF7DPNJmzb0I8hoXomgCnaH/view",
-        "https://drive.google.com/file/d/1KeSaT_WlW5ZEEdOp44AVa5cwZWkZnn4_/view"
-      ],
-      "categories": [
-        "Home Decor"
-      ],
-      "active": true
-    },
-    {
       "sku": "FBZ-20260614-1347",
-      "title": "Vintage Wooden Table with Storage",
-      "description": "This vintage wooden table features a lift-top for storage and tapered legs. It shows some wear with scratches on the surface and comes with various papers underneath.",
+      "title": "Vintage Wooden Piano Bench",
+      "description": "This vintage wooden piano bench features a lift-top for storage and tapered legs. It shows some wear with scratches on the surface and comes with various music books underneath.",
       "price": 25,
       "stock": 1,
-      "image": "https://drive.google.com/file/d/1ULkkQiM58HIRZQWfrcQFY0vy7Uoq_e73/view",
+      "image": "img/FBZ-20260615-191718-IMG_0203.jpg",
       "images": [
-        "https://drive.google.com/file/d/1ULkkQiM58HIRZQWfrcQFY0vy7Uoq_e73/view",
-        "https://drive.google.com/file/d/12nR0Dj7YFAgTLbANLQwtxU9KMIo4EX-9/view"
+        "img/FBZ-20260615-191718-IMG_0203.jpg",
+        "img/FBZ-20260615-191716-IMG_0202.jpg"
       ],
       "categories": [
         "Furniture"
@@ -368,12 +350,10 @@
       "description": "Set of Little Tikes fabric arm floaties designed for kids ages 2-6. Features a fun car design and soft fabric for comfort.",
       "price": 8,
       "stock": 1,
-      "image": "https://drive.google.com/file/d/10mZgbgzdxJTvqOjfTYKLVY50VQThiCD0/view",
+      "image": "img/FBZ-20260615-191541-IMG_0218.jpg",
       "images": [
-        "https://drive.google.com/file/d/10mZgbgzdxJTvqOjfTYKLVY50VQThiCD0/view",
-        "https://drive.google.com/file/d/1JVduS3801krTJ7WZ6XylEK5k8jvvEDOs/view",
-        "https://drive.google.com/file/d/1MAtwSheSzZ2HrnLZdeedoBnLDJSuDL1i/view",
-        "https://drive.google.com/file/d/12P13HiTtRhoU9T5PW-Cb3yVitIQSUH5Z/view"
+        "img/FBZ-20260615-191541-IMG_0218.jpg",
+        "img/FBZ-20260615-191539-IMG_0220.jpg"
       ],
       "categories": [
         "Toys & Games"
@@ -384,13 +364,13 @@
       "sku": "FBZ-20260615-1340",
       "title": "Black Bubble Lidded Storage Box",
       "description": "This black bubble lidded box features a sleek design, ideal for storing small items. It stands four stacked sections high and is a great addition to your home organization.",
-      "price": 7,
+      "price": 5,
       "stock": 1,
-      "image": "https://drive.google.com/file/d/1vQNOOAMXBb9_pEfS3rsHVSwtmYmjARpq/view",
+      "image": "img/FBZ-20260615-191449-IMG_0223.jpg",
       "images": [
-        "https://drive.google.com/file/d/1vQNOOAMXBb9_pEfS3rsHVSwtmYmjARpq/view",
-        "https://drive.google.com/file/d/1UcyS0MEXvtfUG9Tvj28NanoNMv_LF-xZ/view",
-        "https://drive.google.com/file/d/17Hpt3XzE7dOQfZ2Nwal6z5XX6KfdxFUs/view"
+        "img/FBZ-20260615-191449-IMG_0223.jpg",
+        "img/FBZ-20260615-191447-IMG_0222.jpg",
+        "img/FBZ-20260615-191445-IMG_0224.jpg"
       ],
       "categories": [
         "Home Decor"
@@ -403,10 +383,10 @@
       "description": "Up for auction is a Mr. Terrific stretch action figure featuring black and white attire with red accents. Includes original packaging with visible wear, perfect for collectors or playtime.",
       "price": 5,
       "stock": 1,
-      "image": "https://drive.google.com/file/d/1fa378Y2WHoPfqKUfJVOLb7tJI4SxhqBY/view",
+      "image": "img/FBZ-20260615-191406-IMG_0226.jpg",
       "images": [
-        "https://drive.google.com/file/d/1fa378Y2WHoPfqKUfJVOLb7tJI4SxhqBY/view",
-        "https://drive.google.com/file/d/1OwMF9x97OvjfmGqAkxuX0gY6-IwyUh18/view"
+        "img/FBZ-20260615-191406-IMG_0226.jpg",
+        "img/FBZ-20260615-191405-IMG_0225.jpg"
       ],
       "categories": [
         "Toys & Games"
@@ -419,11 +399,11 @@
       "description": "This adorable ceramic figurine features a sitting Shar Pei with detailed wrinkles and a light tan finish. Perfect for dog lovers, it measures approximately 6 inches in length.",
       "price": 10,
       "stock": 1,
-      "image": "https://drive.google.com/file/d/1dvy_sVlHe9h1fc7z5AtC5lWuK7GpZqZU/view",
+      "image": "img/FBZ-20260615-191324-IMG_0234.jpg",
       "images": [
-        "https://drive.google.com/file/d/1dvy_sVlHe9h1fc7z5AtC5lWuK7GpZqZU/view",
-        "https://drive.google.com/file/d/1x7PWvjAhi0Y3VDkORCqSBdeaga1yF-1n/view",
-        "https://drive.google.com/file/d/1rkSQRmR830lIJccp7dNaofAtyH8DDKpe/view"
+        "img/FBZ-20260615-191324-IMG_0234.jpg",
+        "img/FBZ-20260615-191322-IMG_0232.jpg",
+        "img/FBZ-20260615-191320-IMG_0233.jpg"
       ],
       "categories": [
         "Home Decor"
@@ -436,12 +416,11 @@
       "description": "This ceramic serving bowl features a soft pink color and a beautifully textured rim. Perfect for decorative use or serving your favorite dishes.",
       "price": 6,
       "stock": 1,
-      "image": "https://drive.google.com/file/d/1rVCCM8aXq0QDUT_KWi5LE_pbaqaNWSVW/view",
+      "image": "img/FBZ-20260615-191241-IMG_0254.jpg",
       "images": [
-        "https://drive.google.com/file/d/1rVCCM8aXq0QDUT_KWi5LE_pbaqaNWSVW/view",
-        "https://drive.google.com/file/d/1a-w-ISE82_OdIlIs1olI-znsrxPUksr6/view",
-        "https://drive.google.com/file/d/1G2xSXBfRhkTpf_bNRj8Nb30gRhKpxW3I/view",
-        "https://drive.google.com/file/d/1hAliCrZGNA9vbqg2NgAnLGn20TlNQNrT/view"
+        "img/FBZ-20260615-191241-IMG_0254.jpg",
+        "img/FBZ-20260615-191240-IMG_0255.jpg",
+        "img/FBZ-20260615-191238-IMG_0253.jpg"
       ],
       "categories": [
         "Home & Kitchen"
@@ -454,12 +433,12 @@
       "description": "Two colorful water guns featuring a massive capacity design. Includes one blue and one green model, perfect for outdoor fun.",
       "price": 5,
       "stock": 1,
-      "image": "https://drive.google.com/file/d/1dJtstZ7Q6wsU8QtjLcvl7Zhzn2UJbHfG/view",
+      "image": "img/FBZ-20260615-191159-IMG_0258.jpg",
       "images": [
-        "https://drive.google.com/file/d/1dJtstZ7Q6wsU8QtjLcvl7Zhzn2UJbHfG/view",
-        "https://drive.google.com/file/d/134RznoWS99mfnzTEAorK0UTvfRd96Afy/view",
-        "https://drive.google.com/file/d/1b3gBpGybgJW4oT2PCHwbUCj3XMeoR23d/view",
-        "https://drive.google.com/file/d/1XCQMLFCGDD_Sz37leAHHAK7E8sR6V4Cx/view"
+        "img/FBZ-20260615-191159-IMG_0258.jpg",
+        "img/FBZ-20260615-191157-IMG_0260.jpg",
+        "img/FBZ-20260615-191156-IMG_0259.jpg",
+        "img/FBZ-20260615-191153-IMG_0257.jpg"
       ],
       "categories": [
         "Toys & Games"
@@ -472,12 +451,12 @@
       "description": "Includes two Splash Power Shot water blasters in red and white, designed for outdoor fun. Also features a pack of 150 Kaos water balloons in assorted colors. Great for summer water battles!",
       "price": 8,
       "stock": 1,
-      "image": "https://drive.google.com/file/d/14dBluAvFc03cXlN7QkCIqEPTKGn438ED/view",
+      "image": "img/FBZ-20260615-191106-IMG_0273.jpg",
       "images": [
-        "https://drive.google.com/file/d/14dBluAvFc03cXlN7QkCIqEPTKGn438ED/view",
-        "https://drive.google.com/file/d/1-8XpeG6BgHpBz0_qpF_chMpTp2jIB36y/view",
-        "https://drive.google.com/file/d/13tBq_svjiob21rupKsvb4tc1Af8ME_A4/view",
-        "https://drive.google.com/file/d/12AbkNxlaMW0hRj_JpW3ICdWfeJX6J7qs/view"
+        "img/FBZ-20260615-191106-IMG_0273.jpg",
+        "img/FBZ-20260615-191104-IMG_0276.jpg",
+        "img/FBZ-20260615-191102-IMG_0274.jpg",
+        "img/FBZ-20260615-191059-IMG_0275.jpg"
       ],
       "categories": [
         "Toys & Games"
@@ -490,10 +469,10 @@
       "description": "This stylish two-piece swimsuit features a vibrant pastel tropical print with adjustable straps. Size XS with a top and matching bikini bottom included.",
       "price": 10,
       "stock": 1,
-      "image": "https://drive.google.com/file/d/1KaJDOUWjgxnco_ttWA8RrRvCilLtyrN7/view",
+      "image": "img/FBZ-20260615-191003-IMG_0278.jpg",
       "images": [
-        "https://drive.google.com/file/d/1KaJDOUWjgxnco_ttWA8RrRvCilLtyrN7/view",
-        "https://drive.google.com/file/d/12o4lXBOcz1F_oonDq780maYtcV_aC1Fj/view"
+        "img/FBZ-20260615-191003-IMG_0278.jpg",
+        "img/FBZ-20260615-191001-IMG_0277.jpg"
       ],
       "categories": [
         "Clothing"
