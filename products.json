@@ -233,6 +233,272 @@
         "Clothing"
       ],
       "active": true
+    },
+    {
+      "sku": "FBZ-20260612-1338",
+      "title": "Window Visors Set",
+      "description": "Set of four window visors in black with blue trim. Includes two larger and two smaller pieces, all wrapped in protective packaging.",
+      "price": 15,
+      "stock": 2,
+      "image": "https://drive.google.com/file/d/1td2c6lKdsK3lLfqRqKEEfls5KGlcFuS6/view",
+      "images": [
+        "https://drive.google.com/file/d/1td2c6lKdsK3lLfqRqKEEfls5KGlcFuS6/view"
+      ],
+      "categories": [
+        "Auto Parts"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260612-1339",
+      "title": "Ultrasonic Humidifier",
+      "description": "Black ultrasonic humidifier featuring a user manual, power adapter, and additional hoses. Includes a visible water level gauge and adjustable settings.",
+      "price": 13,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/11teY_h0uczLV3vcEibmBhzQdsqIab9C8/view",
+      "images": [
+        "https://drive.google.com/file/d/11teY_h0uczLV3vcEibmBhzQdsqIab9C8/view",
+        "https://drive.google.com/file/d/1m-CCYtMAvskdlvDgZPIh3yTZfYaNp1y-/view"
+      ],
+      "categories": [
+        "Home Appliances"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260612-1343",
+      "title": "Over the sink drying rack",
+      "description": "This metal wire dryiung rack features a circular opening and includes several black clips.",
+      "price": 8,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/1l1fxUM0EbvJAIk8iiGTkBJU_ubu-zC8n/view",
+      "images": [
+        "https://drive.google.com/file/d/1l1fxUM0EbvJAIk8iiGTkBJU_ubu-zC8n/view"
+      ],
+      "categories": [
+        "Kitchen Supplies"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260612-1344",
+      "title": "27\" Sansui Gaming Monitor",
+      "description": "This is a 27-inch Sansui gaming monitor with a sleek black design. Comes with a quick start guide, power cable, and stand.",
+      "price": 75,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/19knJXb_PWbtvrhKaFhDyL4oJH6eb8WnK/view",
+      "images": [
+        "https://drive.google.com/file/d/19knJXb_PWbtvrhKaFhDyL4oJH6eb8WnK/view",
+        "https://drive.google.com/file/d/1O40kwCMaAFOeAoK-naqZ9gqZwFeoxr2H/view",
+        "https://drive.google.com/file/d/1Ct0-oFcx9jJ5ek_6B7e4HdK_qqlZcysQ/view",
+        "https://drive.google.com/file/d/1xK63iIyD7qvYKzX30kBmyZytSz1AjjaT/view"
+      ],
+      "categories": [
+        "Electronics"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260614-1339",
+      "title": "ASUS Dual Bay Disc Duplicator",
+      "description": "ASUS dual bay disc duplicator with two drives. Features a digital display and a compact black design, suitable for various duplication tasks.",
+      "price": 75,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/1o0W2ll8V55_NJ1bu2FAdrjADHTqWj_sv/view",
+      "images": [
+        "https://drive.google.com/file/d/1o0W2ll8V55_NJ1bu2FAdrjADHTqWj_sv/view",
+        "https://drive.google.com/file/d/1IufX1QOJjLYCTefAZWId7gb1aWrUyFJh/view"
+      ],
+      "categories": [
+        "Electronics"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260614-1340",
+      "title": "Globe on Stand",
+      "description": "Decorative globe mounted on a gold-tone stand. It features detailed maps and is approximately 12 inches tall. Great for home or office display.",
+      "price": 13,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/1BsJOwAsOdShSQDHZ6ZGrvppCgSTH5M__/view",
+      "images": [
+        "https://drive.google.com/file/d/1BsJOwAsOdShSQDHZ6ZGrvppCgSTH5M__/view",
+        "https://drive.google.com/file/d/1JMrD659KxIOLs5QK9WiH1oGtgA-1B05z/view"
+      ],
+      "categories": [
+        "Home Decor"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260614-1342",
+      "title": "Decorative Wooden Vase",
+      "description": "This decorative wooden vase features intricate black floral designs on a warm brown finish. It has a unique neck wrapped in twine with decorative accents included.",
+      "price": 8,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/1IlbxR0wa0AF7DPNJmzb0I8hoXomgCnaH/view",
+      "images": [
+        "https://drive.google.com/file/d/1IlbxR0wa0AF7DPNJmzb0I8hoXomgCnaH/view",
+        "https://drive.google.com/file/d/1KeSaT_WlW5ZEEdOp44AVa5cwZWkZnn4_/view"
+      ],
+      "categories": [
+        "Home Decor"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260614-1347",
+      "title": "Vintage Wooden Table with Storage",
+      "description": "This vintage wooden table features a lift-top for storage and tapered legs. It shows some wear with scratches on the surface and comes with various papers underneath.",
+      "price": 25,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/1ULkkQiM58HIRZQWfrcQFY0vy7Uoq_e73/view",
+      "images": [
+        "https://drive.google.com/file/d/1ULkkQiM58HIRZQWfrcQFY0vy7Uoq_e73/view",
+        "https://drive.google.com/file/d/12nR0Dj7YFAgTLbANLQwtxU9KMIo4EX-9/view"
+      ],
+      "categories": [
+        "Furniture"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260615-1339",
+      "title": "Little Tikes Fabric Arm Floaties",
+      "description": "Set of Little Tikes fabric arm floaties designed for kids ages 2-6. Features a fun car design and soft fabric for comfort.",
+      "price": 8,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/10mZgbgzdxJTvqOjfTYKLVY50VQThiCD0/view",
+      "images": [
+        "https://drive.google.com/file/d/10mZgbgzdxJTvqOjfTYKLVY50VQThiCD0/view",
+        "https://drive.google.com/file/d/1JVduS3801krTJ7WZ6XylEK5k8jvvEDOs/view",
+        "https://drive.google.com/file/d/1MAtwSheSzZ2HrnLZdeedoBnLDJSuDL1i/view",
+        "https://drive.google.com/file/d/12P13HiTtRhoU9T5PW-Cb3yVitIQSUH5Z/view"
+      ],
+      "categories": [
+        "Toys & Games"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260615-1340",
+      "title": "Black Bubble Lidded Storage Box",
+      "description": "This black bubble lidded box features a sleek design, ideal for storing small items. It stands four stacked sections high and is a great addition to your home organization.",
+      "price": 7,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/1vQNOOAMXBb9_pEfS3rsHVSwtmYmjARpq/view",
+      "images": [
+        "https://drive.google.com/file/d/1vQNOOAMXBb9_pEfS3rsHVSwtmYmjARpq/view",
+        "https://drive.google.com/file/d/1UcyS0MEXvtfUG9Tvj28NanoNMv_LF-xZ/view",
+        "https://drive.google.com/file/d/17Hpt3XzE7dOQfZ2Nwal6z5XX6KfdxFUs/view"
+      ],
+      "categories": [
+        "Home Decor"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260615-1341",
+      "title": "Mr. Terrific Stretch Action Figure",
+      "description": "Up for auction is a Mr. Terrific stretch action figure featuring black and white attire with red accents. Includes original packaging with visible wear, perfect for collectors or playtime.",
+      "price": 5,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/1fa378Y2WHoPfqKUfJVOLb7tJI4SxhqBY/view",
+      "images": [
+        "https://drive.google.com/file/d/1fa378Y2WHoPfqKUfJVOLb7tJI4SxhqBY/view",
+        "https://drive.google.com/file/d/1OwMF9x97OvjfmGqAkxuX0gY6-IwyUh18/view"
+      ],
+      "categories": [
+        "Toys & Games"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260615-1343",
+      "title": "Ceramic Shar Pei Figurine",
+      "description": "This adorable ceramic figurine features a sitting Shar Pei with detailed wrinkles and a light tan finish. Perfect for dog lovers, it measures approximately 6 inches in length.",
+      "price": 10,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/1dvy_sVlHe9h1fc7z5AtC5lWuK7GpZqZU/view",
+      "images": [
+        "https://drive.google.com/file/d/1dvy_sVlHe9h1fc7z5AtC5lWuK7GpZqZU/view",
+        "https://drive.google.com/file/d/1x7PWvjAhi0Y3VDkORCqSBdeaga1yF-1n/view",
+        "https://drive.google.com/file/d/1rkSQRmR830lIJccp7dNaofAtyH8DDKpe/view"
+      ],
+      "categories": [
+        "Home Decor"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260615-1351",
+      "title": "Ceramic Serving Bowl",
+      "description": "This ceramic serving bowl features a soft pink color and a beautifully textured rim. Perfect for decorative use or serving your favorite dishes.",
+      "price": 6,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/1rVCCM8aXq0QDUT_KWi5LE_pbaqaNWSVW/view",
+      "images": [
+        "https://drive.google.com/file/d/1rVCCM8aXq0QDUT_KWi5LE_pbaqaNWSVW/view",
+        "https://drive.google.com/file/d/1a-w-ISE82_OdIlIs1olI-znsrxPUksr6/view",
+        "https://drive.google.com/file/d/1G2xSXBfRhkTpf_bNRj8Nb30gRhKpxW3I/view",
+        "https://drive.google.com/file/d/1hAliCrZGNA9vbqg2NgAnLGn20TlNQNrT/view"
+      ],
+      "categories": [
+        "Home & Kitchen"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260615-1352",
+      "title": "Splash Power Shot Aqua Blast Water Guns",
+      "description": "Two colorful water guns featuring a massive capacity design. Includes one blue and one green model, perfect for outdoor fun.",
+      "price": 5,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/1dJtstZ7Q6wsU8QtjLcvl7Zhzn2UJbHfG/view",
+      "images": [
+        "https://drive.google.com/file/d/1dJtstZ7Q6wsU8QtjLcvl7Zhzn2UJbHfG/view",
+        "https://drive.google.com/file/d/134RznoWS99mfnzTEAorK0UTvfRd96Afy/view",
+        "https://drive.google.com/file/d/1b3gBpGybgJW4oT2PCHwbUCj3XMeoR23d/view",
+        "https://drive.google.com/file/d/1XCQMLFCGDD_Sz37leAHHAK7E8sR6V4Cx/view"
+      ],
+      "categories": [
+        "Toys & Games"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260615-1355",
+      "title": "Splash Power Shot Water Blasters & Kaos Water Bombs",
+      "description": "Includes two Splash Power Shot water blasters in red and white, designed for outdoor fun. Also features a pack of 150 Kaos water balloons in assorted colors. Great for summer water battles!",
+      "price": 8,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/14dBluAvFc03cXlN7QkCIqEPTKGn438ED/view",
+      "images": [
+        "https://drive.google.com/file/d/14dBluAvFc03cXlN7QkCIqEPTKGn438ED/view",
+        "https://drive.google.com/file/d/1-8XpeG6BgHpBz0_qpF_chMpTp2jIB36y/view",
+        "https://drive.google.com/file/d/13tBq_svjiob21rupKsvb4tc1Af8ME_A4/view",
+        "https://drive.google.com/file/d/12AbkNxlaMW0hRj_JpW3ICdWfeJX6J7qs/view"
+      ],
+      "categories": [
+        "Toys & Games"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260615-1356",
+      "title": "Colorful Two-Piece Swimsuit",
+      "description": "This stylish two-piece swimsuit features a vibrant pastel tropical print with adjustable straps. Size XS with a top and matching bikini bottom included.",
+      "price": 10,
+      "stock": 1,
+      "image": "https://drive.google.com/file/d/1KaJDOUWjgxnco_ttWA8RrRvCilLtyrN7/view",
+      "images": [
+        "https://drive.google.com/file/d/1KaJDOUWjgxnco_ttWA8RrRvCilLtyrN7/view",
+        "https://drive.google.com/file/d/12o4lXBOcz1F_oonDq780maYtcV_aC1Fj/view"
+      ],
+      "categories": [
+        "Clothing"
+      ],
+      "active": true
     }
   ]
 }
