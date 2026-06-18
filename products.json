@@ -1,7 +1,7 @@
 {
   "products": [
     {
-      "sku": "FBZ-20260616-1127",
+      "sku": "FBZ-20260618-1127",
       "title": "Hand-Carved Moon Face Puzzle Jewelry Box",
       "description": "",
       "price": 10,
@@ -15,7 +15,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260616-1266",
+      "sku": "FBZ-20260618-1266",
       "title": "Advantage II Small Cat Flea Treatment - 2 Month Supply",
       "description": "",
       "price": 20,
@@ -30,7 +30,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260616-1273",
+      "sku": "FBZ-20260618-1273",
       "title": "Room Essentials Teddy Body Pillow Cover ? Brand New",
       "description": "",
       "price": 13,
@@ -44,7 +44,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260616-1289",
+      "sku": "FBZ-20260618-1289",
       "title": "Philips Air Fryer",
       "description": "",
       "price": 50,
@@ -58,7 +58,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260616-1305",
+      "sku": "FBZ-20260618-1305",
       "title": "Future Collective Women?s Button Front Shirt ? Size 1X",
       "description": "",
       "price": 7,
@@ -72,7 +72,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260616-1327",
+      "sku": "FBZ-20260618-1327",
       "title": "Framed Dog Wall Art Set",
       "description": "",
       "price": 9,
@@ -87,7 +87,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260616-1332",
+      "sku": "FBZ-20260618-1332",
       "title": "Cat & Jack Glitter Jelly Sandals - Size 4",
       "description": "",
       "price": 7,
@@ -113,22 +113,6 @@
       ],
       "categories": [
         "Outdoor Toys"
-      ],
-      "active": true
-    },
-    {
-      "sku": "FBZ-20260610-1339",
-      "title": "Square Wooden Serving Tray",
-      "description": "This unique square tray features four divided compartments, ideal for serving snacks or appetizers. Crafted from a warm, patterned wood with a vibrant finish, it adds a rustic touch to your gatherings.",
-      "price": 12,
-      "stock": 1,
-      "image": "img/FBZ-20260611-144943-IMG_0038.jpg",
-      "images": [
-        "img/FBZ-20260611-144943-IMG_0038.jpg",
-        "img/FBZ-20260611-144941-IMG_0037.jpg"
-      ],
-      "categories": [
-        "Kitchenware"
       ],
       "active": true
     },
@@ -213,21 +197,6 @@
       ],
       "categories": [
         "Clothing"
-      ],
-      "active": true
-    },
-    {
-      "sku": "FBZ-20260611-1358",
-      "title": "Top Paw Nylon Dog Collars (2 Pack)",
-      "description": "Set of two small nylon dog collars in pink, adjustable from 10 to 16 inches. Features black plastic buckles and D-rings for leash attachment.",
-      "price": 8,
-      "stock": 1,
-      "image": "img/IMG_0094.jpg",
-      "images": [
-        "img/IMG_0094.jpg"
-      ],
-      "categories": [
-        "Pet Supplies"
       ],
       "active": true
     },
