@@ -204,7 +204,7 @@
       background: var(--panel);
       box-shadow: 0 10px 22px rgba(15, 23, 42, 0.2);
     }
-    .auction-image { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: radial-gradient(circle at center, #f9fafb, #e5e7eb); }
+    .auction-image { position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; border: 0; padding: 0; background: radial-gradient(circle at center, #f9fafb, #e5e7eb); color: inherit; cursor: zoom-in; }
     [data-theme="dark"] .auction-image { background: radial-gradient(circle at center, #111827, #020617); }
     .auction-image img { width: 100%; height: 100%; object-fit: cover; }
     .badge-row { position: absolute; top: 0.55rem; left: 0.55rem; display: flex; flex-wrap: wrap; gap: 0.3rem; }
@@ -250,6 +250,109 @@
       font-size: 0.84rem;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+
+    .photo-viewer {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(2, 6, 23, 0.92);
+    }
+    .photo-viewer.show { display: flex; }
+    .photo-viewer-panel {
+      position: relative;
+      width: min(1040px, 100%);
+      max-height: calc(100vh - 2rem);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 0.65rem;
+    }
+    .photo-viewer-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: center;
+      color: #f9fafb;
+    }
+    .photo-viewer-title {
+      min-width: 0;
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 800;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .photo-viewer-count { color: #cbd5e1; font-size: 0.78rem; white-space: nowrap; }
+    .photo-viewer-close, .photo-viewer-arrow {
+      border: 1px solid rgba(248, 250, 252, 0.22);
+      color: #fff;
+      background: rgba(15, 23, 42, 0.78);
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+    }
+    .photo-viewer-close {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+    .photo-viewer-stage {
+      position: relative;
+      min-height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.82);
+    }
+    .photo-viewer-image {
+      max-width: 100%;
+      max-height: calc(100vh - 170px);
+      object-fit: contain;
+    }
+    .photo-viewer-arrow {
+      position: absolute;
+      top: 50%;
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      transform: translateY(-50%);
+      font-size: 1.4rem;
+    }
+    .photo-viewer-prev { left: 0.65rem; }
+    .photo-viewer-next { right: 0.65rem; }
+    .photo-viewer-thumbs {
+      display: flex;
+      gap: 0.45rem;
+      overflow-x: auto;
+      padding-bottom: 0.15rem;
+    }
+    .photo-thumb {
+      flex: 0 0 58px;
+      width: 58px;
+      height: 48px;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      padding: 0;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.9);
+      cursor: pointer;
+    }
+    .photo-thumb.active { border-color: #f97316; }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    @media (max-width: 640px) {
+      .photo-viewer { padding: 0.65rem; }
+      .photo-viewer-stage { min-height: 220px; border-radius: 14px; }
+      .photo-viewer-image { max-height: calc(100vh - 150px); }
+      .photo-viewer-prev { left: 0.4rem; }
+      .photo-viewer-next { right: 0.4rem; }
+    }
   </style>
 </head>
 <body>
@@ -328,6 +431,24 @@
 
   <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
 
+  <div id="photo-viewer" class="photo-viewer" aria-hidden="true">
+    <div class="photo-viewer-panel" role="dialog" aria-modal="true" aria-label="Item photos">
+      <div class="photo-viewer-top">
+        <div>
+          <p id="photo-viewer-title" class="photo-viewer-title"></p>
+          <span id="photo-viewer-count" class="photo-viewer-count"></span>
+        </div>
+        <button id="photo-viewer-close" class="photo-viewer-close" type="button" aria-label="Close photo viewer">&times;</button>
+      </div>
+      <div class="photo-viewer-stage">
+        <button id="photo-viewer-prev" class="photo-viewer-arrow photo-viewer-prev" type="button" aria-label="Previous photo">&#8249;</button>
+        <img id="photo-viewer-image" class="photo-viewer-image" src="" alt="" />
+        <button id="photo-viewer-next" class="photo-viewer-arrow photo-viewer-next" type="button" aria-label="Next photo">&#8250;</button>
+      </div>
+      <div id="photo-viewer-thumbs" class="photo-viewer-thumbs" aria-label="Photo thumbnails"></div>
+    </div>
+  </div>
+
   <script>
     const THEME_STORAGE_KEY = "flashbidz_theme";
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKOemGRRpUN4PYzgiIKCdoVPvKZrA20tGn0uFEa43pQ6UYd4UidTSyCRlv0yU9lcm6/exec";
@@ -336,6 +457,7 @@
 
     let allAuctions = [];
     let toastTimer = null;
+    let activeGallery = { title: "", images: [], index: 0 };
     const el = {};
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -359,6 +481,14 @@
       el.themeIcon = document.getElementById("theme-icon");
       el.verifyButton = document.getElementById("verify-button");
       el.verifyStatus = document.getElementById("verify-status");
+      el.photoViewer = document.getElementById("photo-viewer");
+      el.photoViewerImage = document.getElementById("photo-viewer-image");
+      el.photoViewerTitle = document.getElementById("photo-viewer-title");
+      el.photoViewerCount = document.getElementById("photo-viewer-count");
+      el.photoViewerThumbs = document.getElementById("photo-viewer-thumbs");
+      el.photoViewerClose = document.getElementById("photo-viewer-close");
+      el.photoViewerPrev = document.getElementById("photo-viewer-prev");
+      el.photoViewerNext = document.getElementById("photo-viewer-next");
     }
 
     function bindEvents() {
@@ -367,6 +497,18 @@
       el.sort?.addEventListener("change", applyFilters);
       el.themeToggle?.addEventListener("click", toggleTheme);
       el.verifyButton?.addEventListener("click", () => startVerification(readBidderInfo()));
+      el.photoViewerClose?.addEventListener("click", closePhotoViewer);
+      el.photoViewerPrev?.addEventListener("click", () => movePhoto(-1));
+      el.photoViewerNext?.addEventListener("click", () => movePhoto(1));
+      el.photoViewer?.addEventListener("click", event => {
+        if (event.target === el.photoViewer) closePhotoViewer();
+      });
+      document.addEventListener("keydown", event => {
+        if (!el.photoViewer?.classList.contains("show")) return;
+        if (event.key === "Escape") closePhotoViewer();
+        if (event.key === "ArrowLeft") movePhoto(-1);
+        if (event.key === "ArrowRight") movePhoto(1);
+      });
     }
 
     function fetchJsonp(url, timeoutMs = 20000) {
@@ -507,15 +649,16 @@
       const minBid = Math.max(Number(item.next_bid || 0), Number(item.current_bid || 0) + 1, Number(item.starting_bid || 1));
       const bidder = readBidderInfo();
       const verifyAt = Number(item.verified_required_at || DEFAULT_VERIFY_THRESHOLD);
+      const galleryImages = uniqueImages([item.image, ...(Array.isArray(item.images) ? item.images : [])]);
 
       card.innerHTML = `
-        <div class="auction-image">
+        <button class="auction-image" type="button" aria-label="View photos for ${escapeHtml(item.title || "auction item")}">
           <div class="badge-row">
             <span class="badge ${badgeClass}">${badgeText}</span>
             ${item.sku ? `<span class="badge">${escapeHtml(item.sku)}</span>` : ""}
           </div>
           <img src="${escapeHtml(item.image || "img/placeholder.png")}" alt="${escapeHtml(item.title)}" />
-        </div>
+        </button>
         <div class="auction-body">
           <h3 class="auction-title">${escapeHtml(item.title || "Auction item")}</h3>
           <p class="auction-desc">${escapeHtml(item.description || "")}</p>
@@ -540,7 +683,71 @@
 
       const form = card.querySelector("form");
       form?.addEventListener("submit", event => submitBid(event, item, minBid));
+      const imageButton = card.querySelector(".auction-image");
+      imageButton?.addEventListener("click", () => openPhotoViewer(item.title || "Auction item", galleryImages));
       return card;
+    }
+
+    function uniqueImages(images) {
+      const seen = new Set();
+      return images
+        .map(normalizeImageUrl)
+        .filter(src => src && src !== "img/placeholder.png")
+        .filter(src => {
+          if (seen.has(src)) return false;
+          seen.add(src);
+          return true;
+        });
+    }
+
+    function openPhotoViewer(title, images, startIndex = 0) {
+      const cleanImages = uniqueImages(images);
+      if (!cleanImages.length) cleanImages.push("img/placeholder.png");
+      activeGallery = { title, images: cleanImages, index: Math.max(0, Math.min(startIndex, cleanImages.length - 1)) };
+      renderPhotoViewer();
+      el.photoViewer?.classList.add("show");
+      el.photoViewer?.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closePhotoViewer() {
+      el.photoViewer?.classList.remove("show");
+      el.photoViewer?.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    function movePhoto(direction) {
+      const total = activeGallery.images.length;
+      if (!total) return;
+      activeGallery.index = (activeGallery.index + direction + total) % total;
+      renderPhotoViewer();
+    }
+
+    function renderPhotoViewer() {
+      const total = activeGallery.images.length;
+      const current = activeGallery.images[activeGallery.index] || "img/placeholder.png";
+      if (el.photoViewerImage) {
+        el.photoViewerImage.src = current;
+        el.photoViewerImage.alt = activeGallery.title;
+      }
+      if (el.photoViewerTitle) el.photoViewerTitle.textContent = activeGallery.title;
+      if (el.photoViewerCount) el.photoViewerCount.textContent = total > 1 ? (activeGallery.index + 1) + " of " + total : "1 photo";
+      if (el.photoViewerPrev) el.photoViewerPrev.style.display = total > 1 ? "block" : "none";
+      if (el.photoViewerNext) el.photoViewerNext.style.display = total > 1 ? "block" : "none";
+      if (!el.photoViewerThumbs) return;
+      el.photoViewerThumbs.innerHTML = "";
+      activeGallery.images.forEach((src, index) => {
+        const thumb = document.createElement("button");
+        thumb.type = "button";
+        thumb.className = "photo-thumb" + (index === activeGallery.index ? " active" : "");
+        thumb.setAttribute("aria-label", "Show photo " + (index + 1));
+        thumb.innerHTML = `<img src="${escapeHtml(src)}" alt="" />`;
+        thumb.addEventListener("click", () => {
+          activeGallery.index = index;
+          renderPhotoViewer();
+        });
+        el.photoViewerThumbs.appendChild(thumb);
+      });
     }
 
     async function submitBid(event, item, minBid) {
