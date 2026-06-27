@@ -32,7 +32,6 @@
     }
 
     * { box-sizing: border-box; }
-
     html, body {
       margin: 0;
       padding: 0;
@@ -42,11 +41,10 @@
       color: var(--text);
       -webkit-font-smoothing: antialiased;
     }
-
     body { display: flex; flex-direction: column; }
     a { color: inherit; text-decoration: none; }
     img { display: block; max-width: 100%; }
-    button, input, textarea { font: inherit; }
+    button, input, select { font: inherit; }
 
     .site-header {
       position: sticky;
@@ -69,16 +67,7 @@
     .brand { display: flex; align-items: center; gap: 0.55rem; min-width: 0; }
     .logoimg { width: auto; height: 34px; }
     @media (min-width: 768px) { .logoimg { height: 40px; } }
-
-    .name h1 {
-      margin: 0;
-      font-size: 1rem;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
+    .name h1 { margin: 0; font-size: 1rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
     .tagline { margin: 0; font-size: 0.7rem; opacity: 0.9; white-space: nowrap; }
     .top-cta { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; }
 
@@ -101,6 +90,7 @@
 
     .btn-primary { border: none; color: #fff; background: linear-gradient(to right, #ef4444, #f97316); box-shadow: 0 10px 25px rgba(239, 68, 68, 0.45); }
     .btn-green { border: none; color: #fff; background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 10px 22px rgba(34, 197, 94, 0.36); }
+    .btn-blue { border: none; color: #fff; background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 10px 22px rgba(37, 99, 235, 0.32); }
     .btn-ghost { background: rgba(15, 23, 42, 0.7); border-color: rgba(148, 163, 184, 0.35); }
     .btn:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
 
@@ -118,7 +108,6 @@
     }
 
     main { flex: 1; }
-
     .auction-status {
       position: sticky;
       top: 59px;
@@ -134,13 +123,11 @@
       font-size: 0.76rem;
       backdrop-filter: blur(14px);
     }
-
     [data-theme="dark"] .auction-status { background: rgba(2, 6, 23, 0.96); }
     @media (max-width: 640px) { .auction-status { position: static; } }
 
     .hero { padding: 1.1rem 0.85rem 0.8rem; }
     @media (min-width: 768px) { .hero { padding-inline: 1.25rem; } }
-
     .hero-inner {
       max-width: 1100px;
       margin: 0 auto;
@@ -151,24 +138,17 @@
       overflow: hidden;
       position: relative;
     }
-
     [data-theme="dark"] .hero-inner { background: radial-gradient(circle at top left, #111827, #020617); }
-
-    .hero-inner h2 {
-      margin: 0 0 0.35rem;
-      font-size: 1.35rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
+    .hero-inner h2 { margin: 0 0 0.35rem; font-size: 1.35rem; letter-spacing: 0.04em; text-transform: uppercase; }
     .hero-inner p { max-width: 48rem; margin: 0; color: var(--muted); font-size: 0.9rem; }
     .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem; margin-top: 0.75rem; }
     .hero-pill { border-radius: 999px; padding: 0.28rem 0.72rem; background: rgba(15, 23, 42, 0.05); color: var(--muted); font-size: 0.75rem; }
     [data-theme="dark"] .hero-pill { background: rgba(15, 23, 42, 0.85); color: #e5e7eb; }
+    .verify-status { display: none; color: var(--green); font-size: 0.8rem; font-weight: 800; }
+    .verify-status.show { display: inline-flex; }
 
     .auction-section { padding: 0.9rem 0.85rem 2.5rem; }
     @media (min-width: 768px) { .auction-section { padding-inline: 1.25rem; } }
-
     .section-header { max-width: 1100px; margin: 0 auto 0.75rem; }
     .section-header h2 { margin: 0; font-size: 1.1rem; letter-spacing: 0.05em; text-transform: uppercase; }
     .section-header p { margin: 0.25rem 0 0; max-width: 44rem; color: var(--muted); font-size: 0.85rem; }
@@ -181,7 +161,6 @@
       gap: 0.55rem;
       align-items: end;
     }
-
     @media (max-width: 760px) { .auction-controls { grid-template-columns: 1fr; } }
 
     .field label {
@@ -194,7 +173,7 @@
       letter-spacing: 0.07em;
     }
 
-    .field input, .field select, .bid-form input, .bid-form textarea {
+    .field input, .field select, .bid-form input {
       width: 100%;
       border: 1px solid var(--border);
       border-radius: 999px;
@@ -204,9 +183,7 @@
       outline: none;
       font-size: 0.82rem;
     }
-
-    .bid-form textarea { border-radius: 12px; min-height: 56px; resize: vertical; }
-    [data-theme="dark"] .field input, [data-theme="dark"] .field select, [data-theme="dark"] .bid-form input, [data-theme="dark"] .bid-form textarea { background: rgba(15, 23, 42, 0.98); color: #e5e7eb; border-color: rgba(51, 65, 85, 0.95); }
+    [data-theme="dark"] .field input, [data-theme="dark"] .field select, [data-theme="dark"] .bid-form input { background: rgba(15, 23, 42, 0.98); color: #e5e7eb; border-color: rgba(51, 65, 85, 0.95); }
 
     .auction-grid {
       max-width: 1100px;
@@ -215,7 +192,6 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0.85rem;
     }
-
     @media (max-width: 980px) { .auction-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 620px) { .auction-grid { grid-template-columns: 1fr; } }
 
@@ -228,17 +204,9 @@
       background: var(--panel);
       box-shadow: 0 10px 22px rgba(15, 23, 42, 0.2);
     }
-
-    .auction-image {
-      position: relative;
-      aspect-ratio: 4 / 3;
-      overflow: hidden;
-      background: radial-gradient(circle at center, #f9fafb, #e5e7eb);
-    }
-
+    .auction-image { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: radial-gradient(circle at center, #f9fafb, #e5e7eb); }
     [data-theme="dark"] .auction-image { background: radial-gradient(circle at center, #111827, #020617); }
     .auction-image img { width: 100%; height: 100%; object-fit: cover; }
-
     .badge-row { position: absolute; top: 0.55rem; left: 0.55rem; display: flex; flex-wrap: wrap; gap: 0.3rem; }
     .badge { border-radius: 999px; padding: 0.18rem 0.5rem; color: #fff; background: rgba(15, 23, 42, 0.88); font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
     .badge.live { background: linear-gradient(to right, #ef4444, #f97316); }
@@ -248,23 +216,19 @@
     .auction-body { display: flex; flex-direction: column; gap: 0.55rem; padding: 0.75rem; flex: 1; }
     .auction-title { margin: 0; font-size: 0.98rem; line-height: 1.2; }
     .auction-desc { margin: 0; color: var(--muted); font-size: 0.8rem; line-height: 1.35; }
-
     .auction-numbers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem; }
     .number-box { padding: 0.45rem 0.5rem; border-radius: 12px; background: rgba(148, 163, 184, 0.13); }
     .number-box span { display: block; color: var(--muted); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; }
     .number-box strong { display: block; margin-top: 0.1rem; font-size: 1rem; }
-
     .bid-form { display: grid; gap: 0.45rem; margin-top: auto; padding-top: 0.2rem; }
     .bid-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem; }
     @media (max-width: 420px) { .bid-form-grid { grid-template-columns: 1fr; } }
-
     .bid-note { margin: 0; color: var(--muted); font-size: 0.72rem; line-height: 1.35; }
     .message { max-width: 1100px; margin: 0.8rem auto 0; padding: 0.8rem 0.9rem; border-radius: 16px; border: 1px dashed rgba(148, 163, 184, 0.75); color: var(--muted); background: rgba(255, 255, 255, 0.9); }
     [data-theme="dark"] .message { background: rgba(15, 23, 42, 0.96); }
 
     .site-footer { padding: 1rem 0.85rem 1.2rem; text-align: center; color: var(--muted); font-size: 0.75rem; border-top: 1px solid rgba(148, 163, 184, 0.4); background: rgba(248, 250, 252, 0.96); }
     [data-theme="dark"] .site-footer { background: #020617; border-top-color: rgba(30, 64, 175, 0.8); }
-
     .toast {
       position: fixed;
       left: 50%;
@@ -278,14 +242,13 @@
       pointer-events: none;
       background: rgba(15, 23, 42, 0.94);
       color: #fff;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
       transition: opacity 180ms ease, transform 180ms ease;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       font-size: 0.84rem;
     }
-
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
   </style>
 </head>
@@ -299,7 +262,7 @@
       </div>
     </a>
     <nav class="top-cta">
-      <button id="theme-toggle" class="theme-toggle" type="button"><span>☀️</span><span id="theme-label">Light</span></button>
+      <button id="theme-toggle" class="theme-toggle" type="button"><span id="theme-icon">Light</span></button>
       <a class="btn btn-ghost" href="index.html">Store</a>
       <a class="btn btn-primary" href="#auctions">Bid Now</a>
     </nav>
@@ -314,10 +277,12 @@
     <section class="hero">
       <div class="hero-inner">
         <h2>FlashBidz Online Auctions</h2>
-        <p>Bid directly here when Facebook is unavailable. Winning bidders are expected to pay and pick up on time; repeat no-pay bidders can be blocked.</p>
+        <p>Bid directly here when Facebook is unavailable. Bids in the last 2 minutes extend the clock, and higher bids require bidder verification through Stripe.</p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="#auctions">View Auction Items</a>
           <a class="btn btn-ghost" href="index.html">Shop Store Items</a>
+          <button id="verify-button" class="btn btn-blue" type="button">Verify Bidder</button>
+          <span id="verify-status" class="verify-status">Verified bidder</span>
           <span class="hero-pill">Pickup in Mattawan, MI</span>
         </div>
       </div>
@@ -358,7 +323,7 @@
   </main>
 
   <footer class="site-footer">
-    <p>&copy; <span id="year"></span> FlashBidz LLC • Mattawan, Michigan</p>
+    <p>&copy; <span id="year"></span> FlashBidz LLC - Mattawan, Michigan</p>
   </footer>
 
   <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
@@ -366,11 +331,11 @@
   <script>
     const THEME_STORAGE_KEY = "flashbidz_theme";
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKOemGRRpUN4PYzgiIKCdoVPvKZrA20tGn0uFEa43pQ6UYd4UidTSyCRlv0yU9lcm6/exec";
-    const BIDDER_STORAGE_KEY = "flashbidz_bidder_v1";
+    const BIDDER_STORAGE_KEY = "flashbidz_bidder_v2";
+    const DEFAULT_VERIFY_THRESHOLD = 25;
 
     let allAuctions = [];
     let toastTimer = null;
-
     const el = {};
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -378,6 +343,7 @@
       initTheme();
       bindEvents();
       setCurrentYear();
+      finishVerificationIfNeeded();
       loadAuctions();
     });
 
@@ -390,7 +356,9 @@
       el.status = document.getElementById("status-filter");
       el.sort = document.getElementById("sort-select");
       el.themeToggle = document.getElementById("theme-toggle");
-      el.themeLabel = document.getElementById("theme-label");
+      el.themeIcon = document.getElementById("theme-icon");
+      el.verifyButton = document.getElementById("verify-button");
+      el.verifyStatus = document.getElementById("verify-status");
     }
 
     function bindEvents() {
@@ -398,6 +366,7 @@
       el.status?.addEventListener("change", applyFilters);
       el.sort?.addEventListener("change", applyFilters);
       el.themeToggle?.addEventListener("click", toggleTheme);
+      el.verifyButton?.addEventListener("click", () => startVerification(readBidderInfo()));
     }
 
     function fetchJsonp(url, timeoutMs = 20000) {
@@ -421,6 +390,39 @@
       });
     }
 
+    async function finishVerificationIfNeeded() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("verified") === "cancel") {
+        showToast("Verification cancelled");
+        cleanVerificationUrl();
+        return;
+      }
+      const sessionId = params.get("session_id");
+      if (params.get("verified") !== "1" || !sessionId) {
+        updateVerifyStatus();
+        return;
+      }
+
+      try {
+        const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=finalize_bidder_verification&session_id=" + encodeURIComponent(sessionId), 30000);
+        if (!data || !data.success) throw new Error(data?.error || "Verification failed");
+        const bidder = readBidderInfo();
+        saveBidderInfo({ ...bidder, verified: true, verified_at: new Date().toISOString() });
+        updateVerifyStatus();
+        showToast("Bidder verified");
+      } catch (err) {
+        alert(err.message || "Verification could not be confirmed. Please try again.");
+      } finally {
+        cleanVerificationUrl();
+      }
+    }
+
+    function cleanVerificationUrl() {
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
     async function loadAuctions() {
       setMessage("Loading auction items...");
       try {
@@ -442,13 +444,13 @@
           next_bid: Number(item.next_bid || item.current_bid || item.starting_bid || 0),
           starting_bid: Number(item.starting_bid || 0),
           end_time: item.end_time || item.auction_end || "",
-          status: String(item.status || "live").toLowerCase()
+          status: String(item.status || "live").toLowerCase(),
+          verified_required_at: Number(item.verified_required_at || data.verified_required_at || DEFAULT_VERIFY_THRESHOLD)
         }));
 
         if (el.updated) el.updated.textContent = "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
         applyFilters();
       } catch (err) {
-        console.error(err);
         allAuctions = [];
         if (el.count) el.count.textContent = "Auction feed unavailable";
         setMessage("Auction items are temporarily unavailable. Please refresh in a moment.");
@@ -486,14 +488,11 @@
     function renderAuctions(list) {
       if (!el.grid) return;
       el.grid.innerHTML = "";
-
       if (el.count) el.count.textContent = list.length + " auction item" + (list.length === 1 ? "" : "s");
-
       if (!list.length) {
         setMessage("No auction items match right now.");
         return;
       }
-
       setMessage("");
       list.forEach(item => el.grid.appendChild(buildAuctionCard(item)));
     }
@@ -507,6 +506,7 @@
       const badgeText = ended ? "Ended" : badgeClass === "soon" ? "Ending Soon" : "Live";
       const minBid = Math.max(Number(item.next_bid || 0), Number(item.current_bid || 0) + 1, Number(item.starting_bid || 1));
       const bidder = readBidderInfo();
+      const verifyAt = Number(item.verified_required_at || DEFAULT_VERIFY_THRESHOLD);
 
       card.innerHTML = `
         <div class="auction-image">
@@ -532,7 +532,7 @@
               <div class="field"><label>Phone or Email</label><input name="contact" type="text" value="${escapeHtml(bidder.contact)}" autocomplete="email" ${ended ? "disabled" : ""} /></div>
               <div class="field"><label>Facebook Name</label><input name="facebook" type="text" value="${escapeHtml(bidder.facebook)}" ${ended ? "disabled" : ""} /></div>
             </div>
-            <p class="bid-note">Minimum next bid: $${minBid}. Bids are binding. No-pay bidders may be blocked from future auctions.</p>
+            <p class="bid-note">Minimum next bid: $${minBid}. Bids in the final 2 minutes extend the clock. Bids $${verifyAt}+ require Stripe verification.</p>
             <button class="btn btn-green" type="submit" ${ended ? "disabled" : ""}>Place Bid</button>
           </form>
         </div>
@@ -552,18 +552,25 @@
       const name = String(formData.get("name") || "").trim();
       const contact = String(formData.get("contact") || "").trim();
       const facebook = String(formData.get("facebook") || "").trim();
+      const verifyAt = Number(item.verified_required_at || DEFAULT_VERIFY_THRESHOLD);
 
       if (!name || !contact) {
         alert("Please enter your name and phone or email.");
         return;
       }
-
       if (!(amount >= minBid)) {
         alert("Bid must be at least $" + minBid + ".");
         return;
       }
 
-      saveBidderInfo({ name, contact, facebook });
+      const bidder = { ...readBidderInfo(), name, contact, facebook };
+      saveBidderInfo(bidder);
+      if (amount >= verifyAt && !bidder.verified) {
+        const ok = confirm("Bids of $" + verifyAt + " or more require a one-time Stripe bidder verification. Start verification now?");
+        if (ok) startVerification(bidder);
+        return;
+      }
+
       button.disabled = true;
       button.textContent = "Submitting...";
 
@@ -578,11 +585,17 @@
       try {
         const url = APPS_SCRIPT_URL + "?action=place_bid&payload=" + encodeURIComponent(JSON.stringify(payload));
         const data = await fetchJsonp(url, 30000);
-        if (!data || !data.success) throw new Error(data?.error || "Bid failed");
-        showToast("Bid received: $" + amount);
+        if (!data || !data.success) {
+          if (data && data.requires_verification) {
+            const ok = confirm(data.error + " Start verification now?");
+            if (ok) startVerification(bidder);
+            return;
+          }
+          throw new Error(data?.error || "Bid failed");
+        }
+        showToast(data.extended_end_time ? "Bid received. Auction extended." : "Bid received: $" + amount);
         await loadAuctions();
       } catch (err) {
-        console.error(err);
         alert(err.message || "Bid could not be submitted. Please try again.");
       } finally {
         button.disabled = false;
@@ -590,17 +603,55 @@
       }
     }
 
+    async function startVerification(bidder) {
+      const name = String(bidder.name || "").trim();
+      const contact = String(bidder.contact || "").trim();
+      const facebook = String(bidder.facebook || "").trim();
+      if (!name || !contact) {
+        alert("Enter your name and phone or email on any bid form first, then click Verify Bidder.");
+        return;
+      }
+
+      saveBidderInfo({ ...bidder, name, contact, facebook });
+      try {
+        const payload = { bidder: { name, contact, facebook } };
+        const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=create_bidder_verification_checkout&payload=" + encodeURIComponent(JSON.stringify(payload)), 30000);
+        if (!data || !data.success) throw new Error(data?.error || "Verification could not be started.");
+        if (data.already_verified) {
+          saveBidderInfo({ ...bidder, verified: true });
+          updateVerifyStatus();
+          showToast("Bidder already verified");
+          return;
+        }
+        window.location.href = data.checkout_url;
+      } catch (err) {
+        alert(err.message || "Verification could not be started.");
+      }
+    }
+
     function readBidderInfo() {
       try {
         const saved = JSON.parse(localStorage.getItem(BIDDER_STORAGE_KEY) || "{}");
-        return { name: saved.name || "", contact: saved.contact || "", facebook: saved.facebook || "" };
+        return {
+          name: saved.name || "",
+          contact: saved.contact || "",
+          facebook: saved.facebook || "",
+          verified: !!saved.verified
+        };
       } catch (_) {
-        return { name: "", contact: "", facebook: "" };
+        return { name: "", contact: "", facebook: "", verified: false };
       }
     }
 
     function saveBidderInfo(info) {
       try { localStorage.setItem(BIDDER_STORAGE_KEY, JSON.stringify(info)); } catch (_) {}
+      updateVerifyStatus();
+    }
+
+    function updateVerifyStatus() {
+      const bidder = readBidderInfo();
+      if (el.verifyStatus) el.verifyStatus.classList.toggle("show", !!bidder.verified);
+      if (el.verifyButton) el.verifyButton.textContent = bidder.verified ? "Verified" : "Verify Bidder";
     }
 
     function normalizeImageUrl(src) {
@@ -641,7 +692,7 @@
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
-        .replace(/\"/g, "&quot;")
+        .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
     }
 
@@ -670,9 +721,7 @@
 
     function updateThemeLabel() {
       const theme = document.documentElement.getAttribute("data-theme") || "light";
-      if (!el.themeLabel || !el.themeToggle) return;
-      el.themeLabel.textContent = theme === "dark" ? "Dark" : "Light";
-      if (el.themeToggle.firstElementChild) el.themeToggle.firstElementChild.textContent = theme === "dark" ? "🌙" : "☀️";
+      if (el.themeIcon) el.themeIcon.textContent = theme === "dark" ? "Dark" : "Light";
     }
   </script>
 </body>
