@@ -675,7 +675,7 @@
               <div class="field"><label>Phone or Email</label><input name="contact" type="text" value="${escapeHtml(bidder.contact)}" autocomplete="email" ${ended ? "disabled" : ""} /></div>
               <div class="field"><label>Facebook Name</label><input name="facebook" type="text" value="${escapeHtml(bidder.facebook)}" ${ended ? "disabled" : ""} /></div>
             </div>
-            <p class="bid-note">Minimum next bid: $${minBid}. Bids in the final 2 minutes extend the clock. Bids $${verifyAt}+ require Stripe verification.</p>
+            <p class="bid-note">Minimum next bid: $${minBid}. Bids in the final 2 minutes extend the clock. Bidders with 2 unpaid wins must verify before bidding.</p>
             <button class="btn btn-green" type="submit" ${ended ? "disabled" : ""}>Place Bid</button>
           </form>
         </div>
