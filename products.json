@@ -1,7 +1,7 @@
 {
   "products": [
     {
-      "sku": "FBZ-20260626-1127",
+      "sku": "FBZ-20260628-1127",
       "title": "Hand-Carved Moon Face Puzzle Jewelry Box",
       "description": "",
       "price": 10,
@@ -15,7 +15,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1266",
+      "sku": "FBZ-20260628-1266",
       "title": "Advantage II Small Cat Flea Treatment - 2 Month Supply",
       "description": "",
       "price": 11,
@@ -30,7 +30,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1273",
+      "sku": "FBZ-20260628-1273",
       "title": "Room Essentials Teddy Body Pillow Cover Brand New",
       "description": "",
       "price": 6,
@@ -44,7 +44,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1289",
+      "sku": "FBZ-20260628-1289",
       "title": "Philips Air Fryer",
       "description": "",
       "price": 50,
@@ -58,7 +58,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1305",
+      "sku": "FBZ-20260628-1305",
       "title": "Future Collective Women?s Button Front Shirt Size 1X",
       "description": "",
       "price": 7,
@@ -72,7 +72,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1327",
+      "sku": "FBZ-20260628-1327",
       "title": "Framed Dog Wall Art Set",
       "description": "",
       "price": 9,
@@ -87,7 +87,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1332",
+      "sku": "FBZ-20260628-1332",
       "title": "Cat & Jack Glitter Jelly Sandals - Size 4",
       "description": "",
       "price": 7,
@@ -101,7 +101,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1382",
+      "sku": "FBZ-20260628-1382",
       "title": "ZHU ZHU AQUARIUM SUBMARINE SET",
       "description": "",
       "price": 5,
@@ -115,7 +115,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1384",
+      "sku": "FBZ-20260628-1384",
       "title": "Set of 6 Milasao Whole Wheat Plates",
       "description": "",
       "price": 13,
@@ -131,7 +131,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1386",
+      "sku": "FBZ-20260628-1386",
       "title": "Rollick Playpen for Dogs, 24-Inch, Black",
       "description": "",
       "price": 13,
@@ -149,7 +149,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1388",
+      "sku": "FBZ-20260628-1388",
       "title": "NEW!! Outdoor Patio Cushion Approx. 22 inch x 20 inch",
       "description": "",
       "price": 27,
@@ -165,7 +165,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1394",
+      "sku": "FBZ-20260628-1394",
       "title": "NINE WEST 3-PIECE COSMETIC BAG SET",
       "description": "",
       "price": 8,
@@ -180,7 +180,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1396",
+      "sku": "FBZ-20260628-1396",
       "title": "Room Essentials Stoneware Dinner Bowls ? Set of 4",
       "description": "",
       "price": 5,
@@ -195,7 +195,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1404",
+      "sku": "FBZ-20260628-1404",
       "title": "Sonic the Hedgehog Tornado Biplane Playset",
       "description": "",
       "price": 6,
@@ -209,7 +209,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1424",
+      "sku": "FBZ-20260628-1424",
       "title": "Room Essentials Stoneware Dinner Bowls Set of 4",
       "description": "",
       "price": 9,
@@ -223,7 +223,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1445",
+      "sku": "FBZ-20260628-1445",
       "title": "High Velocity Rafter Clips 2? (10 Pack)",
       "description": "",
       "price": 3,
@@ -237,7 +237,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1459",
+      "sku": "FBZ-20260628-1459",
       "title": "Scentsy Butterfly Blooms Warmer Gift Set",
       "description": "",
       "price": 40,
@@ -256,7 +256,7 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260626-1468",
+      "sku": "FBZ-20260628-1468",
       "title": "Vintage Decorative Vase with Classic Automobile Design",
       "description": "",
       "price": 13,
@@ -267,22 +267,6 @@
         "img/FBZ-20260626-073226-IMG_0608.jpg"
       ],
       "categories": [],
-      "active": true
-    },
-    {
-      "sku": "FBZ-20260607-1267",
-      "title": "FACTION Spectre Gel Bead Blaster",
-      "description": "Get ready for fun with the FACTION Spectre Gel Bead Blaster! This set includes a blaster with a multicolor LED display and is compatible with a mobile app for interactive play.",
-      "price": 12,
-      "stock": 1,
-      "image": "img/FBZ-20260611-145249-IMG_9846.jpg",
-      "images": [
-        "img/FBZ-20260611-145249-IMG_9846.jpg",
-        "img/FBZ-20260611-145247-IMG_9847.jpg"
-      ],
-      "categories": [
-        "Outdoor Toys"
-      ],
       "active": true
     },
     {
@@ -514,42 +498,6 @@
       ],
       "categories": [
         "Home & Kitchen"
-      ],
-      "active": true
-    },
-    {
-      "sku": "FBZ-20260615-1352",
-      "title": "Splash Power Shot Aqua Blast Water Guns",
-      "description": "Two colorful water guns featuring a massive capacity design. Includes one blue and one green model, perfect for outdoor fun.",
-      "price": 5,
-      "stock": 1,
-      "image": "img/FBZ-20260615-191159-IMG_0258.jpg",
-      "images": [
-        "img/FBZ-20260615-191159-IMG_0258.jpg",
-        "img/FBZ-20260615-191157-IMG_0260.jpg",
-        "img/FBZ-20260615-191156-IMG_0259.jpg",
-        "img/FBZ-20260615-191153-IMG_0257.jpg"
-      ],
-      "categories": [
-        "Toys & Games"
-      ],
-      "active": true
-    },
-    {
-      "sku": "FBZ-20260615-1355",
-      "title": "Splash Power Shot Water Blasters & Kaos Water Bombs",
-      "description": "Includes two Splash Power Shot water blasters in red and white, designed for outdoor fun. Also features a pack of 150 Kaos water balloons in assorted colors. Great for summer water battles!",
-      "price": 8,
-      "stock": 1,
-      "image": "img/FBZ-20260615-191106-IMG_0273.jpg",
-      "images": [
-        "img/FBZ-20260615-191106-IMG_0273.jpg",
-        "img/FBZ-20260615-191104-IMG_0276.jpg",
-        "img/FBZ-20260615-191102-IMG_0274.jpg",
-        "img/FBZ-20260615-191059-IMG_0275.jpg"
-      ],
-      "categories": [
-        "Toys & Games"
       ],
       "active": true
     },
