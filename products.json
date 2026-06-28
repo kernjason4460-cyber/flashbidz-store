@@ -200,10 +200,9 @@
       "description": "",
       "price": 6,
       "stock": 1,
-      "image": "img/FBZ-20260623-184942-IMG_0534.jpg",
+      "image": "img/FBZ-20260623-184940-IMG_0533.jpgimg/FBZ-20260623-184942-IMG_0534.jpg",
       "images": [
-        "img/FBZ-20260623-184942-IMG_0534.jpg",
-        "img/FBZ-20260623-184940-IMG_0533.jpg"
+        "img/FBZ-20260623-184940-IMG_0533.jpgimg/FBZ-20260623-184942-IMG_0534.jpg"
       ],
       "categories": [],
       "active": true
@@ -342,11 +341,11 @@
       "description": "Bright turquoise trucker hat for kids featuring a mesh back for breathability. Adjustable fit with a stylish logo patch and original tags attached.",
       "price": 10,
       "stock": 1,
-      "image": "img/FBZ-20260611-173229-IMG_9969.jpg",
+      "image": "img/FBZ-20260611-173225-IMG_9967.jpg",
       "images": [
+        "img/FBZ-20260611-173225-IMG_9967.jpg",
         "img/FBZ-20260611-173229-IMG_9969.jpg",
-        "img/FBZ-20260611-173227-IMG_9968.jpg",
-        "img/FBZ-20260611-173225-IMG_9967.jpg"
+        "img/FBZ-20260611-173227-IMG_9968.jpg"
       ],
       "categories": [
         "Clothing"
@@ -473,11 +472,11 @@
       "description": "This adorable ceramic figurine features a sitting Shar Pei with detailed wrinkles and a light tan finish. Perfect for dog lovers, it measures approximately 6 inches in length.",
       "price": 10,
       "stock": 1,
-      "image": "img/FBZ-20260615-191324-IMG_0234.jpg",
+      "image": "img/FBZ-20260615-191320-IMG_0233.jpg",
       "images": [
+        "img/FBZ-20260615-191320-IMG_0233.jpg",
         "img/FBZ-20260615-191324-IMG_0234.jpg",
-        "img/FBZ-20260615-191322-IMG_0232.jpg",
-        "img/FBZ-20260615-191320-IMG_0233.jpg"
+        "img/FBZ-20260615-191322-IMG_0232.jpg"
       ],
       "categories": [
         "Home Decor"
@@ -490,11 +489,11 @@
       "description": "",
       "price": 6,
       "stock": 1,
-      "image": "img/FBZ-20260615-191241-IMG_0254.jpg",
+      "image": "img/FBZ-20260615-191238-IMG_0253.jpg",
       "images": [
+        "img/FBZ-20260615-191238-IMG_0253.jpg",
         "img/FBZ-20260615-191241-IMG_0254.jpg",
-        "img/FBZ-20260615-191240-IMG_0255.jpg",
-        "img/FBZ-20260615-191238-IMG_0253.jpg"
+        "img/FBZ-20260615-191240-IMG_0255.jpg"
       ],
       "categories": [
         "Home & Kitchen"
