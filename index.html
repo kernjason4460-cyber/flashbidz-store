@@ -3077,5 +3077,50 @@ function playAddToCartSound() {
           <!-- You can replace this file path with any mp3 you upload -->
           <source src="sounds/add.mp3" type="audio/mpeg">
 </audio>
+<script>
+  function fbzTrackSiteVisit(pageName) {
+    try {
+      var appsScriptUrl = typeof APPS_SCRIPT_URL !== "undefined"
+        ? APPS_SCRIPT_URL
+        : "https://script.google.com/macros/s/AKfycbxKOemGRRpUN4PYzgiIKCdoVPvKZrA20tGn0uFEa43pQ6UYd4UidTSyCRlv0yU9lcm6/exec";
+      var key = "flashbidz_visitor_id";
+      var visitorId = localStorage.getItem(key);
+      if (!visitorId) {
+        visitorId = "v-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem(key, visitorId);
+      }
+
+      var payload = {
+        visitor_id: visitorId,
+        page: pageName || "store",
+        path: window.location.pathname || "",
+        title: document.title || "",
+        referrer: document.referrer || "",
+        screen: window.screen ? window.screen.width + "x" + window.screen.height : "",
+        language: navigator.language || "",
+        user_agent: navigator.userAgent || ""
+      };
+      var query = Object.keys(payload)
+        .map(function(key) {
+          return encodeURIComponent(key) + "=" + encodeURIComponent(payload[key]);
+        })
+        .join("&");
+      var callback = "__fbz_visit_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+      var script = document.createElement("script");
+      window[callback] = function() {
+        try { delete window[callback]; } catch (_) { window[callback] = undefined; }
+        if (script.parentNode) script.parentNode.removeChild(script);
+      };
+      script.onerror = window[callback];
+      script.src = appsScriptUrl + "?action=log_visit&callback=" + encodeURIComponent(callback) + "&" + query;
+      document.head.appendChild(script);
+      setTimeout(window[callback], 8000);
+    } catch (_) {}
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    fbzTrackSiteVisit("store");
+  });
+</script>
 </body>
 </html>
