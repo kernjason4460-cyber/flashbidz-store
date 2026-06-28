@@ -759,7 +759,7 @@
       const name = String(formData.get("name") || "").trim();
       const contact = String(formData.get("contact") || "").trim();
       const facebook = String(formData.get("facebook") || "").trim();
-      const verifyAt = Number(item.verified_required_at || DEFAULT_VERIFY_THRESHOLD);
+      
 
       if (!name || !contact) {
         alert("Please enter your name and phone or email.");
@@ -772,11 +772,7 @@
 
       const bidder = { ...readBidderInfo(), name, contact, facebook };
       saveBidderInfo(bidder);
-      if (amount >= verifyAt && !bidder.verified) {
-        const ok = confirm("Bids of $" + verifyAt + " or more require a one-time Stripe bidder verification. Start verification now?");
-        if (ok) startVerification(bidder);
-        return;
-      }
+      
 
       button.disabled = true;
       button.textContent = "Submitting...";
