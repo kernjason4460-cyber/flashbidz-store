@@ -200,9 +200,10 @@
       "description": "",
       "price": 6,
       "stock": 1,
-      "image": "img/FBZ-20260623-184940-IMG_0533.jpgimg/FBZ-20260623-184942-IMG_0534.jpg",
+      "image": "img/FBZ-20260623-184940-IMG_0533.jpg",
       "images": [
-        "img/FBZ-20260623-184940-IMG_0533.jpgimg/FBZ-20260623-184942-IMG_0534.jpg"
+        "img/FBZ-20260623-184940-IMG_0533.jpg",
+        "img/FBZ-20260623-184942-IMG_0534.jpg"
       ],
       "categories": [],
       "active": true
