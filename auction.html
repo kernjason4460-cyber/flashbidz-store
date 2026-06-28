@@ -380,7 +380,7 @@
     <section class="hero">
       <div class="hero-inner">
         <h2>FlashBidz Online Auctions</h2>
-        <p>Bid directly here when Facebook is unavailable. Bids in the last 2 minutes extend the clock, and higher bids require bidder verification through Stripe.</p>
+        <p>Bid directly here when Facebook is unavailable. Bids in the last 2 minutes extend the clock, and bidders with repeated unpaid wins must verify before bidding again.</p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="#auctions">View Auction Items</a>
           <a class="btn btn-ghost" href="index.html">Shop Store Items</a>
@@ -453,7 +453,6 @@
     const THEME_STORAGE_KEY = "flashbidz_theme";
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKOemGRRpUN4PYzgiIKCdoVPvKZrA20tGn0uFEa43pQ6UYd4UidTSyCRlv0yU9lcm6/exec";
     const BIDDER_STORAGE_KEY = "flashbidz_bidder_v2";
-    const DEFAULT_VERIFY_THRESHOLD = 25;
 
     let allAuctions = [];
     let toastTimer = null;
@@ -465,6 +464,7 @@
       initTheme();
       bindEvents();
       setCurrentYear();
+      trackSiteVisit("auction");
       finishVerificationIfNeeded();
       loadAuctions();
     });
@@ -532,6 +532,31 @@
       });
     }
 
+    function trackSiteVisit(pageName) {
+      try {
+        const key = "flashbidz_visitor_id";
+        let visitorId = localStorage.getItem(key);
+        if (!visitorId) {
+          visitorId = "v-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+          localStorage.setItem(key, visitorId);
+        }
+        const payload = {
+          visitor_id: visitorId,
+          page: pageName || "auction",
+          path: window.location.pathname || "",
+          title: document.title || "",
+          referrer: document.referrer || "",
+          screen: (window.screen ? window.screen.width + "x" + window.screen.height : ""),
+          language: navigator.language || "",
+          user_agent: navigator.userAgent || ""
+        };
+        const query = Object.keys(payload)
+          .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(payload[key]))
+          .join("&");
+        fetchJsonp(APPS_SCRIPT_URL + "?action=log_visit&" + query, 8000).catch(() => {});
+      } catch (_) {}
+    }
+
     async function finishVerificationIfNeeded() {
       const params = new URLSearchParams(window.location.search);
       if (params.get("verified") === "cancel") {
@@ -587,7 +612,7 @@
           starting_bid: Number(item.starting_bid || 0),
           end_time: item.end_time || item.auction_end || "",
           status: String(item.status || "live").toLowerCase(),
-          verified_required_at: Number(item.verified_required_at || data.verified_required_at || DEFAULT_VERIFY_THRESHOLD)
+          no_pay_verify_threshold: Number(item.no_pay_verify_threshold || data.no_pay_verify_threshold || 2)
         }));
 
         if (el.updated) el.updated.textContent = "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
@@ -632,7 +657,11 @@
       el.grid.innerHTML = "";
       if (el.count) el.count.textContent = list.length + " auction item" + (list.length === 1 ? "" : "s");
       if (!list.length) {
-        setMessage("No auction items match right now.");
+        if (!allAuctions.length) {
+          setMessage("No live auction items right now. The latest auction may have ended, or the next one has not opened yet. Please check back soon.");
+        } else {
+          setMessage("No auction items match right now.");
+        }
         return;
       }
       setMessage("");
@@ -648,7 +677,6 @@
       const badgeText = ended ? "Ended" : badgeClass === "soon" ? "Ending Soon" : "Live";
       const minBid = Math.max(Number(item.next_bid || 0), Number(item.current_bid || 0) + 1, Number(item.starting_bid || 1));
       const bidder = readBidderInfo();
-      const verifyAt = Number(item.verified_required_at || DEFAULT_VERIFY_THRESHOLD);
       const galleryImages = uniqueImages([item.image, ...(Array.isArray(item.images) ? item.images : [])]);
 
       card.innerHTML = `
@@ -759,7 +787,6 @@
       const name = String(formData.get("name") || "").trim();
       const contact = String(formData.get("contact") || "").trim();
       const facebook = String(formData.get("facebook") || "").trim();
-      
 
       if (!name || !contact) {
         alert("Please enter your name and phone or email.");
@@ -772,7 +799,6 @@
 
       const bidder = { ...readBidderInfo(), name, contact, facebook };
       saveBidderInfo(bidder);
-      
 
       button.disabled = true;
       button.textContent = "Submitting...";
@@ -796,14 +822,30 @@
           }
           throw new Error(data?.error || "Bid failed");
         }
+        applyBidResult(item, data, amount);
         showToast(data.extended_end_time ? "Bid received. Auction extended." : "Bid received: $" + amount);
-        await loadAuctions();
+        setTimeout(loadAuctions, 1800);
       } catch (err) {
         alert(err.message || "Bid could not be submitted. Please try again.");
       } finally {
         button.disabled = false;
         button.textContent = "Place Bid";
       }
+    }
+
+    function applyBidResult(item, data, amount) {
+      const key = item.item_id || item.sku;
+      allAuctions = allAuctions.map(existing => {
+        const existingKey = existing.item_id || existing.sku;
+        if (existingKey !== key) return existing;
+        return {
+          ...existing,
+          current_bid: Number(data.current_bid || amount),
+          next_bid: Number(data.next_bid || amount + 1),
+          end_time: data.extended_end_time || existing.end_time
+        };
+      });
+      applyFilters();
     }
 
     async function startVerification(bidder) {
