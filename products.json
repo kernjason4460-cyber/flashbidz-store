@@ -516,6 +516,172 @@
         "Clothing"
       ],
       "active": true
+    },
+    {
+      "sku": "FBZ-20260626-1539",
+      "title": "Set of Two Blue Ceramic Candle Holders",
+      "description": "This beautiful set of two ceramic candle holders features a stunning blue finish. Each holder is intricately designed with marine-themed motifs, including shells and starfish. Perfect for adding a coastal touch to your home decor or as a lovely gift for ocean lovers.",
+      "price": 20,
+      "stock": 1,
+      "image": "https://drive.google.com/thumbnail?id=1zo4bnTuuQ8_N5T-Nx_4ee2tKytA0e8FR&sz=w1000",
+      "images": [
+        "https://drive.google.com/thumbnail?id=1zo4bnTuuQ8_N5T-Nx_4ee2tKytA0e8FR&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1rtRxoqVHUVDF1PG79z8R_ivikOv17EAj&sz=w1000"
+      ],
+      "categories": [
+        "Home Decor"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260626-1540",
+      "title": "Milwaukee BOLT Eye Visor for Safety Helmet",
+      "description": "This Milwaukee BOLT Eye Visor is designed for use with safety helmets, making it ideal for work environments. It features a comfortable pivoting visor angle and a fog-free interior coating to ensure clear visibility. The visor can be raised and lowered with the headlamp mounted for added convenience. Perfect for those in construction or industrial settings.",
+      "price": 20,
+      "stock": 1,
+      "image": "https://drive.google.com/thumbnail?id=14AgMHy68sJVAVWlTSebJ1vl78m_mG5Bu&sz=w1000",
+      "images": [
+        "https://drive.google.com/thumbnail?id=14AgMHy68sJVAVWlTSebJ1vl78m_mG5Bu&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1MeBnH7sIc9O3jc1y0U0rE3yJ_B7dRHmv&sz=w1000"
+      ],
+      "categories": [
+        "Safety Equipment"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260626-1541",
+      "title": "Glacier Fresh Glass Water Pitcher with Filter",
+      "description": "This is a Glacier Fresh glass water pitcher designed to hold up to 10 cups of water. It features a filtration system and an easy-fill lid for convenience. The pitcher is made of hand-blown resistant glass, perfect for keeping your water pure and fresh. It comes in its original packaging, ready for your kitchen.",
+      "price": 20,
+      "stock": 1,
+      "image": "https://drive.google.com/thumbnail?id=1aoy5od0AwZQQURWm7HzohEE9yzfqyRnu&sz=w1000",
+      "images": [
+        "https://drive.google.com/thumbnail?id=1aoy5od0AwZQQURWm7HzohEE9yzfqyRnu&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1azkRRP802DPbvGWmmQeszPh43G2Pe_g8&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1Nkg08_zQXTFwhcgDJOtQnbdN57E_pGh6&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1_uDNUefaELe-nBxOeai8Jte3OaXJDuyI&sz=w1000"
+      ],
+      "categories": [
+        "Home & Kitchen"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260626-1542",
+      "title": "Set of Three Clear License Plate Covers",
+      "description": "This is a set of three clear license plate covers designed to protect your license plates. Each cover comes sealed in its packaging, ensuring they are clean and ready for use. Ideal for adding a layer of durability to your vehicle's plates while maintaining visibility. Set of three clear license plate covers",
+      "price": 15,
+      "stock": 1,
+      "image": "https://drive.google.com/thumbnail?id=1a3dlDloQvEf-o6I4eonkiT98v7_sArJG&sz=w1000",
+      "images": [
+        "https://drive.google.com/thumbnail?id=1a3dlDloQvEf-o6I4eonkiT98v7_sArJG&sz=w1000"
+      ],
+      "categories": [
+        "Auto Accessories"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260626-1543",
+      "title": "Umbra Loop 1\" Curtain Rod 42-120\" Adjustable",
+      "description": "This is an Umbra Loop curtain rod, designed by Todd Wood. It adjusts between 42 and 120 inches long, making it versatile for various window sizes. The rod is 1 inch in diameter and features a sleek design in a gold color. Ideal for adding a modern touch to your home decor.",
+      "price": 20,
+      "stock": 1,
+      "image": "https://drive.google.com/thumbnail?id=1XX3cJH9B8QOp0fsI9PAy57Vp9zOKmYn1&sz=w1000",
+      "images": [
+        "https://drive.google.com/thumbnail?id=1XX3cJH9B8QOp0fsI9PAy57Vp9zOKmYn1&sz=w1000",
+        "https://drive.google.com/thumbnail?id=15B0W-A4xNxAQDFf5zZy9VHdcDiHuoKvB&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1NP30_9skt1ahJvd_9OKMNTpNGwEWwTqX&sz=w1000"
+      ],
+      "categories": [
+        "Home & Garden"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260626-1544",
+      "title": "Rawlings Players Series Catcher's Gear Black",
+      "description": "This is a Rawlings Players Series catcher's gear in black. It features padded areas for protection and adjustable straps for a secure fit.",
+      "price": 50,
+      "stock": 1,
+      "image": "https://drive.google.com/thumbnail?id=1lUpIxBwfMjmlfZqGJ8HKnDYSCJDJplNc&sz=w1000",
+      "images": [
+        "https://drive.google.com/thumbnail?id=1lUpIxBwfMjmlfZqGJ8HKnDYSCJDJplNc&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1eiey4fFGtQ7qjiBWLNQ0HABkQOwgPgRI&sz=w1000",
+        "https://drive.google.com/thumbnail?id=168DuHZCq4q0dJ2wZwATDvZVngttp4iXW&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1dK9eL1F1tMOa3cyZRYMEp1dLHHiz3bmJ&sz=w1000"
+      ],
+      "categories": [
+        "Sports Equipment"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260626-1545",
+      "title": "Powermate VX Air Die Grinder with Accessories",
+      "description": "Up for auction is a Powermate VX air die grinder, fully equipped with all necessary accessories for your projects. The tool features a sleek design and comes with various attachments for versatility. Ideal for grinding and polishing tasks, this product is perfect for both DIY enthusiasts and professionals. Don't miss this chance to add a reliable tool to your collection!",
+      "price": 30,
+      "stock": 1,
+      "image": "https://drive.google.com/thumbnail?id=12QW6XtUFa4zY-_j6GKJG2Dvt-Hfd77jb&sz=w1000",
+      "images": [
+        "https://drive.google.com/thumbnail?id=12QW6XtUFa4zY-_j6GKJG2Dvt-Hfd77jb&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1-_WgvrgEsApdqO0SuTIlc9fJENDveZgG&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1B_V8_NDFmtbyKwVdq0B_CEjlBsMaPNDs&sz=w1000"
+      ],
+      "categories": [
+        "Tools"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260626-1546",
+      "title": "Decorative Metal Storage Tin with Lid",
+      "description": "This decorative metal storage tin features a unique embossed design on the lid. Perfect for storing small items or as a decorative piece. The metal construction adds durability and a classic touch to any space. It has some visible wear, giving it a vintage appeal.",
+      "price": 15,
+      "stock": 1,
+      "image": "https://drive.google.com/thumbnail?id=1wZnK7KF094zuAECTKwJfqn-aOyJwwTbB&sz=w1000",
+      "images": [
+        "https://drive.google.com/thumbnail?id=1wZnK7KF094zuAECTKwJfqn-aOyJwwTbB&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1HnxDroO4caZWcaTQZ7LuJSDWH4QoQ-pc&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1_ZG0PxpIhQS_2KWasUxNw55xNWyva0ub&sz=w1000"
+      ],
+      "categories": [
+        "Home Decor"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260626-1547",
+      "title": "RCA Indoor Flat HDTV Antenna",
+      "description": "This RCA amplified indoor flat HDTV antenna features a multi-directional design and supports 4K and 8K ultra HD. It has a range of 55 miles. It's a great way to access free HDTV without the hassle of cable. Perfect for enhancing your TV viewing experience.",
+      "price": 25,
+      "stock": 1,
+      "image": "https://drive.google.com/thumbnail?id=1v4D-oXGxyEEdBXuSl-yx8BAaEFBa1Wnq&sz=w1000",
+      "images": [
+        "https://drive.google.com/thumbnail?id=1v4D-oXGxyEEdBXuSl-yx8BAaEFBa1Wnq&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1zsFFoR3K7eFUETTPx17EeeMGHkHQblLl&sz=w1000"
+      ],
+      "categories": [
+        "Electronics"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260626-1548",
+      "title": "Maisto Tech RC Red Bull Racing Car 1/24 Scale",
+      "description": "This is a Maisto Tech RC car featuring the Red Bull Racing design, scaled at 1/24. It operates on a 2.4 GHz frequency and comes with a vehicle, transmitter, and USB cable. Ideal for racing enthusiasts and collectors alike, this set promises high-speed fun. Don't miss the chance to own this exciting RC vehicle!",
+      "price": 30,
+      "stock": 1,
+      "image": "https://drive.google.com/thumbnail?id=1GiA2qQWUCSP3WCVqceMf5pnYZ6d05AVg&sz=w1000",
+      "images": [
+        "https://drive.google.com/thumbnail?id=1GiA2qQWUCSP3WCVqceMf5pnYZ6d05AVg&sz=w1000",
+        "https://drive.google.com/thumbnail?id=1yrp-DCvLN-wrWX7A5qDZmaI5R3Qxvjon&sz=w1000"
+      ],
+      "categories": [
+        "Toys & Hobbies"
+      ],
+      "active": true
     }
   ]
 }
