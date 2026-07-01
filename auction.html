@@ -153,6 +153,30 @@
     .section-header h2 { margin: 0; font-size: 1.1rem; letter-spacing: 0.05em; text-transform: uppercase; }
     .section-header p { margin: 0.25rem 0 0; max-width: 44rem; color: var(--muted); font-size: 0.85rem; }
 
+    .pickup-policy {
+      max-width: 1100px;
+      margin: 0 auto 0.8rem;
+      padding: 0.75rem 0.85rem;
+      border: 1px solid rgba(220, 38, 38, 0.22);
+      border-left: 4px solid var(--primary);
+      border-radius: 14px;
+      background: rgba(254, 242, 242, 0.94);
+      color: var(--text);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+    }
+    [data-theme="dark"] .pickup-policy {
+      background: rgba(127, 29, 29, 0.22);
+      border-color: rgba(248, 113, 113, 0.32);
+    }
+    .pickup-policy strong {
+      display: block;
+      margin-bottom: 0.2rem;
+      font-size: 0.82rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+    .pickup-policy p { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.4; }
+
     .auction-controls {
       max-width: 1100px;
       margin: 0 auto 0.8rem;
@@ -396,6 +420,11 @@
         <h2>Current Auction Items</h2>
         <p>Enter your real contact info with every bid. We use it to confirm winners and protect the auction from no-pay bidders.</p>
       </header>
+
+      <div class="pickup-policy">
+        <strong>Pickup Policy</strong>
+        <p>Auction items must be picked up, or pickup arrangements must be made, no later than the scheduled pickup date and time. Paid items must be picked up or have pickup arrangements made within 7 days. After 7 days with no pickup or arrangement, the items are forfeited and become property of FlashBidz.</p>
+      </div>
 
       <div class="auction-controls">
         <div class="field">
@@ -703,7 +732,7 @@
               <div class="field"><label>Phone or Email</label><input name="contact" type="text" value="${escapeHtml(bidder.contact)}" autocomplete="email" ${ended ? "disabled" : ""} /></div>
               <div class="field"><label>Facebook Name</label><input name="facebook" type="text" value="${escapeHtml(bidder.facebook)}" ${ended ? "disabled" : ""} /></div>
             </div>
-            <p class="bid-note">Minimum next bid: $${minBid}. Bids in the final 2 minutes extend the clock. Bidders with 2 unpaid wins must verify before bidding.</p>
+            <p class="bid-note">Minimum next bid: $${minBid}. Bids in the final 2 minutes extend the clock. By bidding, you agree to the pickup policy. Bidders with 2 unpaid wins must verify before bidding.</p>
             <button class="btn btn-green" type="submit" ${ended ? "disabled" : ""}>Place Bid</button>
           </form>
         </div>
