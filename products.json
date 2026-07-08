@@ -346,10 +346,10 @@
       "description": "",
       "price": 8,
       "stock": 1,
-      "image": "img/FBZ-20260708-090636-IMG_0743.jpg",
+      "image": "img/FBZ-20260708-090634-IMG_0742.jpg",
       "images": [
-        "img/FBZ-20260708-090636-IMG_0743.jpg",
-        "img/FBZ-20260708-090634-IMG_0742.jpg"
+        "img/FBZ-20260708-090634-IMG_0742.jpg",
+        "img/FBZ-20260708-090636-IMG_0743.jpg"
       ],
       "categories": [],
       "active": true
@@ -454,10 +454,10 @@
       "description": "",
       "price": 12,
       "stock": 1,
-      "image": "img/FBZ-20260707-213258-IMG_0718.jpg",
+      "image": "img/FBZ-20260707-213256-IMG_0716.jpg",
       "images": [
-        "img/FBZ-20260707-213258-IMG_0718.jpg",
         "img/FBZ-20260707-213256-IMG_0716.jpg",
+        "img/FBZ-20260707-213258-IMG_0718.jpg",
         "img/FBZ-20260707-213254-IMG_0717.jpg",
         "img/FBZ-20260707-213252-IMG_0719.jpg"
       ],
