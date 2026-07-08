@@ -2044,17 +2044,7 @@ async function loadProducts() {
 
     localStorage.setItem(CACHE_KEY, JSON.stringify(data.products));
 
-    allProducts = data.products.map((p, idx) => ({
-      ...p,
-      __index: idx,
-      title: String(p.title || ""),
-      description: String(p.description || ""),
-      sku: String(p.sku || ""),
-      price: Number(p.price || 0),
-      stock: Number(p.stock ?? 0),
-      categories: Array.isArray(p.categories) ? p.categories : [],
-      images: Array.isArray(p.images) ? p.images : (p.image ? [p.image] : [])
-    }));
+    allProducts = data.products.map(cleanProductForDisplay);
 
     buildCategoryOptions(allProducts);
     buildCategoryPills(allProducts);
@@ -2067,17 +2057,7 @@ async function loadProducts() {
       const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "[]");
 
       if (Array.isArray(cached) && cached.length) {
-        allProducts = cached.map((p, idx) => ({
-          ...p,
-          __index: idx,
-          title: String(p.title || ""),
-          description: String(p.description || ""),
-          sku: String(p.sku || ""),
-          price: Number(p.price || 0),
-          stock: Number(p.stock ?? 0),
-          categories: Array.isArray(p.categories) ? p.categories : [],
-          images: Array.isArray(p.images) ? p.images : (p.image ? [p.image] : [])
-        }));
+        allProducts = cached.map(cleanProductForDisplay);
 
         buildCategoryOptions(allProducts);
         buildCategoryPills(allProducts);
@@ -2094,6 +2074,31 @@ async function loadProducts() {
     showStoreWarning("Store inventory is temporarily unavailable. Please refresh in a moment.");
   }
 }
+
+  function cleanProductForDisplay(p, idx) {
+  return {
+    ...p,
+    __index: idx,
+    title: cleanDisplayText(p.title || ""),
+    description: cleanDisplayText(p.description || ""),
+    sku: String(p.sku || ""),
+    price: Number(p.price || 0),
+    stock: Number(p.stock ?? 0),
+    categories: Array.isArray(p.categories) ? p.categories.map(cleanDisplayText) : [],
+    images: Array.isArray(p.images) ? p.images : (p.image ? [p.image] : [])
+  };
+}
+function cleanDisplayText(value) {
+  var text = String(value || "");
+  text = text.replace(/\uFFFD/g, "?");
+  text = text.replace(/([A-Za-z])\?([A-Za-z])/g, "$1'$2");
+  text = text.replace(/(\d)\?\s*x\s*(\d)/gi, '$1" x $2');
+  text = text.replace(/(\d)\?\b/g, '$1"');
+  text = text.replace(/\s+\?\s+/g, " - ");
+  text = text.replace(/\s{2,}/g, " ");
+  return text.trim();
+}
+  
   function showStoreWarning(message) {
   let bar = document.getElementById("store-warning");
 
