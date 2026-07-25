@@ -729,9 +729,10 @@
               <div class="field"><label>Name</label><input name="name" type="text" value="${escapeHtml(bidder.name)}" autocomplete="name" ${ended ? "disabled" : ""} /></div>
             </div>
             <div class="bid-form-grid">
-              <div class="field"><label>Phone or Email</label><input name="contact" type="text" value="${escapeHtml(bidder.contact)}" autocomplete="email" ${ended ? "disabled" : ""} /></div>
-              <div class="field"><label>Facebook Name</label><input name="facebook" type="text" value="${escapeHtml(bidder.facebook)}" ${ended ? "disabled" : ""} /></div>
+              <div class="field"><label>Email</label><input name="email" type="email" value="${escapeHtml(bidder.email || bidder.contact || "")}" autocomplete="email" required ${ended ? "disabled" : ""} /></div>
+              <div class="field"><label>Phone</label><input name="phone" type="tel" value="${escapeHtml(bidder.phone || "")}" autocomplete="tel" ${ended ? "disabled" : ""} /></div
             </div>
+            <div class="field"><label>Facebook Name</label><input name="facebook" type="text" value="${escapeHtml(bidder.facebook)}" ${ended ? "disabled" : ""} /></div>
             <p class="bid-note">Minimum next bid: $${minBid}. Bids in the final 2 minutes extend the clock. By bidding, you agree to the pickup policy. Bidders with 2 unpaid wins must verify before bidding.</p>
             <button class="btn btn-green" type="submit" ${ended ? "disabled" : ""}>Place Bid</button>
           </form>
@@ -814,11 +815,17 @@
       const formData = new FormData(form);
       const amount = Number(formData.get("amount") || 0);
       const name = String(formData.get("name") || "").trim();
-      const contact = String(formData.get("contact") || "").trim();
+      const email = String(formData.get("email") || "").trim();
+      const phone = String(formData.get("phone") || "").trim();
+      const facebook = String(formData.get("facebook") || "").trim();
       const facebook = String(formData.get("facebook") || "").trim();
 
-      if (!name || !contact) {
-        alert("Please enter your name and phone or email.");
+      if (!name || !email) {
+        alert("Please enter your name and email.");
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert("Please enter a valid email address.");
         return;
       }
       if (!(amount >= minBid)) {
@@ -826,7 +833,7 @@
         return;
       }
 
-      const bidder = { ...readBidderInfo(), name, contact, facebook };
+      const bidder = { ...readBidderInfo(), name, email, contact: email, phone, facebook };
       saveBidderInfo(bidder);
 
       button.disabled = true;
@@ -837,7 +844,7 @@
         sku: item.sku,
         title: item.title,
         amount,
-        bidder: { name, contact, facebook }
+        bidder: { name, email, contact: email, phone, facebook }
       };
 
       try {
@@ -879,16 +886,17 @@
 
     async function startVerification(bidder) {
       const name = String(bidder.name || "").trim();
-      const contact = String(bidder.contact || "").trim();
+      const email = String(bidder.email || bidder.contact || "").trim();
+      const phone = String(bidder.phone || "").trim();
       const facebook = String(bidder.facebook || "").trim();
-      if (!name || !contact) {
-        alert("Enter your name and phone or email on any bid form first, then click Verify Bidder.");
+      if (!name || !email) {
+        alert("Enter your name and email on any bid form first, then click Verify Bidder.");
         return;
       }
 
-      saveBidderInfo({ ...bidder, name, contact, facebook });
+      saveBidderInfo({ ...bidder, name, email, contact: email, phone, facebook })
       try {
-        const payload = { bidder: { name, contact, facebook } };
+        const payload = { bidder: { name, email, contact: email, phone, facebook } };
         const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=create_bidder_verification_checkout&payload=" + encodeURIComponent(JSON.stringify(payload)), 30000);
         if (!data || !data.success) throw new Error(data?.error || "Verification could not be started.");
         if (data.already_verified) {
