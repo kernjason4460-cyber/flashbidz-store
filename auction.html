@@ -916,10 +916,13 @@
         const saved = JSON.parse(localStorage.getItem(BIDDER_STORAGE_KEY) || "{}");
         return {
           name: saved.name || "",
-          contact: saved.contact || "",
-          facebook: saved.facebook || "",
-          verified: !!saved.verified
-        };
+          email: saved.email ||
+        saved.contact || "",
+         contact: saved.email || saved.contact || "",
+  phone: saved.phone || "",
+  facebook: saved.facebook || "",
+  verified: !!saved.verified
+
       } catch (_) {
         return { name: "", contact: "", facebook: "", verified: false };
       }
