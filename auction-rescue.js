@@ -296,7 +296,9 @@
     if (!src) return "img/placeholder.png";
     const driveId = googleDriveFileId(src);
     if (driveId) return "https://lh3.googleusercontent.com/d/" + encodeURIComponent(driveId) + "=w1200";
-    if (src.startsWith("http")) return src;
+    if (src.startsWith("//")) return "https:" + src;
+    if (/^http:\/\//i.test(src)) return src.replace(/^http:\/\//i, "https://");
+    if (/^https:\/\//i.test(src)) return src;
     if (src.startsWith("img/")) return src;
     return "img/" + src.replace(/^\/+/, "");
   }
