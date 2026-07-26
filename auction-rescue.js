@@ -57,21 +57,24 @@
     try {
       const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=auction_items", 30000);
       if (!data || !data.success || !Array.isArray(data.items)) throw new Error(data?.error || "Auction feed unavailable");
-      allAuctions = data.items.map((item, index) => ({
-        ...item,
-        __index: index,
-        item_id: String(item.item_id || item.sku || ""),
-        sku: String(item.sku || item.item_id || ""),
-        title: String(item.title || ""),
-        description: String(item.description || ""),
-        image: normalizeImageUrl(item.image || (Array.isArray(item.images) ? item.images[0] : "")),
-        images: Array.isArray(item.images) ? item.images.map(normalizeImageUrl) : [],
-        current_bid: Number(item.current_bid || item.starting_bid || 0),
-        next_bid: Number(item.next_bid || item.current_bid || item.starting_bid || 0),
-        starting_bid: Number(item.starting_bid || 0),
-        end_time: item.end_time || item.auction_end || "",
-        status: String(item.status || "live").toLowerCase()
-      }));
+      allAuctions = data.items.map((item, index) => {
+        const images = collectItemImages(item);
+        return {
+          ...item,
+          __index: index,
+          item_id: String(item.item_id || item.sku || ""),
+          sku: String(item.sku || item.item_id || ""),
+          title: String(item.title || ""),
+          description: String(item.description || ""),
+          image: images[0] || "img/placeholder.png",
+          images: images.length ? images : ["img/placeholder.png"],
+          current_bid: Number(item.current_bid || item.starting_bid || 0),
+          next_bid: Number(item.next_bid || item.current_bid || item.starting_bid || 0),
+          starting_bid: Number(item.starting_bid || 0),
+          end_time: item.end_time || item.auction_end || "",
+          status: String(item.status || "live").toLowerCase()
+        };
+      });
       const updated = byId("last-updated");
       if (updated) updated.textContent = "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
       applyFilters();
@@ -126,11 +129,11 @@
     const badgeText = ended ? "Ended" : badgeClass === "soon" ? "Ending Soon" : "Live";
     const minBid = Math.max(Number(item.next_bid || 0), Number(item.current_bid || 0) + 1, Number(item.starting_bid || 1));
     const bidder = readBidderInfo();
-    const galleryImages = uniqueImages([item.image, ...(Array.isArray(item.images) ? item.images : [])]);
+    const galleryImages = item.images || [];
     card.innerHTML = `
       <button class="auction-image" type="button" aria-label="View photos for ${escapeHtml(item.title || "auction item")}">
         <div class="badge-row"><span class="badge ${badgeClass}">${badgeText}</span>${item.sku ? `<span class="badge">${escapeHtml(item.sku)}</span>` : ""}</div>
-        <img src="${escapeHtml(item.image || "img/placeholder.png")}" alt="${escapeHtml(item.title)}" />
+        <img alt="${escapeHtml(item.title)}" />
       </button>
       <div class="auction-body">
         <h3 class="auction-title">${escapeHtml(item.title || "Auction item")}</h3>
@@ -153,6 +156,8 @@
           <button class="btn btn-green" type="submit" ${ended ? "disabled" : ""}>Place Bid</button>
         </form>
       </div>`;
+    const img = card.querySelector(".auction-image img");
+    setImageWithFallbacks(img, galleryImages, item.title);
     card.querySelector("form")?.addEventListener("submit", event => submitBid(event, item, minBid));
     card.querySelector(".auction-image")?.addEventListener("click", () => openPhotoViewer(item.title || "Auction item", galleryImages));
     return card;
@@ -211,6 +216,28 @@
     }
   }
 
+  function collectItemImages(item) {
+    const raw = [];
+    [item.auction_photo_url, item.photo_url, item.image_url, item.image, item.images].forEach(value => {
+      if (Array.isArray(value)) value.forEach(v => raw.push(v));
+      else String(value || "").split(/[\n,|]+/).forEach(v => raw.push(v));
+    });
+    return uniqueImages(raw);
+  }
+
+  function setImageWithFallbacks(img, images, title) {
+    if (!img) return;
+    const list = uniqueImages(images);
+    let index = 0;
+    img.alt = title || "Auction item";
+    img.onerror = () => {
+      index += 1;
+      if (index < list.length) img.src = list[index];
+      else img.src = "img/placeholder.png";
+    };
+    img.src = list[0] || "img/placeholder.png";
+  }
+
   function readBidderInfo() {
     try {
       const saved = JSON.parse(localStorage.getItem(BIDDER_STORAGE_KEY) || "{}");
@@ -233,8 +260,7 @@
     if (!viewer || !image) return;
     let index = 0;
     function show() {
-      image.src = clean[index] || "img/placeholder.png";
-      image.alt = title;
+      setImageWithFallbacks(image, clean.slice(index).concat(clean.slice(0, index)), title);
       if (titleEl) titleEl.textContent = title;
       if (count) count.textContent = clean.length > 1 ? (index + 1) + " of " + clean.length : "1 photo";
     }
@@ -254,14 +280,35 @@
 
   function uniqueImages(images) {
     const seen = new Set();
-    return images.map(normalizeImageUrl).filter(src => src && src !== "img/placeholder.png" && !seen.has(src) && seen.add(src));
+    return images
+      .map(normalizeImageUrl)
+      .filter(src => src && src !== "img/placeholder.png")
+      .filter(src => {
+        const key = src.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
   }
 
   function normalizeImageUrl(src) {
-    src = String(src || "").trim();
+    src = String(src || "").trim().replace(/^"|"$/g, "").replace(/^'|'$/g, "").replace(/&amp;/g, "&");
     if (!src) return "img/placeholder.png";
-    if (src.startsWith("http") || src.startsWith("img/")) return src;
+    const driveId = googleDriveFileId(src);
+    if (driveId) return "https://lh3.googleusercontent.com/d/" + encodeURIComponent(driveId) + "=w1200";
+    if (src.startsWith("http")) return src;
+    if (src.startsWith("img/")) return src;
     return "img/" + src.replace(/^\/+/, "");
+  }
+
+  function googleDriveFileId(url) {
+    const text = String(url || "");
+    let match = text.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
+    if (match) return match[1];
+    match = text.match(/[?&]id=([a-zA-Z0-9_-]{20,})/);
+    if (match) return match[1];
+    match = text.match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]{20,})/);
+    return match ? match[1] : "";
   }
 
   function parseEndTime(value) {
