@@ -1735,9 +1735,9 @@
             <div>
               <label>Flat-rate shipping</label>
               <div class="shipping-rate-options">
-                <button type="button" class="shipping-rate-btn" data-amount="8">$8 (small)</button>
-                <button type="button" class="shipping-rate-btn" data-amount="12">$12 (medium)</button>
-                <button type="button" class="shipping-rate-btn" data-amount="18">$18 (large)</button>
+                <button type="button" class="shipping-rate-btn" data-amount="8" data-tier="small">$8 (small)</button>
+                <button type="button" class="shipping-rate-btn" data-amount="12" data-tier="medium">$12 (medium)</button>
+                <button type="button" class="shipping-rate-btn" data-amount="18" data-tier="large">$18 (large)</button>
               </div>
             </div>
           </div>
@@ -1960,8 +1960,8 @@
   const CART_STORAGE_KEY = "flashbidz_cart_v3";
   const THEME_STORAGE_KEY = "flashbidz_theme";
   const TAX_RATE = 0.06;
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKOemGRRpUN4PYzgiIKCdoVPvKZrA20tGn0uFEa43pQ6UYd4UidTSyCRlv0yU9lcm6/exec";
-  window.APPS_SCRIPT_URL = APPS_SCRIPT_URL;
+  const PUBLIC_CHECKOUT_API_URL = "https://script.google.com/macros/s/AKfycbyDY5vZCUfbsEj4lmZesROd-aOgaaeaKyMYtJ_mJB_LhodkMngaXJSg_YZ6apBgfrS3/exec";
+  const ADMIN_SITE_VISIT_URL = "https://script.google.com/macros/s/AKfycbxKOemGRRpUN4PYzgiIKCdoVPvKZrA20tGn0uFEa43pQ6UYd4UidTSyCRlv0yU9lcm6/exec";
   window.setPayButtonsEnabled = window.setPayButtonsEnabled || function(){};
 
   let allProducts = [];
@@ -2789,7 +2789,7 @@ async function handleCheckout() {
     el.fulfillmentShipping && el.fulfillmentShipping.checked ? "shipping" : "pickup";
 
   let shipping = null;
-  let shippingCost = 0;
+  let shippingTier = "";
 
   if (fulfillment === "shipping") {
     const address1 = (el.shippingAddress1?.value || "").trim();
@@ -2810,7 +2810,11 @@ async function handleCheckout() {
       zip
     };
 
-    shippingCost = Number(shippingAmount || 0);
+    shippingTier = document.querySelector(".shipping-rate-btn.active")?.dataset.tier || "";
+    if (!shippingTier) {
+      alert("Please choose a shipping rate.");
+      return;
+    }
   }
 
   checkoutSubmitted = true;
@@ -2823,30 +2827,12 @@ async function handleCheckout() {
 
   const cartSnapshot = cart.map((item) => ({ ...item }));
 
-  const subtotal = cartSnapshot.reduce(
-    (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
-    0
-  );
-
-  const tax = +(subtotal * TAX_RATE).toFixed(2);
-  const grandTotal = subtotal + tax + (fulfillment === "shipping" ? shippingCost : 0);
-
-  lastOrderId = getOrderId_();
-
   const payload = {
-    action: "create_checkout_redirect",
-    channel: "store",
-    orderId: lastOrderId,
     buyer: { name, contact },
     fulfillment,
+    shipping_tier: shippingTier,
     shipping,
     notes,
-    totals: {
-      subtotal,
-      tax,
-      shipping: fulfillment === "shipping" ? shippingCost : 0,
-      grand_total: grandTotal
-    },
     items: cartSnapshot.map((item) => ({
       sku: item.sku,
       qty: item.quantity
@@ -2855,7 +2841,7 @@ async function handleCheckout() {
 
   try {
     const url =
-      window.APPS_SCRIPT_URL +
+      PUBLIC_CHECKOUT_API_URL +
       "?action=create_checkout" +
       "&payload=" + encodeURIComponent(JSON.stringify(payload)) +
       "&t=" + Date.now();
@@ -2869,28 +2855,14 @@ async function handleCheckout() {
     window.location.href = data.checkout_url;
     return;
   } catch (err) {
-    console.warn("Direct checkout failed, using fallback page:", err);
-
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = window.APPS_SCRIPT_URL;
-    form.target = "_top";
-    form.style.display = "none";
-
-    const actionInput = document.createElement("input");
-    actionInput.type = "hidden";
-    actionInput.name = "action";
-    actionInput.value = "create_checkout_redirect";
-    form.appendChild(actionInput);
-
-    const payloadInput = document.createElement("input");
-    payloadInput.type = "hidden";
-    payloadInput.name = "payload";
-    payloadInput.value = JSON.stringify(payload);
-    form.appendChild(payloadInput);
-
-    document.body.appendChild(form);
-    form.submit();
+    console.error("Checkout creation failed:", err);
+    checkoutSubmitted = false;
+    if (el.checkoutBtn) {
+      el.checkoutBtn.disabled = false;
+      el.checkoutBtn.style.opacity = "";
+      el.checkoutBtn.textContent = "Submit Cart";
+    }
+    alert("Could not open checkout. Your cart has been kept. Please try again.");
   }
 }
 
@@ -2912,7 +2884,7 @@ async function finalizeIfReturnedFromStripe() {
 
   try {
     const url =
-      window.APPS_SCRIPT_URL +
+      PUBLIC_CHECKOUT_API_URL +
       "?action=finalize_checkout" +
       "&session_id=" + encodeURIComponent(sessionId) +
       "&t=" + Date.now();
@@ -3080,9 +3052,7 @@ function playAddToCartSound() {
 <script>
   function fbzTrackSiteVisit(pageName) {
     try {
-      var appsScriptUrl = typeof APPS_SCRIPT_URL !== "undefined"
-        ? APPS_SCRIPT_URL
-        : "https://script.google.com/macros/s/AKfycbxKOemGRRpUN4PYzgiIKCdoVPvKZrA20tGn0uFEa43pQ6UYd4UidTSyCRlv0yU9lcm6/exec";
+      var appsScriptUrl = ADMIN_SITE_VISIT_URL;
       var key = "flashbidz_visitor_id";
       var visitorId = localStorage.getItem(key);
       if (!visitorId) {
