@@ -30,20 +30,6 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260924-1273",
-      "title": "Room Essentials Teddy Body Pillow Cover Brand New",
-      "description": "",
-      "price": 6,
-      "stock": 1,
-      "image": "img/FBZ-20260610-174241-IMG_9880.jpg",
-      "images": [
-        "img/FBZ-20260610-174241-IMG_9880.jpg",
-        "img/FBZ-20260610-174239-IMG_9881.jpg"
-      ],
-      "categories": [],
-      "active": true
-    },
-    {
       "sku": "FBZ-20260924-1289",
       "title": "Philips Air Fryer",
       "description": "",
@@ -1119,6 +1105,23 @@
       ],
       "categories": [
         "Toys & Games"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260924-2159",
+      "title": "Black Bubble Lidded Storage Box",
+      "description": "This black bubble lidded box features a sleek design, ideal for storing small items. It stands four stacked sections high and is a great addition to your home organization.",
+      "price": 5,
+      "stock": 1,
+      "image": "img/FBZ-20260615-191449-IMG_0223.jpg",
+      "images": [
+        "img/FBZ-20260615-191449-IMG_0223.jpg",
+        "img/FBZ-20260615-191447-IMG_0222.jpg",
+        "img/FBZ-20260615-191445-IMG_0224.jpg"
+      ],
+      "categories": [
+        "Home Decor"
       ],
       "active": true
     }
