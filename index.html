@@ -2788,6 +2788,38 @@ function updateCartSummary() {
       updateCartSummary();
     }
 
+function customerSafeCheckoutErrorMessage(error) {
+  const message = String(error?.message || error || "").toLowerCase();
+
+  if (
+    message.includes("sku not found") ||
+    message.includes("not available") ||
+    message.includes("unavailable") ||
+    message.includes("already sold") ||
+    message.includes("inactive")
+  ) {
+    return "This item is no longer available.";
+  }
+
+  if (
+    message.includes("invalid store price") ||
+    message.includes("store price") ||
+    message.includes("invalid price")
+  ) {
+    return "This item doesn't have a valid store price. Please contact FlashBidz.";
+  }
+
+  if (
+    message.includes("insufficient quantity") ||
+    message.includes("requested quantity") ||
+    message.includes("quantity is no longer")
+  ) {
+    return "The requested quantity is no longer available.";
+  }
+
+  return "Could not open checkout. Your cart has been kept. Please try again.";
+}
+
 async function handleCheckout() {
   if (!cart.length) {
     alert("Your cart is empty.");
@@ -2882,7 +2914,7 @@ async function handleCheckout() {
       el.checkoutBtn.style.opacity = "";
       el.checkoutBtn.textContent = "Submit Cart";
     }
-    alert("Could not open checkout. Your cart has been kept. Please try again.");
+    alert(customerSafeCheckoutErrorMessage(err));
   }
 }
 
