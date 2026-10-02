@@ -44,20 +44,6 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260924-1305",
-      "title": "Future Collective Women?s Button Front Shirt Size 1X",
-      "description": "",
-      "price": 7,
-      "stock": 1,
-      "image": "img/FBZ-20260610-140251-IMG_9876.jpg",
-      "images": [
-        "img/FBZ-20260610-140251-IMG_9876.jpg",
-        "img/FBZ-20260610-140248-IMG_9875.jpg"
-      ],
-      "categories": [],
-      "active": true
-    },
-    {
       "sku": "FBZ-20260924-1327",
       "title": "Framed Dog Wall Art Set",
       "description": "",
@@ -1122,6 +1108,22 @@
       ],
       "categories": [
         "Home Decor"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260827-2160",
+      "title": "Mr. Terrific Stretch Action Figure",
+      "description": "Up for auction is a Mr. Terrific stretch action figure featuring black and white attire with red accents. Includes original packaging with visible wear, perfect for collectors or playtime.",
+      "price": 5,
+      "stock": 1,
+      "image": "img/FBZ-20260615-191406-IMG_0226.jpg",
+      "images": [
+        "img/FBZ-20260615-191406-IMG_0226.jpg",
+        "img/FBZ-20260615-191405-IMG_0225.jpg"
+      ],
+      "categories": [
+        "Toys & Games"
       ],
       "active": true
     }
