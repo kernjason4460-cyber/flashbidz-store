@@ -59,20 +59,6 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260924-1332",
-      "title": "Cat & Jack Glitter Jelly Sandals - Size 4",
-      "description": "",
-      "price": 7,
-      "stock": 1,
-      "image": "img/FBZ-20260610-112006-IMG_9859.jpg",
-      "images": [
-        "img/FBZ-20260610-112006-IMG_9859.jpg",
-        "img/FBZ-20260610-112004-IMG_9858.jpg"
-      ],
-      "categories": [],
-      "active": true
-    },
-    {
       "sku": "FBZ-20260924-1382",
       "title": "ZHU ZHU AQUARIUM SUBMARINE SET",
       "description": "",
@@ -1124,6 +1110,23 @@
       ],
       "categories": [
         "Toys & Games"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260827-2162",
+      "title": "Ceramic Shar Pei Figurine",
+      "description": "This adorable ceramic figurine features a sitting Shar Pei with detailed wrinkles and a light tan finish. Perfect for dog lovers, it measures approximately 6 inches in length.",
+      "price": 10,
+      "stock": 1,
+      "image": "img/FBZ-20260615-191320-IMG_0233.jpg",
+      "images": [
+        "img/FBZ-20260615-191320-IMG_0233.jpg",
+        "img/FBZ-20260615-191324-IMG_0234.jpg",
+        "img/FBZ-20260615-191322-IMG_0232.jpg"
+      ],
+      "categories": [
+        "Home Decor"
       ],
       "active": true
     }
