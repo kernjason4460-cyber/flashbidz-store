@@ -1994,6 +1994,7 @@
     loadCartFromStorage();
     setCurrentYear();
     handleFulfillmentChange();
+    cancelIfReturnedFromStripe();
     finalizeIfReturnedFromStripe();
   });
 
@@ -2791,6 +2792,10 @@ function updateCartSummary() {
 function customerSafeCheckoutErrorMessage(error) {
   const message = String(error?.message || error || "").toLowerCase();
 
+  if (message.includes("temporarily reserved")) {
+    return "Another customer is checking out with this item. Please try again shortly.";
+  }
+
   if (
     message.includes("sku not found") ||
     message.includes("not available") ||
@@ -2923,6 +2928,39 @@ async function handleCheckout() {
       saveCartToStorage();
       renderCart();
     }
+
+async function cancelIfReturnedFromStripe() {
+  const params = new URLSearchParams(window.location.search);
+  const canceled = params.get("canceled");
+  const orderId = params.get("order_id") || "";
+  const reservationToken = params.get("reservation_token") || "";
+
+  if (!canceled || !orderId || !reservationToken) return;
+
+  try {
+    const url =
+      PUBLIC_CHECKOUT_API_URL +
+      "?action=cancel_checkout" +
+      "&order_id=" + encodeURIComponent(orderId) +
+      "&reservation_token=" + encodeURIComponent(reservationToken) +
+      "&t=" + Date.now();
+
+    const data = await fetchJsonp(url, 30000);
+    if (!data || !data.success) {
+      throw new Error((data && data.error) ? data.error : "Cancellation not confirmed");
+    }
+
+    const cleanUrl = new URL(window.location.href);
+    ["canceled", "channel", "order_id", "reservation_token"].forEach((name) => {
+      cleanUrl.searchParams.delete(name);
+    });
+    history.replaceState({}, document.title, cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+    alert("Checkout canceled. Your cart is still here.");
+  } catch (err) {
+    console.error("Checkout cancellation confirmation failed:", err);
+    alert("We couldn't confirm the cancellation yet. Your cart is still here.");
+  }
+}
 
 async function finalizeIfReturnedFromStripe() {
   const params = new URLSearchParams(window.location.search);
