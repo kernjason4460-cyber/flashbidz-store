@@ -1960,7 +1960,7 @@
   const CART_STORAGE_KEY = "flashbidz_cart_v3";
   const THEME_STORAGE_KEY = "flashbidz_theme";
   const TAX_RATE = 0.06;
-  const PUBLIC_CHECKOUT_API_URL = "https://script.google.com/macros/s/AKfycbyDY5vZCUfbsEj4lmZesROd-aOgaaeaKyMYtJ_mJB_LhodkMngaXJSg_YZ6apBgfrS3/exec";
+  const CHECKOUT_API_BASE = "/api/checkout";
   const ADMIN_SITE_VISIT_URL = "https://script.google.com/macros/s/AKfycbxKOemGRRpUN4PYzgiIKCdoVPvKZrA20tGn0uFEa43pQ6UYd4UidTSyCRlv0yU9lcm6/exec";
   window.setPayButtonsEnabled = window.setPayButtonsEnabled || function(){};
 
@@ -2825,6 +2825,31 @@ function customerSafeCheckoutErrorMessage(error) {
   return "Could not open checkout. Your cart has been kept. Please try again.";
 }
 
+async function checkoutApiPost(action, payload) {
+  const response = await fetch(`${CHECKOUT_API_BASE}/${action}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    cache: "no-store"
+  });
+  const data = await response.json().catch(() => null);
+  if (!data) throw new Error("Checkout service unavailable");
+  return data;
+}
+
+async function checkoutApiPostWithRetry(action, payload, attempts = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await checkoutApiPost(action, payload);
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, 1200));
+    }
+  }
+  throw lastError;
+}
+
 async function handleCheckout() {
   if (!cart.length) {
     alert("Your cart is empty.");
@@ -2897,13 +2922,7 @@ async function handleCheckout() {
   };
 
   try {
-    const url =
-      PUBLIC_CHECKOUT_API_URL +
-      "?action=create_checkout" +
-      "&payload=" + encodeURIComponent(JSON.stringify(payload)) +
-      "&t=" + Date.now();
-
-    const data = await fetchJsonp(url, 30000);
+    const data = await checkoutApiPost("create", payload);
 
     if (!data || !data.success || !data.checkout_url) {
       throw new Error(data?.error || "Checkout failed");
@@ -2938,14 +2957,10 @@ async function cancelIfReturnedFromStripe() {
   if (!canceled || !orderId || !reservationToken) return;
 
   try {
-    const url =
-      PUBLIC_CHECKOUT_API_URL +
-      "?action=cancel_checkout" +
-      "&order_id=" + encodeURIComponent(orderId) +
-      "&reservation_token=" + encodeURIComponent(reservationToken) +
-      "&t=" + Date.now();
-
-    const data = await fetchJsonp(url, 30000);
+    const data = await checkoutApiPost("cancel", {
+      order_id: orderId,
+      reservation_token: reservationToken
+    });
     if (!data || !data.success) {
       throw new Error((data && data.error) ? data.error : "Cancellation not confirmed");
     }
@@ -2973,19 +2988,8 @@ async function finalizeIfReturnedFromStripe() {
   if (!success || !sessionId) return;
 
   try {
-    const url =
-      PUBLIC_CHECKOUT_API_URL +
-      "?action=finalize_checkout" +
-      "&session_id=" + encodeURIComponent(sessionId) +
-      "&t=" + Date.now();
-
     // Finalization is server-idempotent, so bounded transport retries are safe.
-    // Each attempt receives a fresh JSONP callback name and cache-buster.
-    const data = await fetchJsonpWithRetry(url, {
-      attempts: 3,
-      timeoutMs: 30000,
-      retryDelayMs: 1200
-    });
+    const data = await checkoutApiPostWithRetry("finalize", { session_id: sessionId }, 3);
 
     if (!data || !data.success) {
       throw new Error((data && data.error) ? data.error : "Finalize failed");
