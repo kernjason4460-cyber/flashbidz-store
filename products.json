@@ -59,20 +59,6 @@
       "active": true
     },
     {
-      "sku": "FBZ-20260924-1382",
-      "title": "ZHU ZHU AQUARIUM SUBMARINE SET",
-      "description": "",
-      "price": 5,
-      "stock": 1,
-      "image": "img/FBZ-20260623-184514-IMG_0555.jpg",
-      "images": [
-        "img/FBZ-20260623-184514-IMG_0555.jpg",
-        "img/FBZ-20260623-184512-IMG_0556.jpg"
-      ],
-      "categories": [],
-      "active": true
-    },
-    {
       "sku": "FBZ-20260924-1384",
       "title": "Set of 6 Milasao Whole Wheat Plates",
       "description": "",
@@ -1127,6 +1113,23 @@
       ],
       "categories": [
         "Home Decor"
+      ],
+      "active": true
+    },
+    {
+      "sku": "FBZ-20260827-2170",
+      "title": "Ceramic Serving Bowl",
+      "description": "",
+      "price": 6,
+      "stock": 1,
+      "image": "img/FBZ-20260615-191238-IMG_0253.jpg",
+      "images": [
+        "img/FBZ-20260615-191238-IMG_0253.jpg",
+        "img/FBZ-20260615-191241-IMG_0254.jpg",
+        "img/FBZ-20260615-191240-IMG_0255.jpg"
+      ],
+      "categories": [
+        "Home & Kitchen"
       ],
       "active": true
     }
