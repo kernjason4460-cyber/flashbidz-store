@@ -233,47 +233,15 @@
   </div>
 </div>
 
+<script src="/pos-phase4-transport.js"></script>
 <script>
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhNTOWXWvmC0ECjb3t5yKDExTQoJ1GPbe0Yxz1cOxj47jYpzaF1726mU1jUZbtE6uj/exec";
   const TAX_RATE = 0.06;
   const POS_CART_KEY = "fbz_pos_cart";
+  const POS_PENDING_RECEIPT_KEY = "fbz_pos_pending_receipt";
 
   let productsByKey = {};
   let productsList = [];
   let cart = [];
-
-  function fetchJsonp(url, timeoutMs = 20000) {
-    return new Promise((resolve, reject) => {
-      const cbName = "__fbz_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
-      const sep = url.includes("?") ? "&" : "?";
-      const script = document.createElement("script");
-      let timer;
-
-      function cleanup() {
-        if (timer) clearTimeout(timer);
-        try { delete window[cbName]; } catch (e) {}
-        if (script && script.parentNode) script.parentNode.removeChild(script);
-      }
-
-      window[cbName] = (data) => {
-        cleanup();
-        resolve(data);
-      };
-
-      timer = setTimeout(() => {
-        cleanup();
-        reject(new Error("Request timed out"));
-      }, timeoutMs);
-
-      script.src = url + sep + "callback=" + encodeURIComponent(cbName);
-      script.onerror = () => {
-        cleanup();
-        reject(new Error("Script load failed"));
-      };
-
-      document.head.appendChild(script);
-    });
-  }
 
   function money(n) {
     return "$" + (Number(n || 0)).toFixed(2);
@@ -328,7 +296,7 @@
       item_id: String(raw.item_id || raw.itemId || "").trim(),
       barcode: String(raw.barcode || "").trim(),
       title: String(raw.title || raw.Title || "").trim(),
-      price: Number(raw.price || raw.Price || 0),
+      price: Number(raw.price ?? raw.store_price ?? raw.Price ?? 0),
       stock: Number(raw.stock ?? raw.qty_on_hand ?? raw.Qty ?? raw.Stock ?? 0),
       status: String(raw.status || raw.Status || "").trim().toLowerCase(),
       active: String(raw.active || raw.Active || "").trim().toLowerCase(),
@@ -418,7 +386,7 @@
     return productsByKey[key] || null;
   }
 
- function addSkuToCart(scanValue) {
+ async function addSkuToCart(scanValue) {
   const key = String(scanValue || "").trim();
   if (!key) {
     showErr("Enter or scan an item code.");
@@ -426,7 +394,20 @@
     return;
   }
 
-  const p = findItemByScanValue(key);
+  let p = findItemByScanValue(key);
+  if (!p) {
+    try {
+      const result = await FlashBidzPosApi.lookup(key);
+      p = normalizeProduct(result.item || {});
+      getNormalizedKeysForItem(p).forEach(k => { productsByKey[k] = p; });
+      productsList.push(p);
+    } catch (error) {
+      showErr(error && error.message ? error.message : "Item not found: " + key);
+      document.getElementById("skuInput").value = "";
+      focusSkuInput();
+      return;
+    }
+  }
   if (!p) {
     showErr("Item not found: " + key);
     document.getElementById("skuInput").value = "";
@@ -474,37 +455,8 @@
   focusSkuInput();
 }
 
-  function addManualLine() {
-  clearMessages();
-
-  const title = String(document.getElementById("manualTitle").value || "").trim() || "Manual Sale";
-  const amount = Number(document.getElementById("manualAmount").value || 0);
-
-  if (!(amount > 0)) {
-    showErr("Enter a valid manual amount greater than 0.");
-    return;
-  }
-
-  cart.push({
-    item_id: "",
-    sku: "MANUAL",
-    scanKey: "MANUAL",
-    title,
-    price: amount,
-    qty: 1,
-    location_bin: "",
-    consignor_name: "",
-    fee_tier: "",
-    manual: true
-  });
-
-  saveCart();
-  renderCart();
-  showOk("Added manual item: " + title);
-
-  document.getElementById("manualTitle").value = "";
-  document.getElementById("manualAmount").value = "";
-  focusSkuInput();
+function addManualLine() {
+  showErr("Manual non-inventory lines are disabled. Add the item to inventory first.");
 }
   
  async function loadProducts() {
@@ -797,27 +749,25 @@ async function completeManualPaidSale(paymentMethod, cashReceivedOverride = 0) {
     return;
   }
 
+  if (paymentMethod !== "cash") {
+    showErr("This payment method is not enabled yet.");
+    return;
+  }
+
+  const receiptId = localStorage.getItem(POS_PENDING_RECEIPT_KEY) || makeOrderId();
+  localStorage.setItem(POS_PENDING_RECEIPT_KEY, receiptId);
   const payload = {
-    orderId: makeOrderId(),
-    channel: "pos",
-    payment_method: paymentMethod,
+    receipt_id: receiptId,
     fulfillment,
-    buyer,
+    buyer_name: buyer.name,
+    buyer_contact: buyer.contact,
+    cash_received: cashReceived,
     notes: document.getElementById("notes").value || "",
     items: soldItems.map(it => ({
-      item_id: it.item_id || "",
       sku: it.sku,
-      title: it.title,
-      qty: Number(it.qty || 1),
-      price: Number(it.price || 0)
-    })),
-    totals
+      qty: Number(it.qty || 1)
+    }))
   };
-
-  const url = APPS_SCRIPT_URL
-    + "?action=record_pos_sale"
-    + "&payload=" + encodeURIComponent(JSON.stringify(payload))
-    + "&t=" + Date.now();
 
   try {
     showProcessingOverlay("Processing " + paymentMethod + " sale...");
@@ -827,14 +777,17 @@ async function completeManualPaidSale(paymentMethod, cashReceivedOverride = 0) {
     document.getElementById("otherPaidBtn").disabled = true;
     document.getElementById("payBtn").disabled = true;
 
-    fetchJsonp(url, 60000).catch(err => {
-      console.error("Background sale error", err);
-    });
+    const result = await FlashBidzPosApi.recordCashSale(payload);
 
-    applyLocalSaleToInventory(soldItems);
+    const completedItems = (result.lines || []).map(line => ({
+      sku:line.sku, title:line.title, qty:line.qty,
+      price:Number(line.unit_price || 0), stock:0
+    }));
+    applyLocalSaleToInventory(completedItems.length ? completedItems : soldItems);
 
     cart = [];
     saveCart();
+    localStorage.removeItem(POS_PENDING_RECEIPT_KEY);
     renderCart();
 
     document.getElementById("buyerName").value = "Walk-in";
@@ -845,14 +798,14 @@ async function completeManualPaidSale(paymentMethod, cashReceivedOverride = 0) {
     loadProducts().catch(err => console.error("Background reload failed:", err));
 
     showReceipt({
-      orderId: payload.orderId,
+      orderId: result.order_id,
       payment: paymentMethod,
-      totals: totals,
-      items: soldItems,
+      totals: { subtotal:result.subtotal, tax:result.tax, shipping:0, grand_total:result.total },
+      items: completedItems.length ? completedItems : soldItems,
       cashReceived: cashReceived
     });
 
-    showOk("Sale completed: " + paymentMethod + " • Order " + payload.orderId);
+    showOk("Sale completed: " + paymentMethod + " • Order " + result.order_id);
     focusSkuInput();
   } catch (e) {
     showErr("Could not complete sale: " + (e && e.message ? e.message : e));
@@ -866,54 +819,7 @@ async function completeManualPaidSale(paymentMethod, cashReceivedOverride = 0) {
 }
 
 async function pay() {
-  clearMessages();
-
-  if (!cart.length) {
-    showErr("Cart is empty.");
-    focusSkuInput();
-    return;
-  }
-
-  const buyer = {
-    name: document.getElementById("buyerName").value || "Walk-in",
-    contact: document.getElementById("buyerContact").value || ""
-  };
-
-  const fulfillment = document.getElementById("fulfillment").value || "in_store";
-  const totals = recalc();
-
-  const payload = {
-    orderId: makeOrderId(),
-    channel: "pos",
-    fulfillment,
-    buyer,
-    notes: document.getElementById("notes").value || "",
-    items: cart.map(it => ({
-      item_id: it.item_id || "",
-      sku: it.sku,
-      title: it.title,
-      qty: Number(it.qty || 1),
-      price: Number(it.price || 0)
-    })),
-    totals
-  };
-
-  const url = APPS_SCRIPT_URL
-    + "?action=create_checkout"
-    + "&payload=" + encodeURIComponent(JSON.stringify(payload))
-    + "&t=" + Date.now();
-
-  try {
-    const res = await fetchJsonp(url, 60000);
-
-    if (!res || !res.success || !res.checkout_url) {
-      throw new Error((res && res.error) ? res.error : "Checkout failed");
-    }
-
-    window.location.href = res.checkout_url;
-  } catch (e) {
-    showErr("Could not create Stripe checkout: " + (e && e.message ? e.message : e));
-  }
+  showErr("Stripe POS payments are not enabled yet. Use Cash.");
 }
 
 document.getElementById("addBtn").addEventListener("click", () => {
@@ -961,11 +867,11 @@ document.getElementById("cashBtn").addEventListener("click", () => {
 });
 
 document.getElementById("terminalBtn").addEventListener("click", () => {
-  completeManualPaidSale("card_terminal");
+  showErr("Card Terminal is not enabled yet.");
 });
 
 document.getElementById("otherPaidBtn").addEventListener("click", () => {
-  completeManualPaidSale("other_paid");
+  showErr("Other Paid is not enabled yet.");
 });
 
 document.getElementById("suspendBtn").addEventListener("click", () => {
@@ -1061,6 +967,7 @@ document.getElementById("searchInput").addEventListener("input", (e) => {
   focusSkuInput();
 
   try {
+    await FlashBidzPosApi.session();
     await handleStripeReturn();
     await loadProducts();
   } catch (e) {
