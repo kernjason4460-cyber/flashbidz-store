@@ -98,7 +98,7 @@
   <div class="wrap" style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
     <div>
       <h1>FlashBidz POS</h1>
-      <div class="muted">Scan item barcode → add to cart → charge with Stripe</div>
+      <div class="muted">Scan item barcode → add to cart → complete cash sale</div>
     </div>
     <div class="pill mono" id="statusPill">Loading items…</div>
   </div>
@@ -216,17 +216,17 @@
         </div>
       </div>
 
-      <button class="btn" id="payBtn" type="button" style="margin-top:14px;">Pay with Stripe</button>
+      <button class="btn" id="payBtn" type="button" style="margin-top:14px;" disabled>Stripe (not available)</button>
      <div class="row" style="margin-top:10px;">
      <button class="btn2" id="cashBtn" type="button">Cash</button>
-     <button class="btn2" id="terminalBtn" type="button">Card Terminal</button>
+     <button class="btn2" id="terminalBtn" type="button" disabled>Card terminal (not available)</button>
      </div>
      <div class="row" style="margin-top:10px;">
-     <button class="btn2" id="otherPaidBtn" type="button">Other Paid</button>
+     <button class="btn2" id="otherPaidBtn" type="button" disabled>Other payment (not available)</button>
      <button class="btnDanger" id="suspendBtn" type="button">Suspend Sale</button>
      </div>
       <div class="muted" style="margin-top:8px;">
-        This creates an <span class="mono">Orders</span> row as <b>PENDING</b>, then <span class="mono">success.html</span> finalizes the sale and writes <span class="mono">Order_Items</span>.
+        Your receipt appears only after the sale is securely recorded.
       </div>
     </div>
 
@@ -812,9 +812,6 @@ async function completeManualPaidSale(paymentMethod, cashReceivedOverride = 0) {
   } finally {
     hideProcessingOverlay();
     document.getElementById("cashBtn").disabled = false;
-    document.getElementById("terminalBtn").disabled = false;
-    document.getElementById("otherPaidBtn").disabled = false;
-    document.getElementById("payBtn").disabled = false;
   }
 }
 
