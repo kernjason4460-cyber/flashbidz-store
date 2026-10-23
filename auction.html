@@ -250,6 +250,17 @@
     .bid-note { margin: 0; color: var(--muted); font-size: 0.72rem; line-height: 1.35; }
     .message { max-width: 1100px; margin: 0.8rem auto 0; padding: 0.8rem 0.9rem; border-radius: 16px; border: 1px dashed rgba(148, 163, 184, 0.75); color: var(--muted); background: rgba(255, 255, 255, 0.9); }
     [data-theme="dark"] .message { background: rgba(15, 23, 42, 0.96); }
+    .winnings-panel { max-width: 1100px; margin: 0 auto 1rem; padding: 0.9rem; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); }
+    .winnings-panel h2 { margin: 0 0 0.35rem; font-size: 1.05rem; }
+    .winnings-panel > p { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.82rem; }
+    .winnings-login { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr) auto; gap: 0.55rem; align-items: end; }
+    .winning-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.65rem; align-items: center; padding: 0.65rem 0; border-bottom: 1px solid var(--border); }
+    .winning-row:last-child { border-bottom: 0; }
+    .winning-meta { color: var(--muted); font-size: 0.76rem; }
+    .payment-choice { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 0.75rem; }
+    .payment-choice label { display: inline-flex; gap: 0.35rem; align-items: center; font-size: 0.82rem; }
+    .winnings-actions { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; margin-top: 0.75rem; }
+    @media (max-width: 680px) { .winnings-login { grid-template-columns: 1fr; } .winning-row { grid-template-columns: auto minmax(0, 1fr); } .winning-row strong { grid-column: 2; } }
 
     .site-footer { padding: 1rem 0.85rem 1.2rem; text-align: center; color: var(--muted); font-size: 0.75rem; border-top: 1px solid rgba(148, 163, 184, 0.4); background: rgba(248, 250, 252, 0.96); }
     [data-theme="dark"] .site-footer { background: #020617; border-top-color: rgba(30, 64, 175, 0.8); }
@@ -452,6 +463,27 @@
       <div id="auction-grid" class="auction-grid"></div>
       <div id="auction-message" class="message">Loading auction items...</div>
     </section>
+
+    <section id="winnings" class="auction-section">
+      <div class="winnings-panel">
+        <h2>My Auction Winnings</h2>
+        <p>Use the email and phone number entered with your bid. Select unpaid winnings, then choose one payment option.</p>
+        <form id="winnings-login" class="winnings-login">
+          <div class="field"><label for="winnings-email">Email</label><input id="winnings-email" type="email" autocomplete="email" required /></div>
+          <div class="field"><label for="winnings-phone">Phone</label><input id="winnings-phone" type="tel" autocomplete="tel" required /></div>
+          <button class="btn btn-blue" type="submit">View Winnings</button>
+        </form>
+        <div id="winnings-message" class="message" hidden></div>
+        <div id="winnings-list"></div>
+        <form id="winnings-checkout" hidden>
+          <div class="payment-choice">
+            <label><input type="radio" name="payment-choice" value="ONLINE" checked /> Pay Online</label>
+            <label><input type="radio" name="payment-choice" value="PAY_AT_PICKUP" /> Pay at Pickup</label>
+          </div>
+          <div class="winnings-actions"><button id="winnings-submit" class="btn btn-green" type="submit">Continue</button><span id="winnings-total" class="hero-pill"></span></div>
+        </form>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -490,11 +522,15 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       cacheDom();
+      const savedBidder = readBidderInfo();
+      if (el.winningsEmail) el.winningsEmail.value = savedBidder.email || savedBidder.contact || "";
+      if (el.winningsPhone) el.winningsPhone.value = savedBidder.phone || "";
       initTheme();
       bindEvents();
       setCurrentYear();
       trackSiteVisit("auction");
       finishVerificationIfNeeded();
+      finishAuctionPaymentIfNeeded();
       loadAuctions();
     });
 
@@ -518,6 +554,13 @@
       el.photoViewerClose = document.getElementById("photo-viewer-close");
       el.photoViewerPrev = document.getElementById("photo-viewer-prev");
       el.photoViewerNext = document.getElementById("photo-viewer-next");
+      el.winningsLogin = document.getElementById("winnings-login");
+      el.winningsEmail = document.getElementById("winnings-email");
+      el.winningsPhone = document.getElementById("winnings-phone");
+      el.winningsMessage = document.getElementById("winnings-message");
+      el.winningsList = document.getElementById("winnings-list");
+      el.winningsCheckout = document.getElementById("winnings-checkout");
+      el.winningsTotal = document.getElementById("winnings-total");
     }
 
     function bindEvents() {
@@ -526,6 +569,9 @@
       el.sort?.addEventListener("change", applyFilters);
       el.themeToggle?.addEventListener("click", toggleTheme);
       el.verifyButton?.addEventListener("click", () => startVerification(readBidderInfo()));
+      el.winningsLogin?.addEventListener("submit", loadWinnings);
+      el.winningsCheckout?.addEventListener("submit", submitWinningsCheckout);
+      el.winningsList?.addEventListener("change", updateWinningsTotal);
       el.photoViewerClose?.addEventListener("click", closePhotoViewer);
       el.photoViewerPrev?.addEventListener("click", () => movePhoto(-1));
       el.photoViewerNext?.addEventListener("click", () => movePhoto(1));
@@ -605,6 +651,110 @@
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
+    }
+
+    async function finishAuctionPaymentIfNeeded() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("auction_paid") === "cancel") {
+        showToast("Auction payment cancelled. Your winnings remain unpaid.");
+        cleanVerificationUrl();
+        return;
+      }
+      const sessionId = params.get("session_id");
+      if (params.get("auction_paid") !== "1" || !sessionId) return;
+      try {
+        const data = await window.fbzAuctionApi("auction_payment_finalize", { session_id: sessionId });
+        if (!data?.success) throw new Error(data?.error || "Payment could not be confirmed.");
+        showToast("Payment confirmed. Your items are ready for pickup.");
+        if (el.winningsEmail?.value && el.winningsPhone?.value) await loadWinnings();
+      } catch (error) {
+        alert(error.message || "Payment could not be confirmed. Please contact FlashBidz.");
+      } finally {
+        cleanVerificationUrl();
+      }
+    }
+
+    async function loadWinnings(event) {
+      event?.preventDefault();
+      const bidder = readBidderInfo();
+      const email = String(el.winningsEmail?.value || bidder.email || bidder.contact || "").trim().toLowerCase();
+      const phone = String(el.winningsPhone?.value || bidder.phone || "").trim();
+      setWinningsMessage("Checking your winnings...");
+      try {
+        const data = await window.fbzAuctionApi("auction_winnings_get", { bidder_key: email, phone });
+        if (!data?.success) throw new Error(data?.error || "Winnings could not be loaded.");
+        saveBidderInfo({ ...bidder, email, contact: email, phone });
+        renderWinnings(data.winnings || []);
+      } catch (error) {
+        el.winningsList.innerHTML = "";
+        el.winningsCheckout.hidden = true;
+        setWinningsMessage(error.message || "Winnings could not be loaded.");
+      }
+    }
+
+    function renderWinnings(rows) {
+      el.winningsList.innerHTML = "";
+      if (!rows.length) {
+        el.winningsCheckout.hidden = true;
+        setWinningsMessage("No auction winnings were found for this bidder.");
+        return;
+      }
+      setWinningsMessage("");
+      rows.forEach(row => {
+        const committed = Boolean(row.order_id);
+        const paid = String(row.payment_status).toUpperCase() === "PAID";
+        const selectable = !committed && !["NO_PAY", "CANCELED", "CANCELLED"].includes(String(row.winner_status).toUpperCase());
+        const div = document.createElement("div");
+        div.className = "winning-row";
+        div.innerHTML = `<input type="checkbox" class="winning-select" data-sku="${escapeHtml(row.sku)}" data-amount="${Number(row.winning_bid || 0)}" ${selectable ? "checked" : "disabled"} aria-label="Select ${escapeHtml(row.title || row.sku)}" />
+          <div><b>${escapeHtml(row.title || row.sku)}</b><div class="winning-meta">${escapeHtml(row.sku)} · ${paid ? "Paid / ready for pickup" : committed ? "Unpaid / " + escapeHtml(row.payment_choice || "payment selected") : "Payment choice needed"}</div></div>
+          <strong>$${Number(row.winning_bid || 0).toFixed(2)}</strong>`;
+        el.winningsList.appendChild(div);
+      });
+      el.winningsCheckout.hidden = !rows.some(row => !row.order_id && !["NO_PAY", "CANCELED", "CANCELLED"].includes(String(row.winner_status).toUpperCase()));
+      updateWinningsTotal();
+    }
+
+    function updateWinningsTotal() {
+      const total = [...document.querySelectorAll(".winning-select:checked")].reduce((sum, input) => sum + Number(input.dataset.amount || 0), 0);
+      if (el.winningsTotal) el.winningsTotal.textContent = `Selected winnings: $${total.toFixed(2)} before tax`;
+    }
+
+    async function submitWinningsCheckout(event) {
+      event.preventDefault();
+      const bidder = readBidderInfo();
+      const bidderKey = String(el.winningsEmail?.value || bidder.email || bidder.contact || "").trim().toLowerCase();
+      const phone = String(el.winningsPhone?.value || bidder.phone || "").trim();
+      const skus = [...document.querySelectorAll(".winning-select:checked")].map(input => input.dataset.sku).sort();
+      const choice = document.querySelector('input[name="payment-choice"]:checked')?.value || "ONLINE";
+      if (!skus.length) return setWinningsMessage("Select at least one unpaid winning item.");
+      const key = `flashbidz_auction_order_${bidderKey}_${choice}_${skus.join("|")}`;
+      let requestId = localStorage.getItem(key);
+      if (!requestId) {
+        requestId = "AUC-ORDER-" + (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+        localStorage.setItem(key, requestId);
+      }
+      setWinningsMessage("Securing your winning items...");
+      try {
+        const order = await window.fbzAuctionApi("auction_order_create", { request_id: requestId, bidder_key: bidderKey, bidder_name: bidder.name || "", phone, skus, payment_choice: choice });
+        if (!order?.success) throw new Error(order?.error || "Auction order could not be created.");
+        if (choice === "PAY_AT_PICKUP") {
+          setWinningsMessage(`Pay at Pickup selected. Amount due: $${Number(order.grand_total || 0).toFixed(2)}. Your items are reserved for pickup.`);
+          await loadWinnings();
+          return;
+        }
+        const payment = await window.fbzAuctionApi("auction_payment_create", { order_id: order.order_id });
+        if (!payment?.success || !payment.checkout_url) throw new Error(payment?.error || "Online payment could not be opened.");
+        window.location.assign(payment.checkout_url);
+      } catch (error) {
+        setWinningsMessage(error.message || "Auction checkout could not be completed.");
+      }
+    }
+
+    function setWinningsMessage(message) {
+      if (!el.winningsMessage) return;
+      el.winningsMessage.hidden = !message;
+      el.winningsMessage.textContent = message || "";
     }
 
     async function loadAuctions() {
