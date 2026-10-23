@@ -113,7 +113,7 @@
     grid.innerHTML = "";
     if (count) count.textContent = list.length + " auction item" + (list.length === 1 ? "" : "s");
     if (!list.length) {
-      setMessage(allAuctions.length ? "No auction items match right now." : "No live auction items right now. The latest auction may have ended, or the next one has not opened yet. Please check back soon.");
+      setMessage(allAuctions.length ? "No auction items match right now." : "No auctions currently available. Check back soon.");
       return;
     }
     setMessage("");
