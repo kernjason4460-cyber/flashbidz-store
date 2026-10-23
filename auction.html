@@ -480,7 +480,7 @@
 
   <script>
     const THEME_STORAGE_KEY = "flashbidz_theme";
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKOemGRRpUN4PYzgiIKCdoVPvKZrA20tGn0uFEa43pQ6UYd4UidTSyCRlv0yU9lcm6/exec";
+    const APPS_SCRIPT_URL = "same-origin";
     const BIDDER_STORAGE_KEY = "flashbidz_bidder_v2";
 
     let allAuctions = [];
@@ -540,25 +540,13 @@
       });
     }
 
-    function fetchJsonp(url, timeoutMs = 20000) {
-      return new Promise((resolve, reject) => {
-        const cbName = "__fbz_auction_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
-        const sep = url.includes("?") ? "&" : "?";
-        const script = document.createElement("script");
-        let timer;
-
-        function cleanup() {
-          if (timer) clearTimeout(timer);
-          try { delete window[cbName]; } catch (_) { window[cbName] = undefined; }
-          if (script && script.parentNode) script.parentNode.removeChild(script);
-        }
-
-        window[cbName] = data => { cleanup(); resolve(data); };
-        timer = setTimeout(() => { cleanup(); reject(new Error("Load failed")); }, timeoutMs);
-        script.onerror = () => { cleanup(); reject(new Error("Load failed")); };
-        script.src = url + sep + "callback=" + encodeURIComponent(cbName) + "&t=" + Date.now();
-        document.head.appendChild(script);
-      });
+    async function fetchJsonp(url) {
+      const parsed = new URL(url, window.location.href);
+      const action = parsed.searchParams.get("action");
+      let payload = {};
+      if (parsed.searchParams.get("payload")) payload = JSON.parse(parsed.searchParams.get("payload"));
+      if (action === "finalize_bidder_verification") payload = { session_id: parsed.searchParams.get("session_id") || "" };
+      return window.fbzAuctionApi(action, payload);
     }
 
     function trackSiteVisit(pageName) {
@@ -730,7 +718,7 @@
             </div>
             <div class="bid-form-grid">
               <div class="field"><label>Email</label><input name="email" type="email" value="${escapeHtml(bidder.email || bidder.contact || "")}" autocomplete="email" required ${ended ? "disabled" : ""} /></div>
-              <div class="field"><label>Phone</label><input name="phone" type="tel" value="${escapeHtml(bidder.phone || "")}" autocomplete="tel" ${ended ? "disabled" : ""} /></div
+              <div class="field"><label>Phone</label><input name="phone" type="tel" value="${escapeHtml(bidder.phone || "")}" autocomplete="tel" ${ended ? "disabled" : ""} /></div>
             </div>
             <div class="field"><label>Facebook Name</label><input name="facebook" type="text" value="${escapeHtml(bidder.facebook)}" ${ended ? "disabled" : ""} /></div>
             <p class="bid-note">Minimum next bid: $${minBid}. Bids in the final 2 minutes extend the clock. By bidding, you agree to the pickup policy. Bidders with 2 unpaid wins must verify before bidding.</p>
@@ -818,7 +806,6 @@
       const email = String(formData.get("email") || "").trim();
       const phone = String(formData.get("phone") || "").trim();
       const facebook = String(formData.get("facebook") || "").trim();
-      const facebook = String(formData.get("facebook") || "").trim();
 
       if (!name || !email) {
         alert("Please enter your name and email.");
@@ -840,11 +827,10 @@
       button.textContent = "Submitting...";
 
       const payload = {
-        item_id: item.item_id,
+        request_id: "BID-" + Date.now().toString(36) + "-" + crypto.getRandomValues(new Uint32Array(2)).join("-"),
         sku: item.sku,
-        title: item.title,
         amount,
-        bidder: { name, email, contact: email, phone, facebook }
+        bidder: { name, email, phone, facebook }
       };
 
       try {
@@ -896,7 +882,7 @@
 
       saveBidderInfo({ ...bidder, name, email, contact: email, phone, facebook })
       try {
-        const payload = { bidder: { name, email, contact: email, phone, facebook } };
+        const payload = { bidder: { name, email, phone, facebook } };
         const data = await fetchJsonp(APPS_SCRIPT_URL + "?action=create_bidder_verification_checkout&payload=" + encodeURIComponent(JSON.stringify(payload)), 30000);
         if (!data || !data.success) throw new Error(data?.error || "Verification could not be started.");
         if (data.already_verified) {
@@ -916,13 +902,12 @@
         const saved = JSON.parse(localStorage.getItem(BIDDER_STORAGE_KEY) || "{}");
         return {
           name: saved.name || "",
-          email: saved.email ||
-        saved.contact || "",
-         contact: saved.email || saved.contact || "",
-  phone: saved.phone || "",
-  facebook: saved.facebook || "",
-  verified: !!saved.verified
-
+          email: saved.email || saved.contact || "",
+          contact: saved.email || saved.contact || "",
+          phone: saved.phone || "",
+          facebook: saved.facebook || "",
+          verified: !!saved.verified
+        };
       } catch (_) {
         return { name: "", contact: "", facebook: "", verified: false };
       }
@@ -1009,6 +994,6 @@
       if (el.themeIcon) el.themeIcon.textContent = theme === "dark" ? "Dark" : "Light";
     }
   </script>
-<script src="auction-rescue.js?v=20260726c"></script>
+<script src="auction-transport.js"></script>
 </body>
 </html>
